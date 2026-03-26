@@ -1,0 +1,79 @@
+import { beforeAll, afterAll, afterEach } from 'vitest'
+import Database from 'better-sqlite3'
+import { drizzle } from 'drizzle-orm/better-sqlite3'
+import * as schema from '../db/schema'
+import { sql } from 'drizzle-orm'
+import { createTRPCContext } from '../integrations/trpc/context'
+import { trpcRouter } from '../integrations/trpc/router'
+
+// Use an in-memory SQLite database for fast isolated tests
+let sqlite = new Database(':memory:')
+export let db = drizzle(sqlite, { schema })
+
+beforeAll(() => {
+  // Create all tables in the in-memory database
+  // The sqlite driver allows running multi-statement strings
+  // but it's simpler to do it table by table or export schema:
+  
+  sqlite.exec(`
+    CREATE TABLE IF NOT EXISTS users (
+      id TEXT PRIMARY KEY,
+      name TEXT NOT NULL,
+      email TEXT NOT NULL UNIQUE,
+      email_verified INTEGER NOT NULL DEFAULT 0,
+      image TEXT,
+      created_at INTEGER NOT NULL DEFAULT (unixepoch()),
+      updated_at INTEGER NOT NULL DEFAULT (unixepoch())
+    );
+
+    CREATE TABLE IF NOT EXISTS organizations (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      name TEXT NOT NULL,
+      created_at INTEGER NOT NULL DEFAULT (unixepoch())
+    );
+
+    CREATE TABLE IF NOT EXISTS organization_memberships (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      organization_id INTEGER NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
+      user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      role TEXT NOT NULL DEFAULT 'member',
+      created_at INTEGER NOT NULL DEFAULT (unixepoch())
+    );
+    CREATE UNIQUE INDEX IF NOT EXISTS org_membership_org_user_uq ON organization_memberships(organization_id, user_id);
+
+    CREATE TABLE IF NOT EXISTS todos (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      organization_id INTEGER NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
+      created_by_user_id TEXT NOT NULL REFERENCES users(id),
+      name TEXT NOT NULL,
+      completed_at INTEGER,
+      created_at INTEGER NOT NULL DEFAULT (unixepoch())
+    );
+  `)
+})
+
+afterEach(() => {
+  // Clear tables between tests
+  sqlite.exec(`
+    DELETE FROM todos;
+    DELETE FROM organization_memberships;
+    DELETE FROM organizations;
+    DELETE FROM users;
+  `)
+})
+
+afterAll(() => {
+  sqlite.close()
+})
+
+// Helper to create an authenticated tRPC router caller
+export function createTestCaller(user: { id: string; name?: string; email?: string } | null) {
+  const ctx = {
+    db,
+    user: user ? { ...user, name: user.name || 'Test', email: user.email || 'test@example.com', emailVerified: true, image: null, createdAt: new Date(), updatedAt: new Date() } : null,
+    session: user ? { id: 'test', token: 'test', userId: user.id } as any : null,
+    req: new Request('http://localhost'),
+  }
+  
+  return trpcRouter.createCaller(ctx)
+}

@@ -1,31 +1,9 @@
-import { and, desc, eq } from 'drizzle-orm'
+import { desc, eq } from 'drizzle-orm'
 import { z } from 'zod'
-import { createTRPCRouter, protectedProcedure } from './init'
-import { organizationMemberships, organizations, todos } from '@/db/schema'
-import type { TRPCContext } from './context'
+import { createTRPCRouter, protectedProcedure, orgScopedProcedure } from './init'
+import { organizationMemberships, organizations, todos, invitations } from '@/db/schema'
 
-async function getMembershipOrThrow({
-  db,
-  userId,
-  organizationId,
-}: {
-  db: TRPCContext['db']
-  userId: string
-  organizationId: number
-}) {
-  const membership = await db.query.organizationMemberships.findFirst({
-    where: and(
-      eq(organizationMemberships.organizationId, organizationId),
-      eq(organizationMemberships.userId, userId),
-    ),
-  })
-
-  if (!membership) {
-    throw new Error('You are not a member of this organization')
-  }
-
-  return membership
-}
+// ─── Me router ─────────────────────────────────────────────────────────────────
 
 const meRouter = createTRPCRouter({
   session: protectedProcedure.query(({ ctx }) => {
@@ -36,14 +14,15 @@ const meRouter = createTRPCRouter({
   }),
 })
 
+// ─── Organization router ───────────────────────────────────────────────────────
+
 const organizationRouter = createTRPCRouter({
   getOrCreateCurrent: protectedProcedure.query(async ({ ctx }) => {
-    const existingMembership = await ctx.db.query.organizationMemberships.findFirst(
-      {
+    const existingMembership =
+      await ctx.db.query.organizationMemberships.findFirst({
         where: eq(organizationMemberships.userId, ctx.user.id),
         orderBy: desc(organizationMemberships.id),
-      },
-    )
+      })
 
     if (existingMembership) {
       const organization = await ctx.db.query.organizations.findFirst({
@@ -105,11 +84,7 @@ const organizationRouter = createTRPCRouter({
   }),
 
   create: protectedProcedure
-    .input(
-      z.object({
-        name: z.string().min(2),
-      }),
-    )
+    .input(z.object({ name: z.string().min(2) }))
     .mutation(async ({ ctx, input }) => {
       const inserted = await ctx.db
         .insert(organizations)
@@ -132,29 +107,82 @@ const organizationRouter = createTRPCRouter({
         membership: membershipRows[0],
       }
     }),
-})
 
-const todosRouter = createTRPCRouter({
-  list: protectedProcedure
+  listMembers: orgScopedProcedure
+    .input(z.object({ organizationId: z.number().int().positive() }))
+    .query(async ({ ctx }) => {
+      return ctx.db.query.organizationMemberships.findMany({
+        where: eq(
+          organizationMemberships.organizationId,
+          ctx.organizationId,
+        ),
+        orderBy: desc(organizationMemberships.id),
+      })
+    }),
+
+  updateMemberRole: orgScopedProcedure
     .input(
       z.object({
         organizationId: z.number().int().positive(),
+        userId: z.string(),
+        role: z.enum(['admin', 'member']),
       }),
     )
-    .query(async ({ ctx, input }) => {
-      await getMembershipOrThrow({
-        db: ctx.db,
-        userId: ctx.user.id,
-        organizationId: input.organizationId,
-      })
+    .mutation(async ({ ctx, input }) => {
+      if (ctx.membership.role !== 'owner' && ctx.membership.role !== 'admin') {
+        throw new Error('Only owners and admins can change roles')
+      }
 
+      await ctx.db
+        .update(organizationMemberships)
+        .set({ role: input.role })
+        .where(
+          eq(organizationMemberships.organizationId, ctx.organizationId),
+        )
+
+      return { success: true }
+    }),
+
+  invite: orgScopedProcedure
+    .input(
+      z.object({
+        organizationId: z.number().int().positive(),
+        email: z.string().email(),
+        role: z.enum(['admin', 'member']).default('member'),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      if (ctx.membership.role !== 'owner' && ctx.membership.role !== 'admin') {
+        throw new Error('Only owners and admins can invite members')
+      }
+
+      const inserted = await ctx.db
+        .insert(invitations)
+        .values({
+          organizationId: ctx.organizationId,
+          email: input.email,
+          role: input.role,
+          invitedByUserId: ctx.user.id,
+        })
+        .returning()
+
+      return inserted[0]
+    }),
+})
+
+// ─── Todos router ──────────────────────────────────────────────────────────────
+
+const todosRouter = createTRPCRouter({
+  list: orgScopedProcedure
+    .input(z.object({ organizationId: z.number().int().positive() }))
+    .query(async ({ ctx }) => {
       return ctx.db.query.todos.findMany({
-        where: eq(todos.organizationId, input.organizationId),
+        where: eq(todos.organizationId, ctx.organizationId),
         orderBy: desc(todos.id),
       })
     }),
 
-  add: protectedProcedure
+  add: orgScopedProcedure
     .input(
       z.object({
         organizationId: z.number().int().positive(),
@@ -162,16 +190,10 @@ const todosRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      await getMembershipOrThrow({
-        db: ctx.db,
-        userId: ctx.user.id,
-        organizationId: input.organizationId,
-      })
-
       const inserted = await ctx.db
         .insert(todos)
         .values({
-          organizationId: input.organizationId,
+          organizationId: ctx.organizationId,
           createdByUserId: ctx.user.id,
           name: input.name,
         })
@@ -179,7 +201,45 @@ const todosRouter = createTRPCRouter({
 
       return inserted[0]
     }),
+
+  update: orgScopedProcedure
+    .input(
+      z.object({
+        organizationId: z.number().int().positive(),
+        id: z.number().int().positive(),
+        name: z.string().min(1).optional(),
+        completedAt: z.date().nullable().optional(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const updates: Record<string, unknown> = {}
+      if (input.name !== undefined) updates.name = input.name
+      if (input.completedAt !== undefined)
+        updates.completedAt = input.completedAt
+
+      const updated = await ctx.db
+        .update(todos)
+        .set(updates)
+        .where(eq(todos.id, input.id))
+        .returning()
+
+      return updated[0]
+    }),
+
+  delete: orgScopedProcedure
+    .input(
+      z.object({
+        organizationId: z.number().int().positive(),
+        id: z.number().int().positive(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      await ctx.db.delete(todos).where(eq(todos.id, input.id))
+      return { success: true }
+    }),
 })
+
+// ─── Root router ───────────────────────────────────────────────────────────────
 
 export const trpcRouter = createTRPCRouter({
   me: meRouter,

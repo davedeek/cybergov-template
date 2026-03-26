@@ -1,112 +1,98 @@
 import { createFileRoute } from '@tanstack/react-router'
+import { authClient } from '@/lib/auth-client'
 import {
-  Zap,
-  Server,
-  Route as RouteIcon,
   Shield,
-  Waves,
-  Sparkles,
+  Zap,
+  Database,
+  Bot,
+  Users,
+  ArrowRight,
 } from 'lucide-react'
 
-export const Route = createFileRoute('/')({ component: App })
+export const Route = createFileRoute('/')({ component: LandingPage })
 
-function App() {
+function LandingPage() {
+  const { data: session } = authClient.useSession()
+
   const features = [
     {
-      icon: <Zap className="w-12 h-12 text-cyan-400" />,
-      title: 'Powerful Server Functions',
-      description:
-        'Write server-side code that seamlessly integrates with your client components. Type-safe, secure, and simple.',
+      icon: <Shield className="w-8 h-8 text-cyan-400" />,
+      title: 'Authentication',
+      description: 'Email/password auth with Better Auth, sessions, and role-based access.',
     },
     {
-      icon: <Server className="w-12 h-12 text-cyan-400" />,
-      title: 'Flexible Server Side Rendering',
-      description:
-        'Full-document SSR, streaming, and progressive enhancement out of the box. Control exactly what renders where.',
+      icon: <Users className="w-8 h-8 text-cyan-400" />,
+      title: 'Multi-Tenant',
+      description: 'Organization workspaces with member management and invitations.',
     },
     {
-      icon: <RouteIcon className="w-12 h-12 text-cyan-400" />,
-      title: 'API Routes',
-      description:
-        'Build type-safe API endpoints alongside your application. No separate backend needed.',
+      icon: <Database className="w-8 h-8 text-cyan-400" />,
+      title: 'Type-Safe Data',
+      description: 'Drizzle ORM + tRPC with end-to-end type safety from DB to UI.',
     },
     {
-      icon: <Shield className="w-12 h-12 text-cyan-400" />,
-      title: 'Strongly Typed Everything',
-      description:
-        'End-to-end type safety from server to client. Catch errors before they reach production.',
+      icon: <Bot className="w-8 h-8 text-cyan-400" />,
+      title: 'AI Built In',
+      description: 'TanStack AI with multi-provider chat, structured output, and more.',
     },
     {
-      icon: <Waves className="w-12 h-12 text-cyan-400" />,
-      title: 'Full Streaming Support',
-      description:
-        'Stream data from server to client progressively. Perfect for AI applications and real-time updates.',
-    },
-    {
-      icon: <Sparkles className="w-12 h-12 text-cyan-400" />,
-      title: 'Next Generation Ready',
-      description:
-        'Built from the ground up for modern web applications. Deploy anywhere JavaScript runs.',
+      icon: <Zap className="w-8 h-8 text-cyan-400" />,
+      title: 'Full-Stack',
+      description: 'TanStack Start with server functions, SSR, and streaming.',
     },
   ]
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900">
-      <section className="relative py-20 px-6 text-center overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/10 via-blue-500/10 to-purple-500/10"></div>
-        <div className="relative max-w-5xl mx-auto">
-          <div className="flex items-center justify-center gap-6 mb-6">
-            <img
-              src="/tanstack-circle-logo.png"
-              alt="TanStack Logo"
-              className="w-24 h-24 md:w-32 md:h-32"
-            />
-            <h1 className="text-6xl md:text-7xl font-black text-white [letter-spacing:-0.08em]">
-              <span className="text-gray-300">TANSTACK</span>{' '}
-              <span className="bg-gradient-to-r from-cyan-400 to-blue-400 bg-clip-text text-transparent">
-                START
-              </span>
-            </h1>
-          </div>
-          <p className="text-2xl md:text-3xl text-gray-300 mb-4 font-light">
-            The framework for next generation AI applications
+      <section className="relative py-24 px-6 text-center overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/10 via-blue-500/10 to-purple-500/10" />
+        <div className="relative max-w-4xl mx-auto">
+          <h1 className="text-5xl md:text-7xl font-black text-white mb-4 tracking-tight">
+            <span className="bg-gradient-to-r from-cyan-400 to-blue-400 bg-clip-text text-transparent">
+              CyberGov
+            </span>{' '}
+            <span className="text-gray-300">Starter</span>
+          </h1>
+          <p className="text-xl md:text-2xl text-gray-300 mb-4 font-light">
+            Production-ready SaaS template
           </p>
-          <p className="text-lg text-gray-400 max-w-3xl mx-auto mb-8">
-            Full-stack framework powered by TanStack Router for React and Solid.
-            Build modern applications with server functions, streaming, and type
-            safety.
+          <p className="text-gray-400 max-w-2xl mx-auto mb-8">
+            TanStack Start + Better Auth + Drizzle + tRPC + TanStack AI.
+            Multi-tenant, type-safe, and AI-ready out of the box.
           </p>
-          <div className="flex flex-col items-center gap-4">
+
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <a
-              href="https://tanstack.com/start"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="px-8 py-3 bg-cyan-500 hover:bg-cyan-600 text-white font-semibold rounded-lg transition-colors shadow-lg shadow-cyan-500/50"
+              href={session?.user ? '/_authed/dashboard' : '/signup'}
+              className="px-8 py-3.5 bg-cyan-500 hover:bg-cyan-600 text-white font-semibold rounded-lg transition-colors shadow-lg shadow-cyan-500/25 flex items-center gap-2"
             >
-              Documentation
+              {session?.user ? 'Go to Dashboard' : 'Get Started'}
+              <ArrowRight className="w-4 h-4" />
             </a>
-            <p className="text-gray-400 text-sm mt-2">
-              Begin your TanStack Start journey by editing{' '}
-              <code className="px-2 py-1 bg-slate-700 rounded text-cyan-400">
-                /src/routes/index.tsx
-              </code>
-            </p>
+            {!session?.user && (
+              <a
+                href="/signin"
+                className="px-8 py-3.5 bg-slate-700 hover:bg-slate-600 text-white font-semibold rounded-lg transition-colors"
+              >
+                Sign In
+              </a>
+            )}
           </div>
         </div>
       </section>
 
-      <section className="py-16 px-6 max-w-7xl mx-auto">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <section className="py-16 px-6 max-w-6xl mx-auto">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
           {features.map((feature, index) => (
             <div
               key={index}
-              className="bg-slate-800/50 backdrop-blur-sm border border-slate-700 rounded-xl p-6 hover:border-cyan-500/50 transition-all duration-300 hover:shadow-lg hover:shadow-cyan-500/10"
+              className="bg-slate-800/50 backdrop-blur-sm border border-slate-700 rounded-xl p-6 hover:border-cyan-500/30 transition-all duration-300"
             >
-              <div className="mb-4">{feature.icon}</div>
-              <h3 className="text-xl font-semibold text-white mb-3">
+              <div className="mb-3">{feature.icon}</div>
+              <h3 className="text-lg font-semibold text-white mb-2">
                 {feature.title}
               </h3>
-              <p className="text-gray-400 leading-relaxed">
+              <p className="text-gray-400 text-sm leading-relaxed">
                 {feature.description}
               </p>
             </div>

@@ -3,7 +3,23 @@ import { createFileRoute } from '@tanstack/react-router'
 import { ChefHat, Clock, Users, Gauge } from 'lucide-react'
 import { Streamdown } from 'streamdown'
 
-import type { Recipe } from './api.ai.structured'
+interface Recipe {
+  name: string
+  description: string
+  prepTime: string
+  cookTime: string
+  servings: number
+  difficulty: 'easy' | 'medium' | 'hard'
+  ingredients: { item: string; amount: string; notes?: string }[]
+  instructions: string[]
+  tips?: string[]
+  nutritionPerServing?: {
+    calories?: number
+    protein?: string
+    carbs?: string
+    fat?: string
+  }
+}
 
 type Mode = 'structured' | 'oneshot'
 
@@ -159,7 +175,7 @@ function StructuredPage() {
     setResult(null)
 
     try {
-      const response = await fetch('/demo/api/ai/structured', {
+      const response = await fetch('/api/ai/structured', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ recipeName, mode }),
@@ -305,6 +321,6 @@ function StructuredPage() {
   )
 }
 
-export const Route = createFileRoute('/demo/ai-structured')({
+export const Route = createFileRoute('/_authed/ai/structured')({
   component: StructuredPage,
 })

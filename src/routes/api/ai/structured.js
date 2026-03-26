@@ -31,7 +31,7 @@ const RecipeSchema = z.object({
         .optional()
         .describe('Nutritional information per serving'),
 });
-export const Route = createFileRoute('/demo/api/ai/structured')({
+export const Route = createFileRoute('/api/ai/structured')({
     server: {
         handlers: {
             POST: async ({ request }) => {

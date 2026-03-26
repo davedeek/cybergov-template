@@ -1,15 +1,15 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { generateSpeech } from '@tanstack/ai';
-import { openaiSpeech } from '@tanstack/ai-openai';
-export const Route = createFileRoute('/demo/api/ai/tts')({
+import { generateImage, createImageOptions } from '@tanstack/ai';
+import { openaiImage } from '@tanstack/ai-openai';
+export const Route = createFileRoute('/api/ai/image')({
     server: {
         handlers: {
             POST: async ({ request }) => {
                 const body = await request.json();
-                const { text, voice = 'alloy', model = 'tts-1', format = 'mp3', speed = 1.0, } = body;
-                if (!text || text.trim().length === 0) {
+                const { prompt, numberOfImages = 1, size = '1024x1024' } = body;
+                if (!prompt || prompt.trim().length === 0) {
                     return new Response(JSON.stringify({
-                        error: 'Text is required',
+                        error: 'Prompt is required',
                     }), {
                         status: 400,
                         headers: { 'Content-Type': 'application/json' },
@@ -24,21 +24,18 @@ export const Route = createFileRoute('/demo/api/ai/tts')({
                     });
                 }
                 try {
-                    const adapter = openaiSpeech(model);
-                    const result = await generateSpeech({
-                        adapter,
-                        text,
-                        voice,
-                        format,
-                        speed,
+                    const options = createImageOptions({
+                        adapter: openaiImage('gpt-image-1'),
+                    });
+                    const result = await generateImage({
+                        ...options,
+                        prompt,
+                        numberOfImages,
+                        size,
                     });
                     return new Response(JSON.stringify({
-                        id: result.id,
-                        model: result.model,
-                        audio: result.audio,
-                        format: result.format,
-                        contentType: result.contentType,
-                        duration: result.duration,
+                        images: result.images,
+                        model: 'gpt-image-1',
                     }), {
                         status: 200,
                         headers: { 'Content-Type': 'application/json' },

@@ -1,29 +1,23 @@
 import {
   HeadContent,
+  Outlet,
   Scripts,
   createRootRouteWithContext,
 } from '@tanstack/react-router'
 import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools'
 import { TanStackDevtools } from '@tanstack/react-devtools'
 
-import Header from '../components/Header'
-
 import TanStackQueryDevtools from '../integrations/tanstack-query/devtools'
-
-import StoreDevtools from '../lib/demo-store-devtools'
-
 import AiDevtools from '../lib/ai-devtools'
 
 import appCss from '../styles.css?url'
 
 import type { QueryClient } from '@tanstack/react-query'
-
 import type { TRPCRouter } from '@/integrations/trpc/router'
 import type { TRPCOptionsProxy } from '@trpc/tanstack-react-query'
 
 interface MyRouterContext {
   queryClient: QueryClient
-
   trpc: TRPCOptionsProxy<TRPCRouter>
 }
 
@@ -38,7 +32,7 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
         content: 'width=device-width, initial-scale=1',
       },
       {
-        title: 'TanStack Start Starter',
+        title: 'CyberGov — SaaS Starter',
       },
     ],
     links: [
@@ -49,8 +43,45 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
     ],
   }),
 
+  component: RootComponent,
   shellComponent: RootDocument,
+
+  notFoundComponent: () => (
+    <div className="min-h-screen flex items-center justify-center bg-slate-900">
+      <div className="text-center">
+        <h1 className="text-6xl font-bold text-white mb-4">404</h1>
+        <p className="text-gray-400 text-lg mb-6">Page not found</p>
+        <a
+          href="/"
+          className="px-6 py-3 bg-cyan-500 hover:bg-cyan-600 text-white font-semibold rounded-lg transition-colors"
+        >
+          Go Home
+        </a>
+      </div>
+    </div>
+  ),
+
+  errorComponent: ({ error }) => (
+    <div className="min-h-screen flex items-center justify-center bg-slate-900">
+      <div className="text-center max-w-md">
+        <h1 className="text-4xl font-bold text-red-400 mb-4">Something went wrong</h1>
+        <p className="text-gray-400 mb-6">
+          {error instanceof Error ? error.message : 'An unexpected error occurred'}
+        </p>
+        <button
+          onClick={() => window.location.reload()}
+          className="px-6 py-3 bg-cyan-500 hover:bg-cyan-600 text-white font-semibold rounded-lg transition-colors"
+        >
+          Try Again
+        </button>
+      </div>
+    </div>
+  ),
 })
+
+function RootComponent() {
+  return <Outlet />
+}
 
 function RootDocument({ children }: { children: React.ReactNode }) {
   return (
@@ -59,7 +90,6 @@ function RootDocument({ children }: { children: React.ReactNode }) {
         <HeadContent />
       </head>
       <body>
-        <Header />
         {children}
         <TanStackDevtools
           config={{
@@ -71,7 +101,6 @@ function RootDocument({ children }: { children: React.ReactNode }) {
               render: <TanStackRouterDevtoolsPanel />,
             },
             TanStackQueryDevtools,
-            StoreDevtools,
             AiDevtools,
           ]}
         />

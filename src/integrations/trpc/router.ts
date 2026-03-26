@@ -2,8 +2,17 @@ import { and, desc, eq } from 'drizzle-orm'
 import { z } from 'zod'
 import { createTRPCRouter, protectedProcedure } from './init'
 import { organizationMemberships, organizations, todos } from '@/db/schema'
+import type { TRPCContext } from './context'
 
-async function getMembershipOrThrow({ db, userId, organizationId }) {
+async function getMembershipOrThrow({
+  db,
+  userId,
+  organizationId,
+}: {
+  db: TRPCContext['db']
+  userId: string
+  organizationId: number
+}) {
   const membership = await db.query.organizationMemberships.findFirst({
     where: and(
       eq(organizationMemberships.organizationId, organizationId),
@@ -177,3 +186,5 @@ export const trpcRouter = createTRPCRouter({
   organization: organizationRouter,
   todos: todosRouter,
 })
+
+export type TRPCRouter = typeof trpcRouter

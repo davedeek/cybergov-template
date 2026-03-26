@@ -1,10 +1,12 @@
 import { initTRPC, TRPCError } from '@trpc/server'
 import superjson from 'superjson'
-import { createTRPCContext } from './context'
+import type { createTRPCContext } from './context'
 
-const t = initTRPC.context<typeof createTRPCContext>().create({
-  transformer: superjson,
-})
+const t = initTRPC.context<Awaited<ReturnType<typeof createTRPCContext>>>().create(
+  {
+    transformer: superjson,
+  },
+)
 
 export const createTRPCRouter = t.router
 
@@ -23,3 +25,4 @@ const isAuthed = t.middleware(({ ctx, next }) => {
 })
 
 export const protectedProcedure = t.procedure.use(isAuthed)
+

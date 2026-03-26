@@ -1,8 +1,10 @@
-import { useCallback, useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 import { createFileRoute } from '@tanstack/react-router'
-import { useMutation, useQuery } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useTRPC } from '@/integrations/trpc/react'
 import { authClient } from '@/lib/auth-client'
+import { createCollection, useLiveQuery } from '@tanstack/react-db'
+import { queryCollectionOptions } from '@tanstack/query-db-collection'
 
 export const Route = createFileRoute('/demo/trpc-todo')({
   component: TRPCTodos,
@@ -15,34 +17,63 @@ export const Route = createFileRoute('/demo/trpc-todo')({
 
 function TRPCTodos() {
   const trpc = useTRPC()
+  const queryClient = useQueryClient()
+  type Workspace = { organization: { id: number; name: string } }
+  type TodoItem = { id: number; name: string }
   const { data: session, isPending: sessionPending } = authClient.useSession()
   const {
     data: workspace,
     refetch: refetchWorkspace,
     isLoading: workspaceLoading,
-  } = useQuery(trpc.organization.getOrCreateCurrent.queryOptions())
+  } = useQuery<Workspace>(
+    trpc.organization.getOrCreateCurrent.queryOptions() as any,
+  )
 
   const organizationId = workspace?.organization.id
 
-  const { data, refetch, isLoading } = useQuery({
-    ...trpc.todos.list.queryOptions({
+  const todosCollection = useMemo(() => {
+    const queryOptions = trpc.todos.list.queryOptions({
       organizationId: organizationId ?? -1,
-    }),
-    enabled: !!organizationId,
-  })
+    })
+
+    return createCollection(
+      queryCollectionOptions({
+        queryClient,
+        queryKey: queryOptions.queryKey,
+        queryFn: async (ctx) => {
+          if (!organizationId) return []
+          return queryOptions.queryFn(ctx)
+        },
+        getKey: (todo: any) => todo.id,
+      }),
+    )
+  }, [organizationId, queryClient, trpc])
+
+  const { data: liveTodos = [], isLoading } = useLiveQuery(
+    (q) =>
+      q
+        .from({ todo: todosCollection })
+        .select(({ todo }) => ({
+          ...todo,
+        })),
+    [todosCollection],
+  )
 
   const [todo, setTodo] = useState('')
-  const { mutate: addTodo } = useMutation({
-    ...trpc.todos.add.mutationOptions(),
+  const { mutate: addTodo } = useMutation<any, Error, TodoItem>({
+    ...(trpc.todos.add.mutationOptions() as any),
     onSuccess: () => {
-      refetch()
+      queryClient.invalidateQueries({
+        queryKey: trpc.todos.list.queryOptions({ organizationId: organizationId! })
+          .queryKey,
+      })
       setTodo('')
     },
   })
 
   const submitTodo = useCallback(() => {
     if (!organizationId || todo.trim().length === 0) return
-    addTodo({ organizationId, name: todo.trim() })
+    addTodo({ organizationId, name: todo.trim() } as any)
   }, [addTodo, organizationId, todo])
 
   if (sessionPending || workspaceLoading) {
@@ -93,7 +124,7 @@ function TRPCTodos() {
           {isLoading ? (
             <li className="text-white/70">Loading todos...</li>
           ) : (
-            data?.map((t) => (
+            (liveTodos as any[])?.map((t: any) => (
             <li
               key={t.id}
               className="bg-white/10 border border-white/20 rounded-lg p-3 backdrop-blur-sm shadow-md"

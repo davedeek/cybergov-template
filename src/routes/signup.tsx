@@ -29,7 +29,7 @@ function SignUpPage() {
       if (result.error) {
         setError(result.error.message || 'Sign up failed')
       } else {
-        navigate({ to: '/_authed/dashboard' as string })
+        navigate({ to: '/dashboard' })
       }
     } catch {
       setError('Something went wrong. Please try again.')

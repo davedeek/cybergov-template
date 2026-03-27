@@ -98,21 +98,21 @@ function DashboardPage() {
         <h2 className="text-lg font-semibold text-white mb-4">Quick Actions</h2>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           <a
-            href={orgId ? `/_authed/todos?orgId=${orgId}` : '/_authed/todos'}
+            href={orgId ? `/todos?orgId=${orgId}` : '/todos'}
             className="flex items-center gap-3 p-4 bg-slate-700/50 hover:bg-slate-700 rounded-lg transition-colors"
           >
             <CheckSquare className="w-5 h-5 text-cyan-400" />
             <span className="text-sm text-gray-200">Manage Todos</span>
           </a>
           <a
-            href={orgId ? `/_authed/ai/chat?orgId=${orgId}` : '/_authed/ai/chat'}
+            href={orgId ? `/ai/chat?orgId=${orgId}` : '/ai/chat'}
             className="flex items-center gap-3 p-4 bg-slate-700/50 hover:bg-slate-700 rounded-lg transition-colors"
           >
             <MessageSquare className="w-5 h-5 text-cyan-400" />
             <span className="text-sm text-gray-200">AI Chat</span>
           </a>
           <a
-            href={orgId ? `/_authed/settings?orgId=${orgId}` : '/_authed/settings'}
+            href={orgId ? `/settings?orgId=${orgId}` : '/settings'}
             className="flex items-center gap-3 p-4 bg-slate-700/50 hover:bg-slate-700 rounded-lg transition-colors"
           >
             <Users className="w-5 h-5 text-cyan-400" />

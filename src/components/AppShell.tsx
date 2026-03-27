@@ -23,12 +23,12 @@ interface AppShellProps {
 }
 
 const navItems = [
-  { to: '/_authed/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
-  { to: '/_authed/todos', icon: CheckSquare, label: 'Todos' },
-  { to: '/_authed/ai/chat', icon: MessageSquare, label: 'AI Chat' },
-  { to: '/_authed/ai/structured', icon: Sparkles, label: 'AI Structured' },
-  { to: '/_authed/ai/image', icon: Image, label: 'AI Image' },
-  { to: '/_authed/settings', icon: Settings, label: 'Settings' },
+  { to: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
+  { to: '/todos', icon: CheckSquare, label: 'Todos' },
+  { to: '/ai/chat', icon: MessageSquare, label: 'AI Chat' },
+  { to: '/ai/structured', icon: Sparkles, label: 'AI Structured' },
+  { to: '/ai/image', icon: Image, label: 'AI Image' },
+  { to: '/settings', icon: Settings, label: 'Settings' },
 ] as const
 
 export default function AppShell({ children }: AppShellProps) {
@@ -148,7 +148,7 @@ export default function AppShell({ children }: AppShellProps) {
           {/* User menu */}
           <div className="p-3 border-t border-slate-700">
             <Link
-              to={'/_authed/profile' as string}
+              to={'/profile'}
               className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-700/50 transition-colors mb-1"
               onClick={() => setSidebarOpen(false)}
             >

@@ -42,6 +42,8 @@ export function getContext() {
   }
 }
 
+import { QueryClientProvider } from '@tanstack/react-query'
+
 export function Provider({
   children,
   queryClient,
@@ -51,7 +53,9 @@ export function Provider({
 }) {
   return (
     <TRPCProvider trpcClient={trpcClient} queryClient={queryClient}>
-      {children}
+      <QueryClientProvider client={queryClient}>
+        {children}
+      </QueryClientProvider>
     </TRPCProvider>
   )
 }

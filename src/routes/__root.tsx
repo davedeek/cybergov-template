@@ -79,8 +79,18 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
   ),
 })
 
+import { Provider as RootProvider } from '../integrations/tanstack-query/root-provider'
+import { useRouter } from '@tanstack/react-router'
+
 function RootComponent() {
-  return <Outlet />
+  const router = useRouter()
+  const queryClient = router.options.context.queryClient
+
+  return (
+    <RootProvider queryClient={queryClient}>
+      <Outlet />
+    </RootProvider>
+  )
 }
 
 function RootDocument({ children }: { children: React.ReactNode }) {

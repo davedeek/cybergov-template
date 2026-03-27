@@ -27,7 +27,7 @@ function SignInPage() {
       if (result.error) {
         setError(result.error.message || 'Invalid credentials')
       } else {
-        navigate({ to: '/_authed/dashboard' as string })
+        navigate({ to: '/dashboard' })
       }
     } catch {
       setError('Something went wrong. Please try again.')

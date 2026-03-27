@@ -63,7 +63,7 @@ function LandingPage() {
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <a
-              href={session?.user ? '/_authed/dashboard' : '/signup'}
+              href={session?.user ? '/dashboard' : '/signup'}
               className="px-8 py-3.5 bg-cyan-500 hover:bg-cyan-600 text-white font-semibold rounded-lg transition-colors shadow-lg shadow-cyan-500/25 flex items-center gap-2"
             >
               {session?.user ? 'Go to Dashboard' : 'Get Started'}

@@ -4,6 +4,8 @@ import { useTRPC } from '@/integrations/trpc/react'
 import { useQuery } from '@tanstack/react-query'
 import { useLiveQuery } from '@tanstack/react-db'
 import { useTodosCollection, useMembersCollection } from '@/db-collections'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
 
 export const Route = createFileRoute('/_authed/dashboard')({
   component: DashboardPage,
@@ -63,63 +65,75 @@ function DashboardPage() {
   ]
 
   return (
-    <div className="p-6 lg:p-8 max-w-6xl mx-auto">
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold text-white">
+    <div className="p-6 lg:p-8 max-w-6xl mx-auto font-sans">
+      <div className="mb-8 border-b-2 border-nd-ink pb-6">
+        <h1 className="text-3xl font-bold font-serif text-nd-ink uppercase tracking-tight">
           {currentOrg?.organization.name ?? 'Dashboard'}
         </h1>
-        <p className="text-gray-400 mt-1">
+        <p className="text-nd-ink-muted mt-2">
           Welcome back! Here's an overview of your workspace.
         </p>
       </div>
 
       {/* Stats grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         {stats.map((stat) => (
-          <div
-            key={stat.label}
-            className="bg-slate-800 rounded-xl border border-slate-700 p-5"
-          >
-            <div className="flex items-center justify-between mb-3">
-              <span className="text-sm text-gray-400">{stat.label}</span>
-              <div
-                className={`w-8 h-8 rounded-lg bg-gradient-to-br ${stat.color} flex items-center justify-center`}
-              >
-                <stat.icon className="w-4 h-4 text-white" />
+          <Card key={stat.label} className="bg-nd-surface border-2 border-nd-ink rounded-none shadow-[4px_4px_0px_#1A1A18] hover:-translate-y-1 hover:shadow-[6px_6px_0px_#1A1A18] transition-all">
+            <CardHeader className="flex flex-row items-center justify-between pb-2 bg-nd-surface-alt border-b border-nd-border">
+              <CardTitle className="text-[10px] font-bold font-mono uppercase tracking-[0.2em] text-nd-ink-muted">
+                {stat.label}
+              </CardTitle>
+              <div className="w-8 h-8 rounded-none bg-nd-ink flex items-center justify-center border border-nd-border shadow-inner">
+                <stat.icon className="w-4 h-4 text-nd-bg" />
               </div>
-            </div>
-            <p className="text-3xl font-bold text-white">{stat.value}</p>
-          </div>
+            </CardHeader>
+            <CardContent className="pt-6">
+              <div className="text-4xl font-serif font-black text-nd-ink">{stat.value}</div>
+            </CardContent>
+          </Card>
         ))}
       </div>
 
       {/* Quick actions */}
-      <div className="bg-slate-800 rounded-xl border border-slate-700 p-6">
-        <h2 className="text-lg font-semibold text-white mb-4">Quick Actions</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-          <a
-            href={orgId ? `/todos?orgId=${orgId}` : '/todos'}
-            className="flex items-center gap-3 p-4 bg-slate-700/50 hover:bg-slate-700 rounded-lg transition-colors"
-          >
-            <CheckSquare className="w-5 h-5 text-cyan-400" />
-            <span className="text-sm text-gray-200">Manage Todos</span>
-          </a>
-          <a
-            href={orgId ? `/ai/chat?orgId=${orgId}` : '/ai/chat'}
-            className="flex items-center gap-3 p-4 bg-slate-700/50 hover:bg-slate-700 rounded-lg transition-colors"
-          >
-            <MessageSquare className="w-5 h-5 text-cyan-400" />
-            <span className="text-sm text-gray-200">AI Chat</span>
-          </a>
-          <a
-            href={orgId ? `/settings?orgId=${orgId}` : '/settings'}
-            className="flex items-center gap-3 p-4 bg-slate-700/50 hover:bg-slate-700 rounded-lg transition-colors"
-          >
-            <Users className="w-5 h-5 text-cyan-400" />
-            <span className="text-sm text-gray-200">Invite Members</span>
-          </a>
-        </div>
-      </div>
+      <Card className="bg-nd-surface border-2 border-nd-ink rounded-none shadow-sm">
+        <CardHeader className="border-b border-nd-border bg-[#FAF9F5]">
+          <CardTitle className="text-sm font-mono tracking-widest uppercase text-nd-ink">Quick Actions</CardTitle>
+        </CardHeader>
+        <CardContent className="p-6">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <Button
+              variant="outline"
+              className="h-16 justify-start gap-3 bg-nd-bg border-2 border-nd-border hover:border-nd-ink hover:bg-nd-surface-alt text-nd-ink rounded-none transition-colors"
+              asChild
+            >
+              <a href={orgId ? `/todos?orgId=${orgId}` : '/todos'}>
+                <CheckSquare className="w-5 h-5 text-nd-accent" />
+                <span className="font-serif font-bold tracking-wide">Manage Todos</span>
+              </a>
+            </Button>
+            <Button
+              variant="outline"
+              className="h-16 justify-start gap-3 bg-nd-bg border-2 border-nd-border hover:border-nd-ink hover:bg-nd-surface-alt text-nd-ink rounded-none transition-colors"
+              asChild
+            >
+              <a href={orgId ? `/ai/chat?orgId=${orgId}` : '/ai/chat'}>
+                <MessageSquare className="w-5 h-5 text-nd-accent" />
+                <span className="font-serif font-bold tracking-wide">AI Chat</span>
+              </a>
+            </Button>
+            <Button
+              variant="outline"
+              className="h-16 justify-start gap-3 bg-nd-bg border-2 border-nd-border hover:border-nd-ink hover:bg-nd-surface-alt text-nd-ink rounded-none transition-colors"
+              asChild
+            >
+              <a href={orgId ? `/settings?orgId=${orgId}` : '/settings'}>
+                <Users className="w-5 h-5 text-nd-accent" />
+                <span className="font-serif font-bold tracking-wide">Invite Members</span>
+              </a>
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   )
 }

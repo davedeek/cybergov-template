@@ -31,24 +31,24 @@ export const Route = createFileRoute('/_authed')({
   component: AuthedLayout,
 
   pendingComponent: () => (
-    <div className="min-h-screen flex items-center justify-center bg-slate-900">
-      <div className="flex flex-col items-center gap-4">
-        <div className="w-10 h-10 border-4 border-cyan-500 border-t-transparent rounded-full animate-spin" />
-        <p className="text-gray-400 text-sm">Loading...</p>
+    <div className="min-h-screen flex items-center justify-center bg-nd-bg">
+      <div className="flex flex-col items-center gap-6">
+        <div className="w-12 h-12 border-4 border-nd-accent border-t-transparent rounded-full animate-spin" />
+        <p className="text-nd-ink-muted text-[10px] font-mono uppercase tracking-[0.2em] font-bold">Loading Data...</p>
       </div>
     </div>
   ),
 
   errorComponent: ({ error }) => (
-    <div className="min-h-screen flex items-center justify-center bg-slate-900">
-      <div className="text-center max-w-md">
-        <h1 className="text-4xl font-bold text-red-400 mb-4">Error</h1>
-        <p className="text-gray-400 mb-6">
+    <div className="min-h-screen flex items-center justify-center bg-nd-bg font-sans">
+      <div className="text-center max-w-md bg-nd-surface border-2 border-nd-ink p-8 shadow-[4px_4px_0px_#1A1A18]">
+        <h1 className="text-2xl font-serif font-bold text-nd-flag-red mb-4 uppercase tracking-tight">System Error</h1>
+        <p className="text-nd-ink-muted mb-8 font-mono text-xs">
           {error instanceof Error ? error.message : 'An unexpected error occurred'}
         </p>
         <button
           onClick={() => window.location.reload()}
-          className="px-6 py-3 bg-cyan-500 hover:bg-cyan-600 text-white font-semibold rounded-lg transition-colors"
+          className="px-6 py-3 bg-nd-ink hover:bg-nd-ink/90 text-nd-bg font-serif font-bold tracking-wide uppercase text-xs rounded-none border-2 border-nd-ink transition-colors w-full"
         >
           Try Again
         </button>

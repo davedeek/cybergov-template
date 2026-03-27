@@ -49,48 +49,50 @@ function SettingsPage() {
   }
 
   return (
-    <div className="p-6 lg:p-8 max-w-3xl mx-auto">
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold text-white flex items-center gap-3">
-          <Settings className="w-6 h-6 text-cyan-400" />
+    <div className="p-6 lg:p-8 max-w-3xl mx-auto font-sans">
+      <div className="mb-8 border-b-2 border-nd-ink pb-6">
+        <h1 className="text-3xl font-bold font-serif text-nd-ink uppercase tracking-tight flex items-center gap-3">
+          <Settings className="w-6 h-6 text-nd-accent" />
           Organization Settings
         </h1>
-        <p className="text-gray-400 mt-1">
+        <p className="text-nd-ink-muted mt-2">
           Manage your workspace and team.
         </p>
       </div>
 
       {/* Org info */}
-      <div className="bg-slate-800 rounded-xl border border-slate-700 p-6 mb-6">
-        <h2 className="text-lg font-semibold text-white mb-3">Workspace</h2>
-        <p className="text-gray-300 text-sm">
-          <span className="text-gray-500">Name:</span>{' '}
-          {currentOrg?.organization.name}
-        </p>
-        <p className="text-gray-300 text-sm mt-1">
-          <span className="text-gray-500">Your role:</span>{' '}
-          <span className="capitalize">{currentOrg?.membership.role}</span>
-        </p>
+      <div className="bg-nd-surface rounded-none border-2 border-nd-ink p-6 mb-8 shadow-[4px_4px_0px_#1A1A18]">
+        <div className="text-[10px] font-mono tracking-[0.2em] uppercase text-nd-accent mb-4">Workspace Details</div>
+        <div className="grid grid-cols-2 gap-4">
+          <div className="bg-[#FAF9F5] border border-nd-border p-4">
+            <span className="block text-xs font-mono uppercase tracking-wider text-nd-ink-muted mb-1">Name</span>
+            <span className="font-serif font-bold text-lg text-nd-ink">{currentOrg?.organization.name}</span>
+          </div>
+          <div className="bg-[#FAF9F5] border border-nd-border p-4">
+            <span className="block text-xs font-mono uppercase tracking-wider text-nd-ink-muted mb-1">Your role</span>
+            <span className="font-serif font-bold text-lg text-nd-ink capitalize">{currentOrg?.membership.role}</span>
+          </div>
+        </div>
       </div>
 
       {/* Invite member */}
-      <div className="bg-slate-800 rounded-xl border border-slate-700 p-6 mb-6">
-        <h2 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
-          <UserPlus className="w-5 h-5 text-cyan-400" />
+      <div className="bg-nd-surface rounded-none border-2 border-nd-ink p-6 mb-8 shadow-sm">
+        <h2 className="text-xl font-serif font-bold text-nd-ink mb-6 flex items-center gap-3">
+          <UserPlus className="w-5 h-5 text-nd-accent" />
           Invite Member
         </h2>
-        <form onSubmit={handleInvite} className="flex gap-2">
+        <form onSubmit={handleInvite} className="flex flex-col sm:flex-row gap-3">
           <input
             type="email"
             value={inviteEmail}
             onChange={(e) => setInviteEmail(e.target.value)}
             placeholder="member@example.com"
-            className="flex-1 px-4 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 text-sm"
+            className="flex-1 px-4 py-3 bg-nd-bg border border-nd-border rounded-none text-nd-ink placeholder:text-nd-ink-muted focus:outline-none focus:border-nd-accent transition-colors font-sans"
           />
           <select
             value={inviteRole}
             onChange={(e) => setInviteRole(e.target.value as 'member' | 'admin')}
-            className="px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500/50"
+            className="px-4 py-3 bg-nd-bg border border-nd-border rounded-none text-nd-ink font-sans focus:outline-none focus:border-nd-accent cursor-pointer min-w-[120px]"
           >
             <option value="member">Member</option>
             <option value="admin">Admin</option>
@@ -98,38 +100,40 @@ function SettingsPage() {
           <button
             type="submit"
             disabled={!inviteEmail.trim() || inviteMutation.isPending}
-            className="px-4 py-2 bg-cyan-500 hover:bg-cyan-600 disabled:bg-gray-600 text-white font-medium rounded-lg transition-colors text-sm"
+            className="px-6 py-3 bg-nd-ink hover:bg-nd-ink/90 disabled:opacity-50 text-nd-bg font-serif font-bold tracking-wide rounded-none transition-colors border-2 border-nd-ink whitespace-nowrap"
           >
-            Invite
+            Invite User
           </button>
         </form>
         {inviteMutation.isSuccess && (
-          <p className="text-emerald-400 text-xs mt-2">Invitation sent!</p>
+          <p className="text-[#2B5EA7] font-mono text-xs uppercase tracking-widest font-bold mt-4">Invitation sent successfully.</p>
         )}
       </div>
 
       {/* Members list */}
-      <div className="bg-slate-800 rounded-xl border border-slate-700 p-6">
-        <h2 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
-          <Shield className="w-5 h-5 text-cyan-400" />
-          Members ({members?.length ?? 0})
+      <div className="bg-nd-surface rounded-none border-2 border-nd-ink p-6 shadow-sm">
+        <h2 className="text-xl font-serif font-bold text-nd-ink mb-6 flex items-center gap-3">
+          <Shield className="w-5 h-5 text-nd-accent" />
+          Members Directory ({members?.length ?? 0})
         </h2>
         {members?.length ? (
-          <ul className="space-y-2">
+          <ul className="space-y-3">
             {members.map((m) => (
               <li
                 key={m.id}
-                className="flex items-center justify-between p-3 bg-slate-700/50 rounded-lg"
+                className="flex items-center justify-between p-4 bg-nd-bg border border-nd-border rounded-none hover:border-nd-ink transition-colors"
               >
                 <div>
-                  <p className="text-sm text-gray-200">{m.userId}</p>
-                  <p className="text-xs text-gray-400 capitalize">{m.role}</p>
+                  <p className="text-sm font-mono tracking-wider font-bold text-nd-ink">{m.userId}</p>
+                  <p className="text-[10px] font-mono uppercase tracking-[0.2em] text-nd-ink-muted mt-1">{m.role}</p>
                 </div>
               </li>
             ))}
           </ul>
         ) : (
-          <p className="text-gray-400 text-sm">No members found.</p>
+          <div className="text-center py-8 bg-[#FAF9F5] border border-[#C8C3B4] border-dashed">
+            <p className="font-mono text-xs uppercase tracking-widest text-nd-ink-muted">No members found.</p>
+          </div>
         )}
       </div>
     </div>

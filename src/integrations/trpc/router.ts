@@ -2,6 +2,8 @@ import { desc, eq } from 'drizzle-orm'
 import { z } from 'zod'
 import { createTRPCRouter, protectedProcedure, orgScopedProcedure } from './init'
 import { organizationMemberships, organizations, todos, invitations } from '@/db/schema'
+import { wsRouter } from './routers/ws'
+import { shareRouter } from './routers/share'
 
 // ─── Me router ─────────────────────────────────────────────────────────────────
 
@@ -241,10 +243,15 @@ const todosRouter = createTRPCRouter({
 
 // ─── Root router ───────────────────────────────────────────────────────────────
 
-export const trpcRouter = createTRPCRouter({
+export const appRouter = createTRPCRouter({
   me: meRouter,
   organization: organizationRouter,
   todos: todosRouter,
+  ws: wsRouter,
+  share: shareRouter,
 })
 
+export type AppRouter = typeof appRouter
+
+export const trpcRouter = appRouter
 export type TRPCRouter = typeof trpcRouter

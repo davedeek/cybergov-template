@@ -13,10 +13,12 @@ import { Route as SignupRouteImport } from './routes/signup'
 import { Route as SigninRouteImport } from './routes/signin'
 import { Route as AuthedRouteImport } from './routes/_authed'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ShareTokenRouteImport } from './routes/share/$token'
 import { Route as AuthedTodosRouteImport } from './routes/_authed/todos'
 import { Route as AuthedSettingsRouteImport } from './routes/_authed/settings'
 import { Route as AuthedProfileRouteImport } from './routes/_authed/profile'
 import { Route as AuthedDashboardRouteImport } from './routes/_authed/dashboard'
+import { Route as AuthedWsIndexRouteImport } from './routes/_authed/ws/index'
 import { Route as ApiTrpcSplatRouteImport } from './routes/api.trpc.$'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 import { Route as ApiAiTtsRouteImport } from './routes/api/ai/tts'
@@ -27,6 +29,9 @@ import { Route as ApiAiChatRouteImport } from './routes/api/ai/chat'
 import { Route as AuthedAiStructuredRouteImport } from './routes/_authed/ai/structured'
 import { Route as AuthedAiImageRouteImport } from './routes/_authed/ai/image'
 import { Route as AuthedAiChatRouteImport } from './routes/_authed/ai/chat'
+import { Route as AuthedWsUnitIdIndexRouteImport } from './routes/_authed/ws/$unitId/index'
+import { Route as AuthedWsUnitIdWdcWdcIdRouteImport } from './routes/_authed/ws/$unitId/wdc/$wdcId'
+import { Route as AuthedWsUnitIdPcPcIdRouteImport } from './routes/_authed/ws/$unitId/pc/$pcId'
 
 const SignupRoute = SignupRouteImport.update({
   id: '/signup',
@@ -47,6 +52,11 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ShareTokenRoute = ShareTokenRouteImport.update({
+  id: '/share/$token',
+  path: '/share/$token',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthedTodosRoute = AuthedTodosRouteImport.update({
   id: '/todos',
   path: '/todos',
@@ -65,6 +75,11 @@ const AuthedProfileRoute = AuthedProfileRouteImport.update({
 const AuthedDashboardRoute = AuthedDashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
+  getParentRoute: () => AuthedRoute,
+} as any)
+const AuthedWsIndexRoute = AuthedWsIndexRouteImport.update({
+  id: '/ws/',
+  path: '/ws/',
   getParentRoute: () => AuthedRoute,
 } as any)
 const ApiTrpcSplatRoute = ApiTrpcSplatRouteImport.update({
@@ -117,6 +132,21 @@ const AuthedAiChatRoute = AuthedAiChatRouteImport.update({
   path: '/ai/chat',
   getParentRoute: () => AuthedRoute,
 } as any)
+const AuthedWsUnitIdIndexRoute = AuthedWsUnitIdIndexRouteImport.update({
+  id: '/ws/$unitId/',
+  path: '/ws/$unitId/',
+  getParentRoute: () => AuthedRoute,
+} as any)
+const AuthedWsUnitIdWdcWdcIdRoute = AuthedWsUnitIdWdcWdcIdRouteImport.update({
+  id: '/ws/$unitId/wdc/$wdcId',
+  path: '/ws/$unitId/wdc/$wdcId',
+  getParentRoute: () => AuthedRoute,
+} as any)
+const AuthedWsUnitIdPcPcIdRoute = AuthedWsUnitIdPcPcIdRouteImport.update({
+  id: '/ws/$unitId/pc/$pcId',
+  path: '/ws/$unitId/pc/$pcId',
+  getParentRoute: () => AuthedRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -126,6 +156,7 @@ export interface FileRoutesByFullPath {
   '/profile': typeof AuthedProfileRoute
   '/settings': typeof AuthedSettingsRoute
   '/todos': typeof AuthedTodosRoute
+  '/share/$token': typeof ShareTokenRoute
   '/ai/chat': typeof AuthedAiChatRoute
   '/ai/image': typeof AuthedAiImageRoute
   '/ai/structured': typeof AuthedAiStructuredRoute
@@ -136,6 +167,10 @@ export interface FileRoutesByFullPath {
   '/api/ai/tts': typeof ApiAiTtsRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/trpc/$': typeof ApiTrpcSplatRoute
+  '/ws/': typeof AuthedWsIndexRoute
+  '/ws/$unitId/': typeof AuthedWsUnitIdIndexRoute
+  '/ws/$unitId/pc/$pcId': typeof AuthedWsUnitIdPcPcIdRoute
+  '/ws/$unitId/wdc/$wdcId': typeof AuthedWsUnitIdWdcWdcIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -145,6 +180,7 @@ export interface FileRoutesByTo {
   '/profile': typeof AuthedProfileRoute
   '/settings': typeof AuthedSettingsRoute
   '/todos': typeof AuthedTodosRoute
+  '/share/$token': typeof ShareTokenRoute
   '/ai/chat': typeof AuthedAiChatRoute
   '/ai/image': typeof AuthedAiImageRoute
   '/ai/structured': typeof AuthedAiStructuredRoute
@@ -155,6 +191,10 @@ export interface FileRoutesByTo {
   '/api/ai/tts': typeof ApiAiTtsRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/trpc/$': typeof ApiTrpcSplatRoute
+  '/ws': typeof AuthedWsIndexRoute
+  '/ws/$unitId': typeof AuthedWsUnitIdIndexRoute
+  '/ws/$unitId/pc/$pcId': typeof AuthedWsUnitIdPcPcIdRoute
+  '/ws/$unitId/wdc/$wdcId': typeof AuthedWsUnitIdWdcWdcIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -166,6 +206,7 @@ export interface FileRoutesById {
   '/_authed/profile': typeof AuthedProfileRoute
   '/_authed/settings': typeof AuthedSettingsRoute
   '/_authed/todos': typeof AuthedTodosRoute
+  '/share/$token': typeof ShareTokenRoute
   '/_authed/ai/chat': typeof AuthedAiChatRoute
   '/_authed/ai/image': typeof AuthedAiImageRoute
   '/_authed/ai/structured': typeof AuthedAiStructuredRoute
@@ -176,6 +217,10 @@ export interface FileRoutesById {
   '/api/ai/tts': typeof ApiAiTtsRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/trpc/$': typeof ApiTrpcSplatRoute
+  '/_authed/ws/': typeof AuthedWsIndexRoute
+  '/_authed/ws/$unitId/': typeof AuthedWsUnitIdIndexRoute
+  '/_authed/ws/$unitId/pc/$pcId': typeof AuthedWsUnitIdPcPcIdRoute
+  '/_authed/ws/$unitId/wdc/$wdcId': typeof AuthedWsUnitIdWdcWdcIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -187,6 +232,7 @@ export interface FileRouteTypes {
     | '/profile'
     | '/settings'
     | '/todos'
+    | '/share/$token'
     | '/ai/chat'
     | '/ai/image'
     | '/ai/structured'
@@ -197,6 +243,10 @@ export interface FileRouteTypes {
     | '/api/ai/tts'
     | '/api/auth/$'
     | '/api/trpc/$'
+    | '/ws/'
+    | '/ws/$unitId/'
+    | '/ws/$unitId/pc/$pcId'
+    | '/ws/$unitId/wdc/$wdcId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -206,6 +256,7 @@ export interface FileRouteTypes {
     | '/profile'
     | '/settings'
     | '/todos'
+    | '/share/$token'
     | '/ai/chat'
     | '/ai/image'
     | '/ai/structured'
@@ -216,6 +267,10 @@ export interface FileRouteTypes {
     | '/api/ai/tts'
     | '/api/auth/$'
     | '/api/trpc/$'
+    | '/ws'
+    | '/ws/$unitId'
+    | '/ws/$unitId/pc/$pcId'
+    | '/ws/$unitId/wdc/$wdcId'
   id:
     | '__root__'
     | '/'
@@ -226,6 +281,7 @@ export interface FileRouteTypes {
     | '/_authed/profile'
     | '/_authed/settings'
     | '/_authed/todos'
+    | '/share/$token'
     | '/_authed/ai/chat'
     | '/_authed/ai/image'
     | '/_authed/ai/structured'
@@ -236,6 +292,10 @@ export interface FileRouteTypes {
     | '/api/ai/tts'
     | '/api/auth/$'
     | '/api/trpc/$'
+    | '/_authed/ws/'
+    | '/_authed/ws/$unitId/'
+    | '/_authed/ws/$unitId/pc/$pcId'
+    | '/_authed/ws/$unitId/wdc/$wdcId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -243,6 +303,7 @@ export interface RootRouteChildren {
   AuthedRoute: typeof AuthedRouteWithChildren
   SigninRoute: typeof SigninRoute
   SignupRoute: typeof SignupRoute
+  ShareTokenRoute: typeof ShareTokenRoute
   ApiAiChatRoute: typeof ApiAiChatRoute
   ApiAiImageRoute: typeof ApiAiImageRoute
   ApiAiStructuredRoute: typeof ApiAiStructuredRoute
@@ -282,6 +343,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/share/$token': {
+      id: '/share/$token'
+      path: '/share/$token'
+      fullPath: '/share/$token'
+      preLoaderRoute: typeof ShareTokenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_authed/todos': {
       id: '/_authed/todos'
       path: '/todos'
@@ -308,6 +376,13 @@ declare module '@tanstack/react-router' {
       path: '/dashboard'
       fullPath: '/dashboard'
       preLoaderRoute: typeof AuthedDashboardRouteImport
+      parentRoute: typeof AuthedRoute
+    }
+    '/_authed/ws/': {
+      id: '/_authed/ws/'
+      path: '/ws'
+      fullPath: '/ws/'
+      preLoaderRoute: typeof AuthedWsIndexRouteImport
       parentRoute: typeof AuthedRoute
     }
     '/api/trpc/$': {
@@ -380,6 +455,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthedAiChatRouteImport
       parentRoute: typeof AuthedRoute
     }
+    '/_authed/ws/$unitId/': {
+      id: '/_authed/ws/$unitId/'
+      path: '/ws/$unitId'
+      fullPath: '/ws/$unitId/'
+      preLoaderRoute: typeof AuthedWsUnitIdIndexRouteImport
+      parentRoute: typeof AuthedRoute
+    }
+    '/_authed/ws/$unitId/wdc/$wdcId': {
+      id: '/_authed/ws/$unitId/wdc/$wdcId'
+      path: '/ws/$unitId/wdc/$wdcId'
+      fullPath: '/ws/$unitId/wdc/$wdcId'
+      preLoaderRoute: typeof AuthedWsUnitIdWdcWdcIdRouteImport
+      parentRoute: typeof AuthedRoute
+    }
+    '/_authed/ws/$unitId/pc/$pcId': {
+      id: '/_authed/ws/$unitId/pc/$pcId'
+      path: '/ws/$unitId/pc/$pcId'
+      fullPath: '/ws/$unitId/pc/$pcId'
+      preLoaderRoute: typeof AuthedWsUnitIdPcPcIdRouteImport
+      parentRoute: typeof AuthedRoute
+    }
   }
 }
 
@@ -391,6 +487,10 @@ interface AuthedRouteChildren {
   AuthedAiChatRoute: typeof AuthedAiChatRoute
   AuthedAiImageRoute: typeof AuthedAiImageRoute
   AuthedAiStructuredRoute: typeof AuthedAiStructuredRoute
+  AuthedWsIndexRoute: typeof AuthedWsIndexRoute
+  AuthedWsUnitIdIndexRoute: typeof AuthedWsUnitIdIndexRoute
+  AuthedWsUnitIdPcPcIdRoute: typeof AuthedWsUnitIdPcPcIdRoute
+  AuthedWsUnitIdWdcWdcIdRoute: typeof AuthedWsUnitIdWdcWdcIdRoute
 }
 
 const AuthedRouteChildren: AuthedRouteChildren = {
@@ -401,6 +501,10 @@ const AuthedRouteChildren: AuthedRouteChildren = {
   AuthedAiChatRoute: AuthedAiChatRoute,
   AuthedAiImageRoute: AuthedAiImageRoute,
   AuthedAiStructuredRoute: AuthedAiStructuredRoute,
+  AuthedWsIndexRoute: AuthedWsIndexRoute,
+  AuthedWsUnitIdIndexRoute: AuthedWsUnitIdIndexRoute,
+  AuthedWsUnitIdPcPcIdRoute: AuthedWsUnitIdPcPcIdRoute,
+  AuthedWsUnitIdWdcWdcIdRoute: AuthedWsUnitIdWdcWdcIdRoute,
 }
 
 const AuthedRouteWithChildren =
@@ -411,6 +515,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthedRoute: AuthedRouteWithChildren,
   SigninRoute: SigninRoute,
   SignupRoute: SignupRoute,
+  ShareTokenRoute: ShareTokenRoute,
   ApiAiChatRoute: ApiAiChatRoute,
   ApiAiImageRoute: ApiAiImageRoute,
   ApiAiStructuredRoute: ApiAiStructuredRoute,

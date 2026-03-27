@@ -6,6 +6,7 @@ import {
 } from '@tanstack/react-router'
 import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools'
 import { TanStackDevtools } from '@tanstack/react-devtools'
+import { TooltipProvider } from '@/components/ui/tooltip'
 
 import TanStackQueryDevtools from '../integrations/tanstack-query/devtools'
 import AiDevtools from '../lib/ai-devtools'
@@ -39,6 +40,19 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
       {
         rel: 'stylesheet',
         href: appCss,
+      },
+      {
+        rel: 'preconnect',
+        href: 'https://fonts.googleapis.com',
+      },
+      {
+        rel: 'preconnect',
+        href: 'https://fonts.gstatic.com',
+        crossOrigin: 'anonymous',
+      } as any,
+      {
+        rel: 'stylesheet',
+        href: 'https://fonts.googleapis.com/css2?family=Bitter:wght@400;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap',
       },
     ],
   }),
@@ -88,7 +102,9 @@ function RootComponent() {
 
   return (
     <RootProvider queryClient={queryClient}>
-      <Outlet />
+      <TooltipProvider>
+        <Outlet />
+      </TooltipProvider>
     </RootProvider>
   )
 }

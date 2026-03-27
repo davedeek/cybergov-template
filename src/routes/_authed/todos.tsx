@@ -67,10 +67,10 @@ function TodosPage() {
   }
 
   return (
-    <div className="p-6 lg:p-8 max-w-3xl mx-auto">
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-white">Todos</h1>
-        <p className="text-gray-400 mt-1">
+    <div className="p-6 lg:p-8 max-w-3xl mx-auto font-sans">
+      <div className="mb-6 border-b-2 border-nd-ink pb-6">
+        <h1 className="text-3xl font-bold font-serif text-nd-ink uppercase tracking-tight">Todos</h1>
+        <p className="text-nd-ink-muted mt-2">
           Manage tasks for your workspace.
         </p>
       </div>
@@ -81,12 +81,12 @@ function TodosPage() {
           value={newTodo}
           onChange={(e) => setNewTodo(e.target.value)}
           placeholder="Add a new todo..."
-          className="flex-1 px-4 py-2.5 bg-slate-800 border border-slate-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 transition-colors"
+          className="flex-1 px-4 py-3 bg-nd-bg border-2 border-nd-border rounded-none text-nd-ink placeholder:text-nd-ink-muted focus:outline-none focus:border-nd-ink transition-colors font-sans"
         />
         <button
           type="submit"
           disabled={!newTodo.trim() || addMutation.isPending}
-          className="px-4 py-2.5 bg-cyan-500 hover:bg-cyan-600 disabled:bg-gray-600 text-white font-medium rounded-lg transition-colors flex items-center gap-2"
+          className="px-6 py-3 bg-nd-ink hover:bg-nd-ink/90 disabled:opacity-50 text-nd-bg font-serif font-bold tracking-wide rounded-none transition-colors border-2 border-nd-ink flex items-center gap-2"
         >
           <Plus className="w-4 h-4" />
           Add
@@ -99,21 +99,21 @@ function TodosPage() {
           {[1, 2, 3].map((i) => (
             <div
               key={i}
-              className="h-14 bg-slate-800 rounded-lg animate-pulse"
+              className="h-14 bg-[#EDEAE2] border border-[#C8C3B4] rounded-none animate-pulse"
             />
           ))}
         </div>
       ) : !todos?.length ? (
-        <div className="text-center py-12 bg-slate-800 rounded-xl border border-slate-700">
-          <CheckCircle className="w-12 h-12 text-gray-600 mx-auto mb-3" />
-          <p className="text-gray-400">No todos yet. Add one above!</p>
+        <div className="text-center py-12 bg-nd-surface border-2 border-nd-border border-dashed rounded-none">
+          <CheckCircle className="w-12 h-12 text-nd-ink-muted mx-auto mb-3" />
+          <p className="font-mono text-xs uppercase tracking-widest text-nd-ink-muted">No todos yet. Add one above.</p>
         </div>
       ) : (
         <ul className="space-y-2">
           {todos.map((todo) => (
             <li
               key={todo.id}
-              className="flex items-center gap-3 p-3 bg-slate-800 rounded-lg border border-slate-700 group hover:border-slate-600 transition-colors"
+              className={`flex items-center gap-3 p-4 bg-nd-surface border border-nd-border rounded-none group hover:border-nd-ink transition-colors ${todo.completedAt ? 'bg-[#FAF9F5]' : ''}`}
             >
               <button
                 onClick={() =>
@@ -123,19 +123,19 @@ function TodosPage() {
                     completedAt: todo.completedAt ? null : new Date(),
                   })
                 }
-                className="flex-shrink-0 text-gray-400 hover:text-cyan-400 transition-colors"
+                className={`flex-shrink-0 transition-colors ${todo.completedAt ? 'text-[#2B5EA7]' : 'text-nd-ink-muted hover:text-nd-ink'}`}
               >
                 {todo.completedAt ? (
-                  <CheckCircle className="w-5 h-5 text-emerald-400" />
+                  <CheckCircle className="w-5 h-5" />
                 ) : (
                   <Circle className="w-5 h-5" />
                 )}
               </button>
               <span
-                className={`flex-1 text-sm ${
+                className={`flex-1 font-serif text-[15px] ${
                   todo.completedAt
-                    ? 'line-through text-gray-500'
-                    : 'text-gray-200'
+                    ? 'line-through text-nd-ink-muted italic'
+                    : 'text-nd-ink'
                 }`}
               >
                 {todo.name}
@@ -147,7 +147,7 @@ function TodosPage() {
                     id: todo.id,
                   })
                 }
-                className="flex-shrink-0 text-gray-500 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-all"
+                className="flex-shrink-0 text-[#C94A1E]/50 hover:text-[#C94A1E] opacity-0 group-hover:opacity-100 transition-all ml-2"
               >
                 <Trash2 className="w-4 h-4" />
               </button>

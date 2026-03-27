@@ -13,7 +13,6 @@ function handler({ request }: { request: Request }) {
 }
 
 export const Route = createFileRoute('/api/trpc/$')({
-  // @ts-expect-error - Server property is injected by react-start
   server: {
     handlers: {
       GET: handler,

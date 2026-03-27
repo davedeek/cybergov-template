@@ -12,10 +12,10 @@ function InitialLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex-1 flex items-center justify-center px-4">
       <div className="text-center max-w-3xl mx-auto w-full">
-        <h1 className="text-6xl font-bold mb-4 bg-linear-to-r from-cyan-400 to-blue-500 text-transparent bg-clip-text uppercase">
-          <span className="text-white">AI</span> Chat
+        <h1 className="text-6xl font-serif font-black mb-6 text-nd-ink uppercase tracking-tight">
+          <span className="text-nd-accent">AI</span> Chat
         </h1>
-        <p className="text-gray-400 mb-6 w-2/3 mx-auto text-lg">
+        <p className="text-nd-ink-muted mb-8 w-2/3 mx-auto text-lg font-sans">
           Ask me anything. Powered by TanStack AI with multi-provider support.
         </p>
         {children}
@@ -26,8 +26,8 @@ function InitialLayout({ children }: { children: React.ReactNode }) {
 
 function ChattingLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="sticky bottom-0 left-0 right-0 bg-gray-900/80 backdrop-blur-sm border-t border-cyan-500/10 z-10">
-      <div className="max-w-3xl mx-auto w-full px-4 py-3">{children}</div>
+    <div className="sticky bottom-0 left-0 right-0 bg-nd-surface border-t-2 border-nd-ink z-10 p-4">
+      <div className="max-w-3xl mx-auto w-full">{children}</div>
     </div>
   )
 }
@@ -49,25 +49,25 @@ function Messages({ messages }: { messages: ChatMessages }) {
   return (
     <div
       ref={messagesContainerRef}
-      className="flex-1 overflow-y-auto pb-4 min-h-0"
+      className="flex-1 overflow-y-auto min-h-0 bg-nd-bg"
     >
-      <div className="max-w-3xl mx-auto w-full px-4">
+      <div className="max-w-3xl mx-auto w-full pb-8 pt-4">
         {messages.map((message) => (
           <div
             key={message.id}
-            className={`p-4 ${
+            className={`p-6 border-b border-nd-border ${
               message.role === 'assistant'
-                ? 'bg-linear-to-r from-cyan-500/5 to-blue-500/5'
-                : 'bg-transparent'
+                ? 'bg-[#FAF9F5]'
+                : 'bg-nd-surface'
             }`}
           >
-            <div className="flex items-start gap-4 max-w-3xl mx-auto w-full">
+            <div className="flex items-start gap-4 w-full">
               {message.role === 'assistant' ? (
-                <div className="w-8 h-8 rounded-lg bg-linear-to-r from-cyan-500 to-blue-500 mt-2 flex items-center justify-center text-sm font-medium text-white flex-shrink-0">
+                <div className="w-8 h-8 rounded-none border border-nd-ink bg-nd-ink mt-1 flex items-center justify-center text-sm font-bold font-mono text-nd-bg flex-shrink-0">
                   AI
                 </div>
               ) : (
-                <div className="w-8 h-8 rounded-lg bg-gray-700 flex items-center justify-center text-sm font-medium text-white flex-shrink-0">
+                <div className="w-8 h-8 rounded-none border border-nd-border bg-[#EDEAE2] flex items-center justify-center text-sm font-bold font-mono text-nd-ink flex-shrink-0">
                   Y
                 </div>
               )}
@@ -76,7 +76,7 @@ function Messages({ messages }: { messages: ChatMessages }) {
                   if (part.type === 'text' && part.content) {
                     return (
                       <div
-                        className="flex-1 min-w-0 prose dark:prose-invert max-w-none prose-sm"
+                        className="flex-1 min-w-0 prose max-w-none prose-sm text-nd-ink font-sans"
                         key={index}
                       >
                         <Streamdown>{part.content}</Streamdown>
@@ -102,20 +102,20 @@ function ChatPage() {
   const Layout = messages.length ? ChattingLayout : InitialLayout
 
   return (
-    <div className="relative flex h-[calc(100vh-80px)] bg-gray-900">
+    <div className="relative flex flex-col h-[calc(100vh-80px)] bg-nd-surface font-sans">
       <div className="flex-1 flex flex-col min-h-0">
         <Messages messages={messages} />
 
         <Layout>
           <div className="space-y-3">
             {isLoading && (
-              <div className="flex items-center justify-center">
+              <div className="flex items-center justify-center mb-4">
                 <button
                   onClick={stop}
-                  className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-sm font-medium transition-colors flex items-center gap-2"
+                  className="px-6 py-2 bg-nd-surface hover:bg-[#FAF9F5] border-2 border-[#C94A1E] text-[#C94A1E] rounded-none text-xs tracking-widest uppercase font-mono transition-colors flex items-center gap-2 font-bold shadow-[2px_2px_0px_#C94A1E]"
                 >
-                  <Square className="w-4 h-4 fill-current" />
-                  Stop
+                  <Square className="w-3 h-3 fill-current" />
+                  Halt Execution
                 </button>
               </div>
             )}
@@ -134,9 +134,9 @@ function ChatPage() {
                     value={input}
                     onChange={(e) => setInput(e.target.value)}
                     placeholder="Type your message..."
-                    className="w-full rounded-lg border border-cyan-500/20 bg-gray-800/50 pl-4 pr-12 py-3 text-sm text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-transparent resize-none overflow-hidden shadow-lg"
+                    className="w-full rounded-none border-2 border-nd-ink bg-nd-bg pl-4 pr-14 py-4 text-sm text-nd-ink font-serif font-medium placeholder:text-nd-ink-muted focus:outline-none transition-colors focus:border-nd-accent focus:bg-nd-surface resize-none overflow-hidden shadow-[4px_4px_0px_#1A1A18]"
                     rows={1}
-                    style={{ minHeight: '44px', maxHeight: '200px' }}
+                    style={{ minHeight: '56px', maxHeight: '200px' }}
                     disabled={isLoading}
                     onInput={(e) => {
                       const target = e.target as HTMLTextAreaElement
@@ -155,7 +155,7 @@ function ChatPage() {
                   <button
                     type="submit"
                     disabled={!input.trim() || isLoading}
-                    className="absolute right-2 top-1/2 -translate-y-1/2 p-2 text-cyan-500 hover:text-cyan-400 disabled:text-gray-500 transition-colors focus:outline-none"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 p-2 bg-nd-ink hover:bg-nd-accent disabled:bg-[#C8C3B4] text-nd-bg transition-colors focus:outline-none rounded-none"
                   >
                     <Send className="w-4 h-4" />
                   </button>

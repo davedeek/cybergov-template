@@ -1,22 +1,36 @@
 import { useState } from 'react'
-import { Link, useNavigate, useSearch } from '@tanstack/react-router'
+import { Link, useNavigate, useSearch, useRouterState } from '@tanstack/react-router'
 import {
   LayoutDashboard,
   CheckSquare,
   MessageSquare,
   Settings,
   ChevronDown,
-  LogOut,
-  User,
-  Menu,
-  X,
   Building2,
   Sparkles,
   Image,
+  FolderTree,
+  Activity,
+  LogOutIcon
 } from 'lucide-react'
 import { authClient } from '@/lib/auth-client'
 import { useLiveQuery } from '@tanstack/react-db'
 import { useOrganizationsCollection } from '@/db-collections'
+
+import {
+  Sidebar,
+  SidebarContent,
+  SidebarFooter,
+  SidebarGroup,
+  SidebarGroupContent,
+  SidebarGroupLabel,
+  SidebarHeader,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+  SidebarProvider,
+  SidebarTrigger,
+} from '@/components/ui/sidebar'
 
 interface AppShellProps {
   children: React.ReactNode
@@ -28,12 +42,21 @@ const navItems = [
   { to: '/ai/chat', icon: MessageSquare, label: 'AI Chat' },
   { to: '/ai/structured', icon: Sparkles, label: 'AI Structured' },
   { to: '/ai/image', icon: Image, label: 'AI Image' },
+] as const
+
+const wsNavItems = [
+  { to: '/ws', icon: FolderTree, label: 'My Units' },
+] as const
+
+const settingsItems = [
   { to: '/settings', icon: Settings, label: 'Settings' },
 ] as const
 
 export default function AppShell({ children }: AppShellProps) {
   const navigate = useNavigate()
-  const [sidebarOpen, setSidebarOpen] = useState(false)
+  const routerState = useRouterState()
+  const currentPath = routerState.location.pathname
+
   const [orgDropdownOpen, setOrgDropdownOpen] = useState(false)
 
   const { data: session } = authClient.useSession()
@@ -61,139 +84,172 @@ export default function AppShell({ children }: AppShellProps) {
     navigate({ search: { orgId } } as any)
   }
 
+  // Helper to determine if a route is active (including nested WS routes)
+  const isActive = (path: string) => {
+    if (path === '/ws' && currentPath.startsWith('/ws')) return true;
+    return currentPath === path;
+  }
+
   return (
-    <div className="flex h-screen bg-slate-900">
-      {/* Mobile overlay */}
-      {sidebarOpen && (
-        <div
-          className="fixed inset-0 bg-black/50 z-40 lg:hidden"
-          onClick={() => setSidebarOpen(false)}
-        />
-      )}
-
-      {/* Sidebar */}
-      <aside
-        className={`fixed lg:static inset-y-0 left-0 z-50 w-64 bg-slate-800 border-r border-slate-700 transform transition-transform duration-200 ${
-          sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
-        }`}
-      >
-        <div className="flex flex-col h-full">
-          {/* Logo + Org Switcher */}
-          <div className="p-4 border-b border-slate-700">
-            <div className="flex items-center justify-between mb-3">
-              <span className="text-lg font-bold text-white tracking-tight">
-                CyberGov
-              </span>
-              <button
-                className="lg:hidden text-gray-400 hover:text-white"
-                onClick={() => setSidebarOpen(false)}
-              >
-                <X className="w-5 h-5" />
-              </button>
+    <SidebarProvider>
+      <Sidebar variant="inset" className="border-r-0">
+        <SidebarHeader className="bg-nd-ink py-4">
+          <div className="flex items-center gap-3 px-2">
+            <div className="w-8 h-8 bg-nd-accent flex items-center justify-center rounded-none shadow-sm">
+              <Activity className="w-5 h-5 text-white" />
             </div>
-
-            {/* Org Switcher */}
-            <div className="relative">
-              <button
-                onClick={() => setOrgDropdownOpen(!orgDropdownOpen)}
-                className="w-full flex items-center gap-2 px-3 py-2 bg-slate-700/50 hover:bg-slate-700 rounded-lg transition-colors text-sm text-gray-200"
-              >
-                <Building2 className="w-4 h-4 text-cyan-400 flex-shrink-0" />
-                <span className="truncate flex-1 text-left">
-                  {currentOrg?.organization.name ?? 'Select workspace'}
-                </span>
-                <ChevronDown className="w-4 h-4 flex-shrink-0 text-gray-400" />
-              </button>
-
-              {orgDropdownOpen && orgs && (
-                <div className="absolute left-0 right-0 mt-1 bg-slate-700 border border-slate-600 rounded-lg shadow-xl z-50 py-1 max-h-60 overflow-auto">
-                  {orgs.map((o) => (
-                    <button
-                      key={o.organization.id}
-                      onClick={() => switchOrg(o.organization.id)}
-                      className={`w-full text-left px-3 py-2 text-sm hover:bg-slate-600 transition-colors ${
-                        o.organization.id === currentOrg?.organization.id
-                          ? 'text-cyan-400'
-                          : 'text-gray-300'
-                      }`}
-                    >
-                      {o.organization.name}
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
+            <span className="text-xl font-serif font-bold text-white tracking-widest uppercase">CyberGov</span>
           </div>
 
-          {/* Nav links */}
-          <nav className="flex-1 p-3 space-y-1 overflow-y-auto">
-            {navItems.map((item) => (
-              <Link
-                key={item.to}
-                to={item.to as string}
-                search={currentOrgId ? { orgId: currentOrgId } : {}}
-                className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-gray-400 hover:text-white hover:bg-slate-700/50 transition-colors"
-                activeProps={{
-                  className:
-                    'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-cyan-400 bg-cyan-500/10',
-                }}
-                onClick={() => setSidebarOpen(false)}
-              >
-                <item.icon className="w-5 h-5 flex-shrink-0" />
-                {item.label}
-              </Link>
-            ))}
-          </nav>
-
-          {/* User menu */}
-          <div className="p-3 border-t border-slate-700">
-            <Link
-              to={'/profile'}
-              className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-700/50 transition-colors mb-1"
-              onClick={() => setSidebarOpen(false)}
-            >
-              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-cyan-500 to-blue-500 flex items-center justify-center text-white text-sm font-semibold flex-shrink-0">
-                {session?.user?.name?.charAt(0).toUpperCase() ?? 'U'}
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-white truncate">
-                  {session?.user?.name ?? 'User'}
-                </p>
-                <p className="text-xs text-gray-400 truncate">
-                  {session?.user?.email}
-                </p>
-              </div>
-              <User className="w-4 h-4 text-gray-400 flex-shrink-0" />
-            </Link>
+          {/* Org Switcher */}
+          <div className="relative mt-6 px-2">
             <button
-              onClick={handleSignOut}
-              className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-400 hover:text-red-400 hover:bg-red-500/10 transition-colors"
+              onClick={() => setOrgDropdownOpen(!orgDropdownOpen)}
+              className="w-full flex items-center justify-between gap-2 px-3 py-2 bg-[#2A2A28] hover:bg-[#343432] transition-colors text-sm text-white border border-[#343432] rounded-none shadow-inner"
             >
-              <LogOut className="w-5 h-5" />
-              Sign out
+              <div className="flex items-center gap-2 overflow-hidden">
+                <Building2 className="w-4 h-4 text-nd-accent flex-shrink-0" />
+                <span className="truncate font-mono tracking-wider text-xs">
+                  {currentOrg?.organization.name ?? 'SELECT WORKSPACE'}
+                </span>
+              </div>
+              <ChevronDown className="w-4 h-4 flex-shrink-0 text-white/50" />
             </button>
-          </div>
-        </div>
-      </aside>
 
-      {/* Main content */}
-      <div className="flex-1 flex flex-col min-w-0">
-        {/* Mobile header */}
-        <header className="lg:hidden flex items-center gap-4 px-4 py-3 bg-slate-800 border-b border-slate-700">
-          <button
-            onClick={() => setSidebarOpen(true)}
-            className="text-gray-400 hover:text-white"
-          >
-            <Menu className="w-6 h-6" />
-          </button>
-          <span className="text-lg font-bold text-white">CyberGov</span>
+            {orgDropdownOpen && orgs && (
+              <div className="absolute left-2 right-2 mt-1 bg-[#2A2A28] border border-[#343432] shadow-xl z-50 py-1 max-h-60 overflow-auto rounded-none">
+                {orgs.map((o) => (
+                  <button
+                    key={o.organization.id}
+                    onClick={() => switchOrg(o.organization.id)}
+                    className={`w-full text-left px-3 py-2.5 text-xs font-mono uppercase tracking-widest hover:bg-[#343432] transition-colors ${
+                      o.organization.id === currentOrg?.organization.id
+                        ? 'text-nd-accent font-bold bg-[#343432]/50'
+                        : 'text-white/70'
+                    }`}
+                  >
+                    {o.organization.name}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        </SidebarHeader>
+
+        <SidebarContent className="bg-nd-ink">
+          <SidebarGroup>
+            <SidebarGroupLabel className="text-white/40 uppercase text-[10px] font-mono tracking-[0.2em] mb-2 px-4">Application</SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                {navItems.map((item) => (
+                  <SidebarMenuItem key={item.to}>
+                    <SidebarMenuButton asChild isActive={isActive(item.to)} tooltip={item.label} className="rounded-none hover:bg-transparent hover:text-white">
+                      <Link
+                        to={item.to as string}
+                        search={currentOrgId ? { orgId: currentOrgId } : {}}
+                        className={`flex items-center gap-3 px-4 py-2 decoration-transparent font-serif text-sm transition-all ${isActive(item.to) ? 'text-white bg-[#2A2A28] border-l-2 border-nd-accent font-bold' : 'text-white/70 hover:text-white hover:bg-[#2A2A28]/50 border-l-2 border-transparent'}`}
+                      >
+                        <item.icon className={`w-4 h-4 ${isActive(item.to) ? 'text-nd-accent' : 'text-white/50'}`} />
+                        <span>{item.label}</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                ))}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+
+          <div className="h-[1px] bg-[#2A2A28] w-full my-4" />
+
+          <SidebarGroup>
+            <SidebarGroupLabel className="text-nd-accent uppercase text-[10px] font-mono tracking-[0.2em] mb-2 px-4">Work Simplification</SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                {wsNavItems.map((item) => (
+                  <SidebarMenuItem key={item.to}>
+                    <SidebarMenuButton asChild isActive={isActive(item.to)} tooltip={item.label} className="rounded-none hover:bg-transparent hover:text-white">
+                      <Link
+                        to={item.to as string}
+                        search={currentOrgId ? { orgId: currentOrgId } : {}}
+                        className={`flex items-center gap-3 px-4 py-2 decoration-transparent font-serif text-sm transition-all ${isActive(item.to) ? 'text-white bg-[#2A2A28] border-l-2 border-[#D4A017] font-bold' : 'text-white/70 hover:text-white hover:bg-[#2A2A28]/50 border-l-2 border-transparent'}`}
+                      >
+                        <item.icon className={`w-4 h-4 ${isActive(item.to) ? 'text-[#D4A017]' : 'text-white/50'}`} />
+                        <span>{item.label}</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                ))}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+
+          <div className="h-[1px] bg-[#2A2A28] w-full my-4" />
+
+          <SidebarGroup>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                {settingsItems.map((item) => (
+                  <SidebarMenuItem key={item.to}>
+                    <SidebarMenuButton asChild isActive={isActive(item.to)} className="rounded-none hover:bg-transparent hover:text-white">
+                      <Link
+                        to={item.to as string}
+                        search={currentOrgId ? { orgId: currentOrgId } : {}}
+                        className={`flex items-center gap-3 px-4 py-2 decoration-transparent font-serif text-sm transition-all ${isActive(item.to) ? 'text-white bg-[#2A2A28] border-l-2 border-white' : 'text-white/70 hover:text-white hover:bg-[#2A2A28]/50 border-l-2 border-transparent'}`}
+                      >
+                        <item.icon className="w-4 h-4 text-white/50" />
+                        <span>{item.label}</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                ))}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        </SidebarContent>
+
+        <SidebarFooter className="bg-nd-ink border-t border-[#2A2A28] p-0">
+          <SidebarMenu>
+            <SidebarMenuItem>
+              <Link to="/profile" className="flex items-center gap-3 px-4 py-3 hover:bg-[#2A2A28] transition-colors w-full decoration-transparent group">
+                <div className="w-8 h-8 rounded-none bg-nd-surface-alt flex items-center justify-center text-nd-ink text-sm font-bold font-mono flex-shrink-0 border border-[#C8C3B4]">
+                  {session?.user?.name?.charAt(0).toUpperCase() ?? 'U'}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-serif font-bold text-white truncate group-hover:text-nd-accent transition-colors">
+                    {session?.user?.name ?? 'User'}
+                  </p>
+                  <p className="text-[10px] font-mono tracking-wider text-white/50 truncate">
+                    {session?.user?.email}
+                  </p>
+                </div>
+              </Link>
+            </SidebarMenuItem>
+            <SidebarMenuItem>
+              <button onClick={handleSignOut} className="w-full flex items-center gap-3 px-5 py-4 text-[10px] font-mono tracking-[0.2em] uppercase text-white/50 hover:text-[#C94A1E] hover:bg-[#2A2A28] transition-colors text-left border-t border-[#2A2A28]">
+                <LogOutIcon className="w-3.5 h-3.5" />
+                <span>Sign out</span>
+              </button>
+            </SidebarMenuItem>
+          </SidebarMenu>
+        </SidebarFooter>
+      </Sidebar>
+
+      {/* Main Content Area */}
+      <div className="flex-1 flex flex-col min-w-0 h-[100dvh] bg-nd-bg overflow-hidden font-sans text-nd-ink w-full relative">
+        <header className="flex h-14 lg:h-16 items-center gap-4 border-b-2 border-nd-ink bg-[#FAF9F5] px-6 shrink-0 transition-colors z-10 relative">
+          <SidebarTrigger className="text-nd-ink hover:text-nd-bg hover:bg-nd-ink transition-colors w-8 h-8 flex items-center justify-center border-2 border-nd-ink bg-white shadow-[2px_2px_0px_#1A1A18] rounded-none cursor-pointer" />
+          <div className="flex-1 flex items-center gap-4 ml-2">
+             <div className="h-5 w-[2px] bg-nd-accent rotate-12 opacity-50" />
+             <span className="font-mono text-[11px] font-bold uppercase tracking-[0.2em] text-nd-ink-muted">
+               {currentPath === '/' ? 'ROOT' : currentPath.split('/').filter(Boolean).join(' / ')}
+             </span>
+          </div>
         </header>
 
-        {/* Page content */}
-        <main className="flex-1 overflow-y-auto">
+        <main className="flex-1 overflow-y-auto w-full relative z-0">
           {children}
         </main>
       </div>
-    </div>
+    </SidebarProvider>
   )
 }

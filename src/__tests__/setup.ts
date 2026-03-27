@@ -2,8 +2,6 @@ import { beforeAll, afterAll, afterEach } from 'vitest'
 import Database from 'better-sqlite3'
 import { drizzle } from 'drizzle-orm/better-sqlite3'
 import * as schema from '../db/schema'
-import { sql } from 'drizzle-orm'
-import { createTRPCContext } from '../integrations/trpc/context'
 import { trpcRouter } from '../integrations/trpc/router'
 
 // Use an in-memory SQLite database for fast isolated tests

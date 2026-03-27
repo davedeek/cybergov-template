@@ -15,8 +15,8 @@ import {
   Image,
 } from 'lucide-react'
 import { authClient } from '@/lib/auth-client'
-import { useTRPC } from '@/integrations/trpc/react'
-import { useQuery } from '@tanstack/react-query'
+import { useLiveQuery } from '@tanstack/react-db'
+import { useOrganizationsCollection } from '@/db-collections'
 
 interface AppShellProps {
   children: React.ReactNode
@@ -37,9 +37,13 @@ export default function AppShell({ children }: AppShellProps) {
   const [orgDropdownOpen, setOrgDropdownOpen] = useState(false)
 
   const { data: session } = authClient.useSession()
-  const trpc = useTRPC()
 
-  const { data: orgs } = useQuery(trpc.organization.listMine.queryOptions())
+  const orgsCollection = useOrganizationsCollection()
+  const { data: liveOrgs = [] } = useLiveQuery(
+    (q) => q.from({ o: orgsCollection }).select(({ o }) => o),
+    [orgsCollection]
+  )
+  const orgs = liveOrgs as any[]
   const search = useSearch({ strict: false }) as { orgId?: number }
   const currentOrgId = search?.orgId
 

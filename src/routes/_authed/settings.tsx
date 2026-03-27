@@ -3,6 +3,8 @@ import { createFileRoute, useSearch } from '@tanstack/react-router'
 import { Settings, UserPlus, Shield } from 'lucide-react'
 import { useTRPC } from '@/integrations/trpc/react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { useLiveQuery } from '@tanstack/react-db'
+import { useMembersCollection } from '@/db-collections'
 
 export const Route = createFileRoute('/_authed/settings')({
   component: SettingsPage,
@@ -20,10 +22,12 @@ function SettingsPage() {
   )
   const orgId = search?.orgId ?? currentOrg?.organization.id
 
-  const { data: members } = useQuery({
-    ...trpc.organization.listMembers.queryOptions({ organizationId: orgId! }),
-    enabled: !!orgId,
-  })
+  const membersCollection = useMembersCollection(orgId)
+  const { data: liveMembers = [] } = useLiveQuery(
+    (q) => q.from({ m: membersCollection }).select(({ m }) => m),
+    [membersCollection]
+  )
+  const members = liveMembers as any[]
 
   const inviteMutation = useMutation(
     trpc.organization.invite.mutationOptions({

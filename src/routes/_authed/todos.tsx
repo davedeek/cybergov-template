@@ -3,6 +3,8 @@ import { createFileRoute, useSearch } from '@tanstack/react-router'
 import { Plus, Trash2, CheckCircle, Circle } from 'lucide-react'
 import { useTRPC } from '@/integrations/trpc/react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { useLiveQuery } from '@tanstack/react-db'
+import { useTodosCollection } from '@/db-collections'
 
 export const Route = createFileRoute('/_authed/todos')({
   component: TodosPage,
@@ -19,10 +21,19 @@ function TodosPage() {
   )
   const orgId = search?.orgId ?? currentOrg?.organization.id
 
-  const { data: todos, isLoading } = useQuery({
-    ...trpc.todos.list.queryOptions({ organizationId: orgId! }),
-    enabled: !!orgId,
-  })
+  const todosCollection = useTodosCollection(orgId)
+
+  const { data: liveTodos = [], isLoading } = useLiveQuery(
+    (q) =>
+      q
+        .from({ todo: todosCollection })
+        .select(({ todo }) => ({
+          ...todo,
+        })),
+    [todosCollection],
+  )
+  
+  const todos = liveTodos as any[]
 
   const addMutation = useMutation(
     trpc.todos.add.mutationOptions({

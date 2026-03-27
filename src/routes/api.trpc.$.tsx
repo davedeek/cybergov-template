@@ -1,4 +1,3 @@
-import { createServerFileRoute } from '@tanstack/react-start/server'
 import { fetchRequestHandler } from '@trpc/server/adapters/fetch'
 import { trpcRouter } from '@/integrations/trpc/router'
 import { createFileRoute } from '@tanstack/react-router'
@@ -14,6 +13,7 @@ function handler({ request }: { request: Request }) {
 }
 
 export const Route = createFileRoute('/api/trpc/$')({
+  // @ts-expect-error - Server property is injected by react-start
   server: {
     handlers: {
       GET: handler,

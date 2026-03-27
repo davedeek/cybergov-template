@@ -2,6 +2,8 @@ import { createFileRoute, useSearch } from '@tanstack/react-router'
 import { LayoutDashboard, Users, CheckSquare, MessageSquare } from 'lucide-react'
 import { useTRPC } from '@/integrations/trpc/react'
 import { useQuery } from '@tanstack/react-query'
+import { useLiveQuery } from '@tanstack/react-db'
+import { useTodosCollection, useMembersCollection } from '@/db-collections'
 
 export const Route = createFileRoute('/_authed/dashboard')({
   component: DashboardPage,
@@ -15,15 +17,20 @@ function DashboardPage() {
   const search = useSearch({ strict: false }) as { orgId?: number }
   const orgId = search?.orgId ?? currentOrg?.organization.id
 
-  const { data: todos } = useQuery({
-    ...trpc.todos.list.queryOptions({ organizationId: orgId! }),
-    enabled: !!orgId,
-  })
+  const todosCollection = useTodosCollection(orgId)
+  const membersCollection = useMembersCollection(orgId)
 
-  const { data: members } = useQuery({
-    ...trpc.organization.listMembers.queryOptions({ organizationId: orgId! }),
-    enabled: !!orgId,
-  })
+  const { data: liveTodos = [] } = useLiveQuery(
+    (q) => q.from({ t: todosCollection }).select(({ t }) => t),
+    [todosCollection]
+  )
+  const { data: liveMembers = [] } = useLiveQuery(
+    (q) => q.from({ m: membersCollection }).select(({ m }) => m),
+    [membersCollection]
+  )
+
+  const todos = liveTodos as any[]
+  const members = liveMembers as any[]
 
   const completedCount = todos?.filter((t) => t.completedAt).length ?? 0
   const pendingCount = (todos?.length ?? 0) - completedCount

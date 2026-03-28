@@ -5,6 +5,7 @@ import { Streamdown } from 'streamdown'
 
 import { useAIChat } from '@/lib/ai-chat-hook'
 import type { ChatMessages } from '@/lib/ai-chat-hook'
+import { Button } from '@/components/ui/button'
 
 import './chat.css'
 
@@ -57,7 +58,7 @@ function Messages({ messages }: { messages: ChatMessages }) {
             key={message.id}
             className={`p-6 border-b border-nd-border ${
               message.role === 'assistant'
-                ? 'bg-[#FAF9F5]'
+                ? 'bg-nd-surface-alt'
                 : 'bg-nd-surface'
             }`}
           >
@@ -67,7 +68,7 @@ function Messages({ messages }: { messages: ChatMessages }) {
                   AI
                 </div>
               ) : (
-                <div className="w-8 h-8 rounded-none border border-nd-border bg-[#EDEAE2] flex items-center justify-center text-sm font-bold font-mono text-nd-ink flex-shrink-0">
+                <div className="w-8 h-8 rounded-none border border-nd-border bg-nd-surface-alt flex items-center justify-center text-sm font-bold font-mono text-nd-ink flex-shrink-0">
                   Y
                 </div>
               )}
@@ -110,13 +111,14 @@ function ChatPage() {
           <div className="space-y-3">
             {isLoading && (
               <div className="flex items-center justify-center mb-4">
-                <button
+                <Button
+                  variant="outline"
                   onClick={stop}
-                  className="px-6 py-2 bg-nd-surface hover:bg-[#FAF9F5] border-2 border-[#C94A1E] text-[#C94A1E] rounded-none text-xs tracking-widest uppercase font-mono transition-colors flex items-center gap-2 font-bold shadow-[2px_2px_0px_#C94A1E]"
+                  className="px-6 h-10 border-2 border-nd-accent text-nd-accent rounded-none text-xs tracking-widest uppercase font-mono transition-colors flex items-center gap-2 font-bold shadow-[2px_2px_0px_#C94A1E]"
                 >
                   <Square className="w-3 h-3 fill-current" />
                   Halt Execution
-                </button>
+                </Button>
               </div>
             )}
             <form
@@ -152,13 +154,14 @@ function ChatPage() {
                       }
                     }}
                   />
-                  <button
+                  <Button
                     type="submit"
                     disabled={!input.trim() || isLoading}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 p-2 bg-nd-ink hover:bg-nd-accent disabled:bg-[#C8C3B4] text-nd-bg transition-colors focus:outline-none rounded-none"
+                    size="icon"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 bg-nd-ink hover:bg-nd-accent text-nd-bg transition-colors rounded-none"
                   >
                     <Send className="w-4 h-4" />
-                  </button>
+                  </Button>
                 </div>
               </div>
             </form>
@@ -168,6 +171,7 @@ function ChatPage() {
     </div>
   )
 }
+
 
 export const Route = createFileRoute('/_authed/ai/chat')({
   component: ChatPage,

@@ -1,6 +1,18 @@
 import { useState } from 'react'
 import { createFileRoute } from '@tanstack/react-router'
 import { ImageIcon, Loader2, Download } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
+import { Label } from '@/components/ui/label'
+import { Alert, AlertDescription } from '@/components/ui/alert'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 
 const SIZES = ['1024x1024', '1536x1024', '1024x1536', 'auto']
 
@@ -82,74 +94,87 @@ function ImagePage() {
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Input Panel */}
-          <div className="space-y-6">
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-xs font-mono uppercase tracking-wider text-nd-ink-muted mb-2">
-                  Size
-                </label>
-                <select
-                  value={size}
-                  onChange={(e) => setSize(e.target.value)}
-                  disabled={isLoading}
-                  className="w-full rounded-none border border-nd-border bg-nd-surface px-4 py-3 text-nd-ink focus:outline-none focus:border-nd-accent font-sans"
-                >
-                  {SIZES.map((s) => (
-                    <option key={s} value={s}>
-                      {s}
-                    </option>
-                  ))}
-                </select>
+          <Card className="bg-nd-surface border-2 border-nd-ink rounded-none shadow-[4px_4px_0px_#1A1A18] h-fit">
+            <CardHeader className="bg-nd-surface-alt border-b-2 border-nd-ink py-4">
+              <CardTitle className="text-xs font-mono font-bold uppercase tracking-widest text-nd-ink">
+                Configuration
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="p-6 space-y-6">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label className="text-[10px] font-mono uppercase tracking-[0.2em] text-nd-ink-muted">
+                    Size
+                  </Label>
+                  <Select
+                    value={size}
+                    onValueChange={setSize}
+                    disabled={isLoading}
+                  >
+                    <SelectTrigger className="w-full h-10 rounded-none border border-nd-border bg-nd-bg px-3 text-nd-ink focus:ring-nd-accent font-sans text-xs">
+                      <SelectValue placeholder="Size" />
+                    </SelectTrigger>
+                    <SelectContent className="rounded-none border-2 border-nd-ink">
+                      {SIZES.map((s) => (
+                        <SelectItem key={s} value={s} className="text-xs font-mono">
+                          {s}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="image-count" className="text-[10px] font-mono uppercase tracking-[0.2em] text-nd-ink-muted">
+                    Count
+                  </Label>
+                  <Input
+                    id="image-count"
+                    type="number"
+                    value={numberOfImages}
+                    onChange={(e) =>
+                      setNumberOfImages(
+                        Math.max(1, Math.min(4, parseInt(e.target.value) || 1)),
+                      )
+                    }
+                    min={1}
+                    max={4}
+                    disabled={isLoading}
+                    className="w-full h-10 rounded-none border border-nd-border bg-nd-bg px-3 text-nd-ink focus-visible:ring-nd-accent font-mono text-xs shadow-inner"
+                  />
+                </div>
               </div>
-              <div>
-                <label className="block text-xs font-mono uppercase tracking-wider text-nd-ink-muted mb-2">
-                  Count
-                </label>
-                <input
-                  type="number"
-                  value={numberOfImages}
-                  onChange={(e) =>
-                    setNumberOfImages(
-                      Math.max(1, Math.min(4, parseInt(e.target.value) || 1)),
-                    )
-                  }
-                  min={1}
-                  max={4}
+
+              <div className="space-y-2">
+                <Label htmlFor="prompt" className="text-[10px] font-mono uppercase tracking-[0.2em] text-nd-ink-muted">
+                  Prompt
+                </Label>
+                <textarea
+                  id="prompt"
+                  value={prompt}
+                  onChange={(e) => setPrompt(e.target.value)}
                   disabled={isLoading}
-                  className="w-full rounded-none border border-nd-border bg-nd-surface px-4 py-3 text-nd-ink focus:outline-none focus:border-nd-accent font-sans"
+                  rows={6}
+                  className="w-full rounded-none border border-nd-border bg-nd-bg px-4 py-3 text-sm text-nd-ink focus:outline-none focus:border-nd-accent focus:ring-1 focus:ring-nd-accent resize-none font-serif shadow-inner"
+                  placeholder="Describe the image you want to generate..."
                 />
               </div>
-            </div>
 
-            <div>
-              <label className="block text-xs font-mono uppercase tracking-wider text-nd-ink-muted mb-2">
-                Prompt
-              </label>
-              <textarea
-                value={prompt}
-                onChange={(e) => setPrompt(e.target.value)}
-                disabled={isLoading}
-                rows={6}
-                className="w-full rounded-none border border-nd-border bg-nd-surface px-4 py-3 text-nd-ink focus:outline-none focus:border-nd-accent resize-none font-sans"
-                placeholder="Describe the image you want to generate..."
-              />
-            </div>
-
-            <button
-              onClick={handleGenerate}
-              disabled={isLoading || !prompt.trim()}
-              className="w-full px-6 py-4 bg-nd-ink hover:bg-nd-ink/90 disabled:opacity-50 text-nd-bg font-serif font-bold tracking-wide uppercase rounded-none transition-colors border-2 border-nd-ink flex items-center justify-center gap-3"
-            >
-              {isLoading ? (
-                <>
-                  <Loader2 className="w-5 h-5 animate-spin" />
-                  Generating...
-                </>
-              ) : (
-                'Generate Image'
-              )}
-            </button>
-          </div>
+              <Button
+                onClick={handleGenerate}
+                disabled={isLoading || !prompt.trim()}
+                className="w-full h-12 bg-nd-ink hover:bg-nd-accent text-nd-bg font-serif font-bold tracking-widest uppercase rounded-none transition-all border-2 border-nd-ink flex items-center justify-center gap-3 shadow-[3px_3px_0px_#C94A1E]"
+              >
+                {isLoading ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    Executing...
+                  </>
+                ) : (
+                  'Generate Result'
+                )}
+              </Button>
+            </CardContent>
+          </Card>
 
           {/* Output Panel */}
           <div className="lg:col-span-2 bg-nd-surface rounded-none border-2 border-nd-ink p-8 shadow-[4px_4px_0px_#1A1A18]">
@@ -158,9 +183,11 @@ function ImagePage() {
             </h2>
 
             {error && (
-              <div className="p-4 bg-white border-2 border-[#C94A1E] text-[#C94A1E] font-mono text-sm mb-6">
-                <strong>Error:</strong> {error}
-              </div>
+              <Alert variant="destructive" className="rounded-none border-2 border-nd-flag-red bg-nd-flag-red/5 mb-6">
+                <AlertDescription className="font-mono text-sm">
+                  <strong>Error:</strong> {error}
+                </AlertDescription>
+              </Alert>
             )}
 
             {images.length > 0 ? (
@@ -168,20 +195,21 @@ function ImagePage() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {images.map((image, index) => (
                     <div key={index} className="relative group">
-                      <div className="p-2 border border-[#C8C3B4] bg-[#FAF9F5] shadow-sm">
+                      <div className="p-2 border border-nd-border bg-nd-surface-alt shadow-sm">
                         <img
                           src={getImageSrc(image)}
                           alt={`Generated image ${index + 1}`}
                           className="w-full rounded-none mix-blend-multiply"
                         />
                       </div>
-                      <button
+                      <Button
                         onClick={() => handleDownload(image, index)}
-                        className="absolute top-4 right-4 p-2 bg-nd-ink hover:bg-nd-accent shadow-md rounded-none opacity-0 group-hover:opacity-100 transition-all text-nd-bg flex items-center justify-center"
+                        size="icon"
+                        className="absolute top-4 right-4 bg-nd-ink hover:bg-nd-accent shadow-md rounded-none opacity-0 group-hover:opacity-100 transition-all text-nd-bg"
                         title="Download image"
                       >
                         <Download className="w-5 h-5" />
-                      </button>
+                      </Button>
                       {image.revisedPrompt && (
                         <p className="mt-4 text-xs font-serif text-nd-ink-muted italic border-l-2 border-nd-accent pl-3">
                           Revised: {image.revisedPrompt}
@@ -192,7 +220,7 @@ function ImagePage() {
                 </div>
               </div>
             ) : !error && !isLoading ? (
-              <div className="flex flex-col items-center justify-center h-64 text-nd-ink-muted border-2 border-dashed border-[#C8C3B4] bg-[#FAF9F5] m-4">
+              <div className="flex flex-col items-center justify-center h-64 text-nd-ink-muted border-2 border-dashed border-nd-border bg-nd-surface-alt m-4">
                 <ImageIcon className="w-12 h-12 mb-4 opacity-50" />
                 <p className="font-mono text-xs uppercase tracking-widest text-center px-4">
                   Enter a prompt and click generate<br/>to create an artifact.
@@ -205,6 +233,7 @@ function ImagePage() {
     </div>
   )
 }
+
 
 export const Route = createFileRoute('/_authed/ai/image')({
   component: ImagePage,

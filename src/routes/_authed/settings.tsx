@@ -5,6 +5,17 @@ import { useTRPC } from '@/integrations/trpc/react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useLiveQuery } from '@tanstack/react-db'
 import { useMembersCollection } from '@/db-collections'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
+import { Label } from '@/components/ui/label'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 
 export const Route = createFileRoute('/_authed/settings')({
   component: SettingsPage,
@@ -61,81 +72,120 @@ function SettingsPage() {
       </div>
 
       {/* Org info */}
-      <div className="bg-nd-surface rounded-none border-2 border-nd-ink p-6 mb-8 shadow-[4px_4px_0px_#1A1A18]">
-        <div className="text-[10px] font-mono tracking-[0.2em] uppercase text-nd-accent mb-4">Workspace Details</div>
-        <div className="grid grid-cols-2 gap-4">
-          <div className="bg-[#FAF9F5] border border-nd-border p-4">
-            <span className="block text-xs font-mono uppercase tracking-wider text-nd-ink-muted mb-1">Name</span>
-            <span className="font-serif font-bold text-lg text-nd-ink">{currentOrg?.organization.name}</span>
+      <Card className="bg-nd-surface border-2 border-nd-ink rounded-none shadow-[4px_4px_0px_#1A1A18] mb-10 overflow-hidden">
+        <CardHeader className="bg-nd-surface-alt border-b-2 border-nd-ink py-4">
+          <CardTitle className="text-xs font-mono font-bold uppercase tracking-widest text-nd-ink">
+            Workspace Registry
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="p-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="bg-nd-bg border-2 border-nd-border p-5 shadow-inner">
+              <span className="block text-[10px] font-mono uppercase tracking-[0.2em] text-nd-ink-muted mb-2">Legal Identifier</span>
+              <span className="font-serif font-black text-2xl text-nd-ink uppercase tracking-tight">{currentOrg?.organization.name}</span>
+            </div>
+            <div className="bg-nd-bg border-2 border-nd-border p-5 shadow-inner">
+              <span className="block text-[10px] font-mono uppercase tracking-[0.2em] text-nd-ink-muted mb-2">Clearance Level</span>
+              <span className="font-serif font-black text-2xl text-nd-ink uppercase tracking-tight capitalize">{currentOrg?.membership.role}</span>
+            </div>
           </div>
-          <div className="bg-[#FAF9F5] border border-nd-border p-4">
-            <span className="block text-xs font-mono uppercase tracking-wider text-nd-ink-muted mb-1">Your role</span>
-            <span className="font-serif font-bold text-lg text-nd-ink capitalize">{currentOrg?.membership.role}</span>
-          </div>
-        </div>
-      </div>
+        </CardContent>
+      </Card>
 
       {/* Invite member */}
-      <div className="bg-nd-surface rounded-none border-2 border-nd-ink p-6 mb-8 shadow-sm">
-        <h2 className="text-xl font-serif font-bold text-nd-ink mb-6 flex items-center gap-3">
-          <UserPlus className="w-5 h-5 text-nd-accent" />
-          Invite Member
-        </h2>
-        <form onSubmit={handleInvite} className="flex flex-col sm:flex-row gap-3">
-          <input
-            type="email"
-            value={inviteEmail}
-            onChange={(e) => setInviteEmail(e.target.value)}
-            placeholder="member@example.com"
-            className="flex-1 px-4 py-3 bg-nd-bg border border-nd-border rounded-none text-nd-ink placeholder:text-nd-ink-muted focus:outline-none focus:border-nd-accent transition-colors font-sans"
-          />
-          <select
-            value={inviteRole}
-            onChange={(e) => setInviteRole(e.target.value as 'member' | 'admin')}
-            className="px-4 py-3 bg-nd-bg border border-nd-border rounded-none text-nd-ink font-sans focus:outline-none focus:border-nd-accent cursor-pointer min-w-[120px]"
-          >
-            <option value="member">Member</option>
-            <option value="admin">Admin</option>
-          </select>
-          <button
-            type="submit"
-            disabled={!inviteEmail.trim() || inviteMutation.isPending}
-            className="px-6 py-3 bg-nd-ink hover:bg-nd-ink/90 disabled:opacity-50 text-nd-bg font-serif font-bold tracking-wide rounded-none transition-colors border-2 border-nd-ink whitespace-nowrap"
-          >
-            Invite User
-          </button>
-        </form>
-        {inviteMutation.isSuccess && (
-          <p className="text-[#2B5EA7] font-mono text-xs uppercase tracking-widest font-bold mt-4">Invitation sent successfully.</p>
-        )}
-      </div>
+      <Card className="bg-nd-surface border-2 border-nd-ink rounded-none shadow-[4px_4px_0px_#1A1A18] mb-10 overflow-hidden">
+        <CardHeader className="bg-nd-surface-alt border-b-2 border-nd-ink py-4">
+          <CardTitle className="text-xs font-mono font-bold uppercase tracking-widest text-nd-ink flex items-center gap-2">
+            <UserPlus className="w-4 h-4" />
+            Personnel Induction
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="p-8">
+          <form onSubmit={handleInvite} className="flex flex-col md:flex-row gap-4 items-end">
+            <div className="flex-1 w-full space-y-2">
+              <Label htmlFor="invite-email" className="text-[10px] font-mono uppercase tracking-[0.2em] text-nd-ink-muted">
+                Member Transmission Endpoint (Email)
+              </Label>
+              <Input
+                id="invite-email"
+                type="email"
+                value={inviteEmail}
+                onChange={(e) => setInviteEmail(e.target.value)}
+                placeholder="representative@domain.gov"
+                className="h-12 bg-nd-bg border-2 border-nd-border rounded-none text-nd-ink placeholder:text-nd-ink-muted/50 focus:border-nd-ink transition-all font-mono text-sm shadow-inner"
+              />
+            </div>
+            <div className="w-full md:w-[160px] space-y-2">
+              <Label className="text-[10px] font-mono uppercase tracking-[0.2em] text-nd-ink-muted">
+                Authorization Tier
+              </Label>
+              <Select 
+                value={inviteRole} 
+                onValueChange={(v) => setInviteRole(v as 'member' | 'admin')}
+              >
+                <SelectTrigger className="h-12 w-full bg-nd-bg border-2 border-nd-border rounded-none text-nd-ink font-mono text-xs focus:ring-nd-ink shadow-inner uppercase">
+                  <SelectValue placeholder="Select Tier" />
+                </SelectTrigger>
+                <SelectContent className="rounded-none border-2 border-nd-ink bg-nd-surface">
+                  <SelectItem value="member" className="font-mono text-xs uppercase tracking-widest">Member</SelectItem>
+                  <SelectItem value="admin" className="font-mono text-xs uppercase tracking-widest">Administrator</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <Button
+              type="submit"
+              disabled={!inviteEmail.trim() || inviteMutation.isPending}
+              className="h-12 bg-nd-ink hover:bg-nd-accent text-nd-bg font-serif font-bold tracking-widest rounded-none transition-all border-2 border-nd-ink whitespace-nowrap px-8 uppercase shadow-[3px_3px_0px_#C94A1E]"
+            >
+              {inviteMutation.isPending ? 'Invoking...' : 'Induct User'}
+            </Button>
+          </form>
+          {inviteMutation.isSuccess && (
+            <div className="mt-6 p-3 bg-nd-flag-blue/5 border border-nd-flag-blue border-dashed text-nd-flag-blue font-mono text-[10px] uppercase tracking-widest font-bold flex items-center gap-2">
+              <Shield className="w-3 h-3" />
+              Manifest Dispatched Successfully.
+            </div>
+          )}
+        </CardContent>
+      </Card>
 
       {/* Members list */}
-      <div className="bg-nd-surface rounded-none border-2 border-nd-ink p-6 shadow-sm">
-        <h2 className="text-xl font-serif font-bold text-nd-ink mb-6 flex items-center gap-3">
-          <Shield className="w-5 h-5 text-nd-accent" />
-          Members Directory ({members?.length ?? 0})
-        </h2>
-        {members?.length ? (
-          <ul className="space-y-3">
-            {members.map((m) => (
-              <li
-                key={m.id}
-                className="flex items-center justify-between p-4 bg-nd-bg border border-nd-border rounded-none hover:border-nd-ink transition-colors"
-              >
-                <div>
-                  <p className="text-sm font-mono tracking-wider font-bold text-nd-ink">{m.userId}</p>
-                  <p className="text-[10px] font-mono uppercase tracking-[0.2em] text-nd-ink-muted mt-1">{m.role}</p>
-                </div>
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <div className="text-center py-8 bg-[#FAF9F5] border border-[#C8C3B4] border-dashed">
-            <p className="font-mono text-xs uppercase tracking-widest text-nd-ink-muted">No members found.</p>
-          </div>
-        )}
-      </div>
+      <Card className="bg-nd-surface border-2 border-nd-ink rounded-none shadow-[4px_4px_0px_#1A1A18] overflow-hidden">
+        <CardHeader className="bg-nd-surface-alt border-b-2 border-nd-ink py-4">
+          <CardTitle className="text-xs font-mono font-bold uppercase tracking-widest text-nd-ink flex items-center gap-2">
+            <Shield className="w-4 h-4" />
+            Personnel Directory ({members?.length ?? 0})
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="p-8">
+          {members?.length ? (
+            <ul className="space-y-3">
+              {members.map((m) => (
+                <li
+                  key={m.id}
+                  className="group flex items-center justify-between p-5 bg-nd-bg border-2 border-nd-border rounded-none hover:border-nd-ink hover:shadow-sm transition-all"
+                >
+                  <div className="flex items-center gap-4">
+                    <div className="w-10 h-10 bg-nd-surface-alt border-2 border-nd-ink flex items-center justify-center font-mono font-black text-nd-ink shadow-sm group-hover:bg-nd-ink group-hover:text-nd-bg transition-colors">
+                      {m.role?.charAt(0).toUpperCase()}
+                    </div>
+                    <div>
+                      <p className="text-base font-serif font-black tracking-tight text-nd-ink uppercase group-hover:text-nd-accent transition-colors">{m.userId}</p>
+                      <p className="text-[10px] font-mono uppercase tracking-[0.2em] text-nd-ink-muted mt-1 leading-none">{m.role} · Active Session</p>
+                    </div>
+                  </div>
+                  <div className="h-2 w-2 rounded-full bg-nd-flag-blue animate-pulse" />
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <div className="text-center py-20 bg-nd-bg border-2 border-nd-border border-dashed">
+              <p className="font-mono text-[10px] uppercase tracking-widest text-nd-ink-muted">Awaiting personnel registry synchronization.</p>
+            </div>
+          )}
+        </CardContent>
+      </Card>
     </div>
   )
 }
+

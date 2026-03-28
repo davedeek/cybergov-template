@@ -2,6 +2,10 @@ import { useState } from 'react'
 import { createFileRoute } from '@tanstack/react-router'
 import { User, Save } from 'lucide-react'
 import { authClient } from '@/lib/auth-client'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 
 export const Route = createFileRoute('/_authed/profile')({
   component: ProfilePage,
@@ -38,48 +42,59 @@ function ProfilePage() {
         <p className="text-nd-ink-muted mt-2">Manage your account settings.</p>
       </div>
 
-      <div className="bg-nd-surface rounded-none border-2 border-nd-ink p-8 shadow-[4px_4px_0px_#1A1A18]">
-        <div className="text-[10px] font-mono tracking-[0.2em] uppercase text-nd-accent mb-6">User Parameters</div>
-        <form onSubmit={handleSave} className="space-y-6">
-          <div>
-            <label className="block text-xs font-mono uppercase tracking-wider text-nd-ink-muted mb-2">
-              Email
-            </label>
-            <input
-              type="email"
-              value={session?.user?.email ?? ''}
-              disabled
-              className="w-full px-4 py-3 bg-[#EDEAE2] border-none rounded-none text-nd-ink-muted cursor-not-allowed font-sans font-medium"
-            />
-          </div>
+      <Card className="bg-nd-surface border-2 border-nd-ink rounded-none shadow-[4px_4px_0px_#1A1A18]">
+        <CardHeader className="bg-nd-surface-alt border-b-2 border-nd-ink py-4">
+          <CardTitle className="text-xs font-mono font-bold uppercase tracking-widest text-nd-ink">
+            User Parameters
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="p-8">
+          <form onSubmit={handleSave} className="space-y-6">
+            <div className="space-y-2">
+              <Label htmlFor="email" className="text-[10px] font-mono uppercase tracking-[0.2em] text-nd-ink-muted">
+                Email Address
+              </Label>
+              <Input
+                id="email"
+                type="email"
+                value={session?.user?.email ?? ''}
+                disabled
+                className="h-12 bg-nd-bg border-2 border-nd-border rounded-none text-nd-ink-muted cursor-not-allowed font-mono text-sm opacity-60 shadow-inner"
+              />
+            </div>
 
-          <div>
-            <label className="block text-xs font-mono uppercase tracking-wider text-nd-ink-muted mb-2">
-              Name
-            </label>
-            <input
-              type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              className="w-full px-4 py-3 bg-nd-bg border border-nd-border rounded-none text-nd-ink placeholder:text-nd-ink-muted/50 focus:outline-none focus:border-nd-accent transition-colors font-sans"
-            />
-          </div>
+            <div className="space-y-2">
+              <Label htmlFor="name" className="text-[10px] font-mono uppercase tracking-[0.2em] text-nd-ink-muted">
+                Legal Entity Name
+              </Label>
+              <Input
+                id="name"
+                type="text"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                className="h-12 bg-nd-bg border-2 border-nd-border focus:border-nd-ink rounded-none text-nd-ink font-serif text-lg shadow-inner"
+              />
+            </div>
 
-          <div className="flex items-center gap-4 pt-4 border-t border-nd-border/50">
-            <button
-              type="submit"
-              disabled={isLoading}
-              className="px-6 py-3 bg-nd-ink hover:bg-nd-ink/90 disabled:opacity-50 text-nd-bg font-serif font-bold tracking-wide rounded-none transition-colors border-2 border-nd-ink flex items-center gap-2"
-            >
-              <Save className="w-4 h-4" />
-              {isLoading ? 'Saving...' : 'Save changes'}
-            </button>
-            {saved && (
-              <span className="text-[#2B5EA7] font-mono text-xs uppercase tracking-widest font-bold">Saved successfully.</span>
-            )}
-          </div>
-        </form>
-      </div>
+            <div className="flex items-center gap-6 pt-6 border-t border-nd-border border-dashed">
+              <Button
+                type="submit"
+                disabled={isLoading}
+                className="px-8 h-12 bg-nd-ink hover:bg-nd-accent text-nd-bg font-serif font-bold tracking-widest uppercase rounded-none transition-all border-2 border-nd-ink flex items-center gap-3 shadow-[3px_3px_0px_#C94A1E]"
+              >
+                <Save className="w-4 h-4" />
+                {isLoading ? 'Processing...' : 'Save Artifacts'}
+              </Button>
+              {saved && (
+                <span className="text-nd-flag-blue font-mono text-[10px] uppercase tracking-widest font-bold bg-nd-flag-blue/5 border border-nd-flag-blue px-2 py-1 italic">
+                  Changes Committed
+                </span>
+              )}
+            </div>
+          </form>
+        </CardContent>
+      </Card>
     </div>
   )
 }
+

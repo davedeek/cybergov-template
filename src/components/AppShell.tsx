@@ -105,7 +105,7 @@ export default function AppShell({ children }: AppShellProps) {
           <div className="relative mt-6 px-2">
             <button
               onClick={() => setOrgDropdownOpen(!orgDropdownOpen)}
-              className="w-full flex items-center justify-between gap-2 px-3 py-2 bg-[#2A2A28] hover:bg-[#343432] transition-colors text-sm text-white border border-[#343432] rounded-none shadow-inner"
+              className="w-full flex items-center justify-between gap-2 px-3 py-2 bg-nd-surface-dark hover:bg-nd-surface-dark/90 transition-colors text-sm text-white border border-nd-ink-muted rounded-none shadow-inner"
             >
               <div className="flex items-center gap-2 overflow-hidden">
                 <Building2 className="w-4 h-4 text-nd-accent flex-shrink-0" />
@@ -117,14 +117,14 @@ export default function AppShell({ children }: AppShellProps) {
             </button>
 
             {orgDropdownOpen && orgs && (
-              <div className="absolute left-2 right-2 mt-1 bg-[#2A2A28] border border-[#343432] shadow-xl z-50 py-1 max-h-60 overflow-auto rounded-none">
+              <div className="absolute left-2 right-2 mt-1 bg-nd-surface-dark border border-nd-ink-muted shadow-xl z-50 py-1 max-h-60 overflow-auto rounded-none">
                 {orgs.map((o) => (
                   <button
                     key={o.organization.id}
                     onClick={() => switchOrg(o.organization.id)}
-                    className={`w-full text-left px-3 py-2.5 text-xs font-mono uppercase tracking-widest hover:bg-[#343432] transition-colors ${
+                    className={`w-full text-left px-3 py-2.5 text-xs font-mono uppercase tracking-widest hover:bg-white/5 transition-colors ${
                       o.organization.id === currentOrg?.organization.id
-                        ? 'text-nd-accent font-bold bg-[#343432]/50'
+                        ? 'text-nd-accent font-bold bg-white/10'
                         : 'text-white/70'
                     }`}
                   >
@@ -147,7 +147,7 @@ export default function AppShell({ children }: AppShellProps) {
                       <Link
                         to={item.to as string}
                         search={currentOrgId ? { orgId: currentOrgId } : {}}
-                        className={`flex items-center gap-3 px-4 py-2 decoration-transparent font-serif text-sm transition-all ${isActive(item.to) ? 'text-white bg-[#2A2A28] border-l-2 border-nd-accent font-bold' : 'text-white/70 hover:text-white hover:bg-[#2A2A28]/50 border-l-2 border-transparent'}`}
+                        className={`flex items-center gap-3 px-4 py-2 decoration-transparent font-serif text-sm transition-all ${isActive(item.to) ? 'text-white bg-nd-surface-dark border-l-2 border-nd-accent font-bold' : 'text-white/70 hover:text-white hover:bg-nd-surface-dark/50 border-l-2 border-transparent'}`}
                       >
                         <item.icon className={`w-4 h-4 ${isActive(item.to) ? 'text-nd-accent' : 'text-white/50'}`} />
                         <span>{item.label}</span>
@@ -159,7 +159,7 @@ export default function AppShell({ children }: AppShellProps) {
             </SidebarGroupContent>
           </SidebarGroup>
 
-          <div className="h-[1px] bg-[#2A2A28] w-full my-4" />
+          <div className="h-[1px] bg-nd-surface-dark w-full my-4" />
 
           <SidebarGroup>
             <SidebarGroupLabel className="text-nd-accent uppercase text-[10px] font-mono tracking-[0.2em] mb-2 px-4">Work Simplification</SidebarGroupLabel>
@@ -171,7 +171,7 @@ export default function AppShell({ children }: AppShellProps) {
                       <Link
                         to={item.to as string}
                         search={currentOrgId ? { orgId: currentOrgId } : {}}
-                        className={`flex items-center gap-3 px-4 py-2 decoration-transparent font-serif text-sm transition-all ${isActive(item.to) ? 'text-white bg-[#2A2A28] border-l-2 border-[#D4A017] font-bold' : 'text-white/70 hover:text-white hover:bg-[#2A2A28]/50 border-l-2 border-transparent'}`}
+                        className={`flex items-center gap-3 px-4 py-2 decoration-transparent font-serif text-sm transition-all ${isActive(item.to) ? 'text-white bg-nd-surface-dark border-l-2 border-nd-flag-yellow font-bold' : 'text-white/70 hover:text-white hover:bg-nd-surface-dark/50 border-l-2 border-transparent'}`}
                       >
                         <item.icon className={`w-4 h-4 ${isActive(item.to) ? 'text-[#D4A017]' : 'text-white/50'}`} />
                         <span>{item.label}</span>
@@ -183,7 +183,7 @@ export default function AppShell({ children }: AppShellProps) {
             </SidebarGroupContent>
           </SidebarGroup>
 
-          <div className="h-[1px] bg-[#2A2A28] w-full my-4" />
+          <div className="h-[1px] bg-nd-surface-dark w-full my-4" />
 
           <SidebarGroup>
             <SidebarGroupContent>
@@ -194,7 +194,7 @@ export default function AppShell({ children }: AppShellProps) {
                       <Link
                         to={item.to as string}
                         search={currentOrgId ? { orgId: currentOrgId } : {}}
-                        className={`flex items-center gap-3 px-4 py-2 decoration-transparent font-serif text-sm transition-all ${isActive(item.to) ? 'text-white bg-[#2A2A28] border-l-2 border-white' : 'text-white/70 hover:text-white hover:bg-[#2A2A28]/50 border-l-2 border-transparent'}`}
+                        className={`flex items-center gap-3 px-4 py-2 decoration-transparent font-serif text-sm transition-all ${isActive(item.to) ? 'text-white bg-nd-surface-dark border-l-2 border-white' : 'text-white/70 hover:text-white hover:bg-nd-surface-dark/50 border-l-2 border-transparent'}`}
                       >
                         <item.icon className="w-4 h-4 text-white/50" />
                         <span>{item.label}</span>
@@ -207,10 +207,10 @@ export default function AppShell({ children }: AppShellProps) {
           </SidebarGroup>
         </SidebarContent>
 
-        <SidebarFooter className="bg-nd-ink border-t border-[#2A2A28] p-0">
+        <SidebarFooter className="bg-nd-ink border-t border-nd-surface-dark p-0">
           <SidebarMenu>
             <SidebarMenuItem>
-              <Link to="/profile" className="flex items-center gap-3 px-4 py-3 hover:bg-[#2A2A28] transition-colors w-full decoration-transparent group">
+              <Link to="/profile" className="flex items-center gap-3 px-4 py-3 hover:bg-nd-surface-dark transition-colors w-full decoration-transparent group">
                 <div className="w-8 h-8 rounded-none bg-nd-surface-alt flex items-center justify-center text-nd-ink text-sm font-bold font-mono flex-shrink-0 border border-[#C8C3B4]">
                   {session?.user?.name?.charAt(0).toUpperCase() ?? 'U'}
                 </div>
@@ -225,7 +225,7 @@ export default function AppShell({ children }: AppShellProps) {
               </Link>
             </SidebarMenuItem>
             <SidebarMenuItem>
-              <button onClick={handleSignOut} className="w-full flex items-center gap-3 px-5 py-4 text-[10px] font-mono tracking-[0.2em] uppercase text-white/50 hover:text-[#C94A1E] hover:bg-[#2A2A28] transition-colors text-left border-t border-[#2A2A28]">
+              <button onClick={handleSignOut} className="w-full flex items-center gap-3 px-5 py-4 text-[10px] font-mono tracking-[0.2em] uppercase text-white/50 hover:text-nd-accent hover:bg-nd-surface-dark transition-colors text-left border-t border-nd-surface-dark">
                 <LogOutIcon className="w-3.5 h-3.5" />
                 <span>Sign out</span>
               </button>

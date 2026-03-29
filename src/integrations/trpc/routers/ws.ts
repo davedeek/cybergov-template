@@ -118,6 +118,24 @@ const wdcRouter = createTRPCRouter({
       })
     }),
 
+  listAll: orgScopedProcedure
+    .input(z.object({ organizationId: z.number().int().positive() }))
+    .query(async ({ ctx }) => {
+      return ctx.db
+        .select({
+          id: wdcCharts.id,
+          unitId: wdcCharts.unitId,
+          name: wdcCharts.name,
+          createdAt: wdcCharts.createdAt,
+          updatedAt: wdcCharts.updatedAt,
+          unitName: units.name,
+        })
+        .from(wdcCharts)
+        .innerJoin(units, eq(wdcCharts.unitId, units.id))
+        .where(eq(units.organizationId, ctx.organizationId))
+        .orderBy(desc(wdcCharts.id))
+    }),
+
   listEmployees: orgScopedProcedure
     .input(z.object({ organizationId: z.number().int().positive(), wdcId: z.number().int().positive() }))
     .query(async ({ ctx, input }) => {
@@ -287,6 +305,24 @@ const processChartRouter = createTRPCRouter({
         where: eq(processCharts.unitId, input.unitId),
         orderBy: desc(processCharts.id),
       })
+    }),
+
+  listAll: orgScopedProcedure
+    .input(z.object({ organizationId: z.number().int().positive() }))
+    .query(async ({ ctx }) => {
+      return ctx.db
+        .select({
+          id: processCharts.id,
+          unitId: processCharts.unitId,
+          name: processCharts.name,
+          createdAt: processCharts.createdAt,
+          updatedAt: processCharts.updatedAt,
+          unitName: units.name,
+        })
+        .from(processCharts)
+        .innerJoin(units, eq(processCharts.unitId, units.id))
+        .where(eq(units.organizationId, ctx.organizationId))
+        .orderBy(desc(processCharts.id));
     }),
 
   listSteps: orgScopedProcedure

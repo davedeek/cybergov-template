@@ -118,6 +118,29 @@ export function useProcessChartsCollection(orgId?: number, unitId?: number) {
   }, [orgId, unitId, queryClient, trpc])
 }
 
+export function useAllProcessChartsCollection(orgId?: number) {
+  const trpc = useTRPC()
+  const queryClient = useQueryClient()
+
+  return useMemo(() => {
+    const queryOptions = trpc.ws.processChart.listAll.queryOptions({
+      organizationId: orgId ?? -1,
+    })
+
+    return createCollection(
+      queryCollectionOptions({
+        queryClient,
+        queryKey: queryOptions.queryKey,
+        queryFn: async (ctx) => {
+          if (!orgId || !queryOptions.queryFn) return []
+          return queryOptions.queryFn(ctx)
+        },
+        getKey: (chart: any) => chart.id,
+      })
+    )
+  }, [orgId, queryClient, trpc])
+}
+
 export function useWDCChartsCollection(orgId?: number, unitId?: number) {
   const trpc = useTRPC()
   const queryClient = useQueryClient()
@@ -140,6 +163,29 @@ export function useWDCChartsCollection(orgId?: number, unitId?: number) {
       })
     )
   }, [orgId, unitId, queryClient, trpc])
+}
+
+export function useAllWDCChartsCollection(orgId?: number) {
+  const trpc = useTRPC()
+  const queryClient = useQueryClient()
+
+  return useMemo(() => {
+    const queryOptions = trpc.ws.wdc.listAll.queryOptions({
+      organizationId: orgId ?? -1,
+    })
+
+    return createCollection(
+      queryCollectionOptions({
+        queryClient,
+        queryKey: queryOptions.queryKey,
+        queryFn: async (ctx) => {
+          if (!orgId || !queryOptions.queryFn) return []
+          return queryOptions.queryFn(ctx)
+        },
+        getKey: (chart: any) => chart.id,
+      })
+    )
+  }, [orgId, queryClient, trpc])
 }
 
 export function useStepsCollection(orgId?: number, pcId?: number) {

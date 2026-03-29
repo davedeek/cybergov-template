@@ -26,6 +26,8 @@ import { Route as ApiAiTranscriptionRouteImport } from './routes/api/ai/transcri
 import { Route as ApiAiStructuredRouteImport } from './routes/api/ai/structured'
 import { Route as ApiAiImageRouteImport } from './routes/api/ai/image'
 import { Route as ApiAiChatRouteImport } from './routes/api/ai/chat'
+import { Route as AuthedWsWdcChartsRouteImport } from './routes/_authed/ws/wdc-charts'
+import { Route as AuthedWsProcessChartsRouteImport } from './routes/_authed/ws/process-charts'
 import { Route as AuthedAiStructuredRouteImport } from './routes/_authed/ai/structured'
 import { Route as AuthedAiImageRouteImport } from './routes/_authed/ai/image'
 import { Route as AuthedAiChatRouteImport } from './routes/_authed/ai/chat'
@@ -117,6 +119,16 @@ const ApiAiChatRoute = ApiAiChatRouteImport.update({
   path: '/api/ai/chat',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthedWsWdcChartsRoute = AuthedWsWdcChartsRouteImport.update({
+  id: '/ws/wdc-charts',
+  path: '/ws/wdc-charts',
+  getParentRoute: () => AuthedRoute,
+} as any)
+const AuthedWsProcessChartsRoute = AuthedWsProcessChartsRouteImport.update({
+  id: '/ws/process-charts',
+  path: '/ws/process-charts',
+  getParentRoute: () => AuthedRoute,
+} as any)
 const AuthedAiStructuredRoute = AuthedAiStructuredRouteImport.update({
   id: '/ai/structured',
   path: '/ai/structured',
@@ -160,6 +172,8 @@ export interface FileRoutesByFullPath {
   '/ai/chat': typeof AuthedAiChatRoute
   '/ai/image': typeof AuthedAiImageRoute
   '/ai/structured': typeof AuthedAiStructuredRoute
+  '/ws/process-charts': typeof AuthedWsProcessChartsRoute
+  '/ws/wdc-charts': typeof AuthedWsWdcChartsRoute
   '/api/ai/chat': typeof ApiAiChatRoute
   '/api/ai/image': typeof ApiAiImageRoute
   '/api/ai/structured': typeof ApiAiStructuredRoute
@@ -184,6 +198,8 @@ export interface FileRoutesByTo {
   '/ai/chat': typeof AuthedAiChatRoute
   '/ai/image': typeof AuthedAiImageRoute
   '/ai/structured': typeof AuthedAiStructuredRoute
+  '/ws/process-charts': typeof AuthedWsProcessChartsRoute
+  '/ws/wdc-charts': typeof AuthedWsWdcChartsRoute
   '/api/ai/chat': typeof ApiAiChatRoute
   '/api/ai/image': typeof ApiAiImageRoute
   '/api/ai/structured': typeof ApiAiStructuredRoute
@@ -210,6 +226,8 @@ export interface FileRoutesById {
   '/_authed/ai/chat': typeof AuthedAiChatRoute
   '/_authed/ai/image': typeof AuthedAiImageRoute
   '/_authed/ai/structured': typeof AuthedAiStructuredRoute
+  '/_authed/ws/process-charts': typeof AuthedWsProcessChartsRoute
+  '/_authed/ws/wdc-charts': typeof AuthedWsWdcChartsRoute
   '/api/ai/chat': typeof ApiAiChatRoute
   '/api/ai/image': typeof ApiAiImageRoute
   '/api/ai/structured': typeof ApiAiStructuredRoute
@@ -236,6 +254,8 @@ export interface FileRouteTypes {
     | '/ai/chat'
     | '/ai/image'
     | '/ai/structured'
+    | '/ws/process-charts'
+    | '/ws/wdc-charts'
     | '/api/ai/chat'
     | '/api/ai/image'
     | '/api/ai/structured'
@@ -260,6 +280,8 @@ export interface FileRouteTypes {
     | '/ai/chat'
     | '/ai/image'
     | '/ai/structured'
+    | '/ws/process-charts'
+    | '/ws/wdc-charts'
     | '/api/ai/chat'
     | '/api/ai/image'
     | '/api/ai/structured'
@@ -285,6 +307,8 @@ export interface FileRouteTypes {
     | '/_authed/ai/chat'
     | '/_authed/ai/image'
     | '/_authed/ai/structured'
+    | '/_authed/ws/process-charts'
+    | '/_authed/ws/wdc-charts'
     | '/api/ai/chat'
     | '/api/ai/image'
     | '/api/ai/structured'
@@ -434,6 +458,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiAiChatRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authed/ws/wdc-charts': {
+      id: '/_authed/ws/wdc-charts'
+      path: '/ws/wdc-charts'
+      fullPath: '/ws/wdc-charts'
+      preLoaderRoute: typeof AuthedWsWdcChartsRouteImport
+      parentRoute: typeof AuthedRoute
+    }
+    '/_authed/ws/process-charts': {
+      id: '/_authed/ws/process-charts'
+      path: '/ws/process-charts'
+      fullPath: '/ws/process-charts'
+      preLoaderRoute: typeof AuthedWsProcessChartsRouteImport
+      parentRoute: typeof AuthedRoute
+    }
     '/_authed/ai/structured': {
       id: '/_authed/ai/structured'
       path: '/ai/structured'
@@ -487,6 +525,8 @@ interface AuthedRouteChildren {
   AuthedAiChatRoute: typeof AuthedAiChatRoute
   AuthedAiImageRoute: typeof AuthedAiImageRoute
   AuthedAiStructuredRoute: typeof AuthedAiStructuredRoute
+  AuthedWsProcessChartsRoute: typeof AuthedWsProcessChartsRoute
+  AuthedWsWdcChartsRoute: typeof AuthedWsWdcChartsRoute
   AuthedWsIndexRoute: typeof AuthedWsIndexRoute
   AuthedWsUnitIdIndexRoute: typeof AuthedWsUnitIdIndexRoute
   AuthedWsUnitIdPcPcIdRoute: typeof AuthedWsUnitIdPcPcIdRoute
@@ -501,6 +541,8 @@ const AuthedRouteChildren: AuthedRouteChildren = {
   AuthedAiChatRoute: AuthedAiChatRoute,
   AuthedAiImageRoute: AuthedAiImageRoute,
   AuthedAiStructuredRoute: AuthedAiStructuredRoute,
+  AuthedWsProcessChartsRoute: AuthedWsProcessChartsRoute,
+  AuthedWsWdcChartsRoute: AuthedWsWdcChartsRoute,
   AuthedWsIndexRoute: AuthedWsIndexRoute,
   AuthedWsUnitIdIndexRoute: AuthedWsUnitIdIndexRoute,
   AuthedWsUnitIdPcPcIdRoute: AuthedWsUnitIdPcPcIdRoute,

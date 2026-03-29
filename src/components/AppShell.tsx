@@ -11,7 +11,9 @@ import {
   Image,
   FolderTree,
   Activity,
-  LogOutIcon
+  LogOutIcon,
+  GitBranch,
+  FileSpreadsheet
 } from 'lucide-react'
 import { authClient } from '@/lib/auth-client'
 import { useLiveQuery } from '@tanstack/react-db'
@@ -46,6 +48,8 @@ const navItems = [
 
 const wsNavItems = [
   { to: '/ws', icon: FolderTree, label: 'My Units' },
+  { to: '/ws/process-charts', icon: GitBranch, label: 'Process Charts' },
+  { to: '/ws/wdc-charts', icon: FileSpreadsheet, label: 'Work Distribution' },
 ] as const
 
 const settingsItems = [
@@ -86,8 +90,12 @@ export default function AppShell({ children }: AppShellProps) {
 
   // Helper to determine if a route is active (including nested WS routes)
   const isActive = (path: string) => {
-    if (path === '/ws' && currentPath.startsWith('/ws')) return true;
-    return currentPath === path;
+    if (path === '/ws') {
+      return currentPath === '/ws' || (currentPath.startsWith('/ws/') && 
+        !currentPath.startsWith('/ws/process-charts') && 
+        !currentPath.startsWith('/ws/wdc-charts'));
+    }
+    return currentPath === path || currentPath.startsWith(path + '/');
   }
 
   return (

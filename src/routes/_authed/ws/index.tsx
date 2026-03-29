@@ -2,6 +2,8 @@ import { createFileRoute, Link, useSearch } from '@tanstack/react-router'
 import { useState } from 'react'
 import { useTRPC } from '@/integrations/trpc/react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { useLiveQuery } from '@tanstack/react-db'
+import { useUnitsCollection } from '@/db-collections'
 import { Plus, FolderTree, Activity, ArrowRight } from 'lucide-react'
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card'
@@ -21,10 +23,11 @@ function UnitsLandingPage() {
   const { data: currentOrg } = useQuery(trpc.organization.getOrCreateCurrent.queryOptions())
   const orgId = search?.orgId ?? currentOrg?.organization.id
 
-  const { data: units = [], isLoading } = useQuery({
-    ...trpc.ws.units.list.queryOptions({ organizationId: orgId as number }),
-    enabled: !!orgId,
-  })
+  const unitsCollection = useUnitsCollection(orgId)
+  const { data: units = [], isLoading } = useLiveQuery(
+    (q) => q.from({ units: unitsCollection }).select(({ units }) => units),
+    [unitsCollection],
+  )
 
   const createUnitMutation = useMutation(trpc.ws.units.create.mutationOptions())
 

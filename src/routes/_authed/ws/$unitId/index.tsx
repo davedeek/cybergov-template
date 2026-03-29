@@ -2,6 +2,8 @@ import { createFileRoute, Link, useNavigate, useSearch } from '@tanstack/react-r
 import { useState } from 'react'
 import { useTRPC } from '@/integrations/trpc/react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { useLiveQuery } from '@tanstack/react-db'
+import { useProcessChartsCollection, useWDCChartsCollection } from '@/db-collections'
 import { ArrowLeft, Plus, FileSpreadsheet, GitBranch, Calendar } from 'lucide-react'
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -32,16 +34,19 @@ function UnitDashboardPage() {
     enabled: !!orgId && !isNaN(parsedUnitId),
   })
 
-  // Fetch charts
-  const { data: wdcList = [], isLoading: wdcLoading } = useQuery({
-    ...trpc.ws.wdc.listByUnit.queryOptions({ organizationId: orgId as number, unitId: parsedUnitId }),
-    enabled: !!orgId && !isNaN(parsedUnitId),
-  })
+  // Fetch charts via TanStack DB collections
+  const wdcCollection = useWDCChartsCollection(orgId, parsedUnitId)
+  const pcCollection = useProcessChartsCollection(orgId, parsedUnitId)
 
-  const { data: pcList = [], isLoading: pcLoading } = useQuery({
-    ...trpc.ws.processChart.listByUnit.queryOptions({ organizationId: orgId as number, unitId: parsedUnitId }),
-    enabled: !!orgId && !isNaN(parsedUnitId),
-  })
+  const { data: wdcList = [], isLoading: wdcLoading } = useLiveQuery(
+    (q) => q.from({ wdc: wdcCollection }).select(({ wdc }) => wdc),
+    [wdcCollection],
+  )
+
+  const { data: pcList = [], isLoading: pcLoading } = useLiveQuery(
+    (q) => q.from({ pc: pcCollection }).select(({ pc }) => pc),
+    [pcCollection],
+  )
 
   // Create WDC Mutation
   const [isWdcOpen, setIsWdcOpen] = useState(false)

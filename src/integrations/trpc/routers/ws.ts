@@ -118,6 +118,32 @@ const wdcRouter = createTRPCRouter({
       })
     }),
 
+  listEmployees: orgScopedProcedure
+    .input(z.object({ organizationId: z.number().int().positive(), wdcId: z.number().int().positive() }))
+    .query(async ({ ctx, input }) => {
+      return ctx.db.query.wdcEmployees.findMany({
+        where: eq(wdcEmployees.wdcChartId, input.wdcId),
+        orderBy: desc(wdcEmployees.sortOrder),
+      })
+    }),
+
+  listActivities: orgScopedProcedure
+    .input(z.object({ organizationId: z.number().int().positive(), wdcId: z.number().int().positive() }))
+    .query(async ({ ctx, input }) => {
+      return ctx.db.query.wdcActivities.findMany({
+        where: eq(wdcActivities.wdcChartId, input.wdcId),
+        orderBy: desc(wdcActivities.sortOrder),
+      })
+    }),
+
+  listTasks: orgScopedProcedure
+    .input(z.object({ organizationId: z.number().int().positive(), wdcId: z.number().int().positive() }))
+    .query(async ({ ctx, input }) => {
+      return ctx.db.query.wdcTasks.findMany({
+        where: eq(wdcTasks.wdcChartId, input.wdcId),
+      })
+    }),
+
   addEmployee: orgScopedProcedure
     .input(z.object({
       organizationId: z.number().int().positive(),
@@ -260,6 +286,15 @@ const processChartRouter = createTRPCRouter({
       return ctx.db.query.processCharts.findMany({
         where: eq(processCharts.unitId, input.unitId),
         orderBy: desc(processCharts.id),
+      })
+    }),
+
+  listSteps: orgScopedProcedure
+    .input(z.object({ organizationId: z.number().int().positive(), processChartId: z.number().int().positive() }))
+    .query(async ({ ctx, input }) => {
+      return ctx.db.query.processSteps.findMany({
+        where: eq(processSteps.processChartId, input.processChartId),
+        orderBy: processSteps.sequenceNumber,
       })
     }),
 

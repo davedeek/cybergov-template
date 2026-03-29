@@ -2,6 +2,8 @@ import { createFileRoute, Link, useSearch } from '@tanstack/react-router'
 import { useState, useMemo, useEffect } from 'react'
 import { useTRPC } from '@/integrations/trpc/react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { useLiveQuery } from '@tanstack/react-db'
+import { useStepsCollection } from '@/db-collections'
 import { ArrowLeft, Copy, Trash2, AlertTriangle, LayoutList, TableProperties, Code2, GripVertical, Check, Info, Activity } from 'lucide-react'
 import mermaid from 'mermaid'
 
@@ -76,10 +78,21 @@ function ProcessChartPage() {
   const pPcId = parseInt(pcId, 10)
 
   // -- Queries --
-  const { data: pcData, isLoading } = useQuery({
+  const { data: pcData, isLoading: pcLoading } = useQuery({
     ...trpc.ws.processChart.get.queryOptions({ organizationId: orgId as number, processChartId: pPcId }),
     enabled: !!orgId && !isNaN(pPcId),
   })
+
+  // TanStack DB Collection for steps
+  const stepsCollection = useStepsCollection(orgId, pPcId)
+  const { data: liveSteps = [], isLoading: stepsLoading } = useLiveQuery(
+    (q) => q.from({ step: stepsCollection }).select(({ step }) => step),
+    [stepsCollection],
+  )
+
+  const chart = pcData?.chart
+  const steps = (liveSteps as any[]) || []
+  const isLoading = pcLoading || stepsLoading
 
   // -- Mutations --
   const addStepMutation = useMutation(trpc.ws.processChart.addStep.mutationOptions())
@@ -121,10 +134,10 @@ function ProcessChartPage() {
   const [dragId, setDragId] = useState<number | null>(null)
   const [dropIdx, setDropIdx] = useState<number | null>(null)
 
-  const invalidatePc = () => queryClient.invalidateQueries(trpc.ws.processChart.get.queryFilter({ processChartId: pPcId }))
-
-  const chart = pcData?.chart
-  const steps = pcData?.steps || []
+  const invalidatePc = () => {
+    queryClient.invalidateQueries(trpc.ws.processChart.get.queryFilter({ processChartId: pPcId }))
+    queryClient.invalidateQueries(trpc.ws.processChart.listSteps.queryFilter({ processChartId: pPcId }))
+  }
 
   // Mermaid Generation
   const mermaidSrc = useMemo(() => {

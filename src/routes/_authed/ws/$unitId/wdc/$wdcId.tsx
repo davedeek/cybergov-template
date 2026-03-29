@@ -2,6 +2,8 @@ import { createFileRoute, Link, useSearch } from '@tanstack/react-router'
 import { useState, useMemo } from 'react'
 import { useTRPC } from '@/integrations/trpc/react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { useLiveQuery } from '@tanstack/react-db'
+import { useWDCEmployeesCollection, useWDCActivitiesCollection, useWDCTasksCollection } from '@/db-collections'
 import { ArrowLeft, ArrowRight, AlertCircle, FileText, HelpCircle, UserPlus, Plus, Flag } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
@@ -24,10 +26,32 @@ function WdcPage() {
   const pWdcId = parseInt(wdcId, 10)
 
   // -- Queries --
-  const { data: wdcData, isLoading } = useQuery({
+  const { data: wdcData, isLoading: wdcLoading } = useQuery({
     ...trpc.ws.wdc.get.queryOptions({ organizationId: orgId as number, wdcId: pWdcId }),
     enabled: !!orgId && !isNaN(pWdcId),
   })
+
+  // TanStack DB Collections
+  const employeesCollection = useWDCEmployeesCollection(orgId, pWdcId)
+  const activitiesCollection = useWDCActivitiesCollection(orgId, pWdcId)
+  const tasksCollection = useWDCTasksCollection(orgId, pWdcId)
+
+  const { data: employees = [], isLoading: empLoading } = useLiveQuery(
+    (q) => q.from({ emp: employeesCollection }).select(({ emp }) => emp),
+    [employeesCollection],
+  )
+
+  const { data: activities = [], isLoading: actLoading } = useLiveQuery(
+    (q) => q.from({ act: activitiesCollection }).select(({ act }) => act),
+    [activitiesCollection],
+  )
+
+  const { data: tasks = [], isLoading: tasksLoading } = useLiveQuery(
+    (q) => q.from({ task: tasksCollection }).select(({ task }) => task),
+    [tasksCollection],
+  )
+
+  const isLoading = wdcLoading || empLoading || actLoading || tasksLoading
 
   // -- Mutations --
   const addEmpMutation = useMutation(trpc.ws.wdc.addEmployee.mutationOptions())
@@ -46,7 +70,12 @@ function WdcPage() {
   const [activeCell, setActiveCell] = useState<{ actId: number, empId: number } | null>(null)
   const [newTask, setNewTask] = useState({ taskName: '', hours: '' })
 
-  const invalidateWdc = () => queryClient.invalidateQueries(trpc.ws.wdc.get.queryFilter({ wdcId: pWdcId }))
+  const invalidateWdc = () => {
+    queryClient.invalidateQueries(trpc.ws.wdc.get.queryFilter({ wdcId: pWdcId }))
+    queryClient.invalidateQueries(trpc.ws.wdc.listEmployees.queryFilter({ wdcId: pWdcId }))
+    queryClient.invalidateQueries(trpc.ws.wdc.listActivities.queryFilter({ wdcId: pWdcId }))
+    queryClient.invalidateQueries(trpc.ws.wdc.listTasks.queryFilter({ wdcId: pWdcId }))
+  }
 
   // Actions
   const handleAddEmployee = async () => {
@@ -87,9 +116,6 @@ function WdcPage() {
 
   // Derived Data
   const chart = wdcData?.chart
-  const employees = wdcData?.employees || []
-  const activities = wdcData?.activities || []
-  const tasks = wdcData?.tasks || []
 
   const empTotals = useMemo(() => {
     const t: Record<number, number> = {}

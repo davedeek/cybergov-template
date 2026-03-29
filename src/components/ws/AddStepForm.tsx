@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { SymbolIcon, SYMBOL_META, SymbolType } from './SymbolMeta'
+import { FormError } from '@/components/ui/form-error'
 
 interface AddStepFormProps {
   form: any
@@ -57,6 +58,9 @@ export function AddStepForm({ form }: AddStepFormProps) {
               onChange={(e: React.ChangeEvent<HTMLInputElement>) => field.handleChange(e.target.value)}
               className="h-10 bg-nd-ink text-nd-bg border-none hover:bg-white/5 rounded-none placeholder:text-nd-bg/30 focus-visible:ring-0 text-sm"
             />
+            <div className="absolute left-2 bottom-0 transform translate-y-full z-10 w-full">
+              <FormError errors={field.state.meta.errors} />
+            </div>
           </div>
         )}
       />
@@ -73,6 +77,9 @@ export function AddStepForm({ form }: AddStepFormProps) {
               onChange={(e: React.ChangeEvent<HTMLInputElement>) => field.handleChange(e.target.value)}
               className="h-10 bg-nd-ink text-nd-bg border-none hover:bg-white/5 rounded-none placeholder:text-nd-bg/30 font-mono text-xs focus-visible:ring-0"
             />
+            <div className="absolute left-2 bottom-0 transform translate-y-full z-10 w-full">
+              <FormError errors={field.state.meta.errors} />
+            </div>
           </div>
         )}
       />

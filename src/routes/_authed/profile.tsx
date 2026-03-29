@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { createFileRoute } from '@tanstack/react-router'
 import { useForm } from '@tanstack/react-form'
 import { User, Save } from 'lucide-react'
@@ -7,6 +7,8 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { z } from 'zod'
+import { FormError } from '@/components/ui/form-error'
 
 export const Route = createFileRoute('/_authed/profile')({
   component: ProfilePage,
@@ -16,6 +18,10 @@ function ProfilePage() {
   const { data: session } = authClient.useSession()
   const [saved, setSaved] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
+ 
+  const profileSchema = z.object({
+    name: z.string().min(2, 'Name must be at least 2 characters'),
+  })
 
   const form = useForm({
     defaultValues: {
@@ -35,6 +41,12 @@ function ProfilePage() {
       }
     },
   })
+
+  // Reset saved state when value changes
+  const nameValue = form.useStore((state) => state.values.name)
+  useEffect(() => {
+    setSaved(false)
+  }, [nameValue])
 
   return (
     <div className="p-6 lg:p-8 max-w-xl mx-auto font-sans">
@@ -76,6 +88,9 @@ function ProfilePage() {
 
             <form.Field
               name="name"
+              validators={{
+                onChange: profileSchema.shape.name,
+              }}
               children={(field) => (
                 <div className="space-y-2">
                   <Label htmlFor={field.name} className="text-[10px] font-mono uppercase tracking-[0.2em] text-nd-ink-muted">
@@ -89,6 +104,7 @@ function ProfilePage() {
                     onChange={(e) => field.handleChange(e.target.value)}
                     className="h-12 bg-nd-bg border-2 border-nd-border focus:border-nd-ink rounded-none text-nd-ink font-serif text-lg shadow-inner"
                   />
+                  <FormError errors={field.state.meta.errors} />
                 </div>
               )}
             />

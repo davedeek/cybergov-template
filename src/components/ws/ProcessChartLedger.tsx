@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { SymbolIcon, SYMBOL_META, SymbolType } from './SymbolMeta'
+import { FormError } from '@/components/ui/form-error'
 
 interface ProcessChartLedgerProps {
   steps: any[]
@@ -97,17 +98,20 @@ export function ProcessChartLedger({
                       <editForm.Field
                         name="description"
                         children={(field: any) => (
-                          <Input 
-                            autoFocus 
-                            value={field.state.value} 
-                            onBlur={field.handleBlur}
-                            onChange={(e: React.ChangeEvent<HTMLInputElement>) => field.handleChange(e.target.value)} 
-                            onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => { 
-                              if (e.key === 'Enter') commitEdit(); 
-                              if (e.key === 'Escape') setEditingId(null) 
-                            }} 
-                            className="h-7 text-sm rounded-none border-nd-border focus-visible:ring-nd-accent" 
-                          />
+                          <>
+                            <Input 
+                              autoFocus 
+                              value={field.state.value} 
+                              onBlur={field.handleBlur}
+                              onChange={(e: React.ChangeEvent<HTMLInputElement>) => field.handleChange(e.target.value)} 
+                              onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => { 
+                                if (e.key === 'Enter') commitEdit(); 
+                                if (e.key === 'Escape') setEditingId(null) 
+                              }} 
+                              className="h-7 text-sm rounded-none border-nd-border focus-visible:ring-nd-accent" 
+                            />
+                            <FormError errors={field.state.meta.errors} />
+                          </>
                         )}
                       />
                     ) : (
@@ -122,16 +126,19 @@ export function ProcessChartLedger({
                       <editForm.Field
                         name="who"
                         children={(field: any) => (
-                          <Input 
-                            value={field.state.value} 
-                            onBlur={field.handleBlur}
-                            onChange={(e: React.ChangeEvent<HTMLInputElement>) => field.handleChange(e.target.value)} 
-                            onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => { 
-                              if (e.key === 'Enter') commitEdit(); 
-                              if (e.key === 'Escape') setEditingId(null) 
-                            }} 
-                            className="h-7 text-xs font-mono rounded-none border-nd-border focus-visible:ring-nd-accent" 
-                          />
+                          <>
+                            <Input 
+                              value={field.state.value} 
+                              onBlur={field.handleBlur}
+                              onChange={(e: React.ChangeEvent<HTMLInputElement>) => field.handleChange(e.target.value)} 
+                              onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => { 
+                                if (e.key === 'Enter') commitEdit(); 
+                                if (e.key === 'Escape') setEditingId(null) 
+                              }} 
+                              className="h-7 text-xs font-mono rounded-none border-nd-border focus-visible:ring-nd-accent" 
+                            />
+                            <FormError errors={field.state.meta.errors} />
+                          </>
                         )}
                       />
                     ) : (
@@ -147,17 +154,22 @@ export function ProcessChartLedger({
                             <editForm.Field
                               name="minutes"
                               children={(field: any) => (
-                                <Input 
-                                  type="number" 
-                                  value={field.state.value} 
-                                  onBlur={field.handleBlur}
-                                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => field.handleChange(e.target.value)} 
-                                  onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => { 
-                                    if (e.key === 'Enter') commitEdit(); 
-                                    if (e.key === 'Escape') setEditingId(null) 
-                                  }} 
-                                  className="h-7 text-xs font-mono text-right rounded-none border-nd-border focus-visible:ring-nd-accent" 
-                                />
+                                <div className="relative">
+                                  <Input 
+                                    type="number" 
+                                    value={field.state.value} 
+                                    onBlur={field.handleBlur}
+                                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => field.handleChange(e.target.value)} 
+                                    onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => { 
+                                      if (e.key === 'Enter') commitEdit(); 
+                                      if (e.key === 'Escape') setEditingId(null) 
+                                    }} 
+                                    className="h-7 text-xs font-mono text-right rounded-none border-nd-border focus-visible:ring-nd-accent" 
+                                  />
+                                  <div className="absolute right-0 top-full z-20">
+                                    <FormError errors={field.state.meta.errors} />
+                                  </div>
+                                </div>
                               )}
                             />
                           ) : (
@@ -182,17 +194,22 @@ export function ProcessChartLedger({
                             <editForm.Field
                               name="feet"
                               children={(field: any) => (
-                                <Input 
-                                  type="number" 
-                                  value={field.state.value} 
-                                  onBlur={field.handleBlur}
-                                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => field.handleChange(e.target.value)} 
-                                  onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => { 
-                                    if (e.key === 'Enter') commitEdit(); 
-                                    if (e.key === 'Escape') setEditingId(null) 
-                                  }} 
-                                  className="h-7 text-xs font-mono text-right rounded-none border-nd-border focus-visible:ring-nd-accent" 
-                                />
+                                <div className="relative">
+                                  <Input 
+                                    type="number" 
+                                    value={field.state.value} 
+                                    onBlur={field.handleBlur}
+                                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => field.handleChange(e.target.value)} 
+                                    onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => { 
+                                      if (e.key === 'Enter') commitEdit(); 
+                                      if (e.key === 'Escape') setEditingId(null) 
+                                    }} 
+                                    className="h-7 text-xs font-mono text-right rounded-none border-nd-border focus-visible:ring-nd-accent" 
+                                  />
+                                  <div className="absolute right-0 top-full z-20">
+                                    <FormError errors={field.state.meta.errors} />
+                                  </div>
+                                </div>
                               )}
                             />
                           ) : (

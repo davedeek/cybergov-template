@@ -7,6 +7,8 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Alert, AlertDescription } from '@/components/ui/alert'
+import { z } from 'zod'
+import { FormError } from '@/components/ui/form-error'
 
 export const Route = createFileRoute('/signup')({
   component: SignUpPage,
@@ -17,6 +19,12 @@ function SignUpPage() {
   const queryClient = useQueryClient()
   const [error, setError] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
+
+  const signupSchema = z.object({
+    name: z.string().min(2, 'Name must be at least 2 characters'),
+    email: z.string().email('Valid email is required'),
+    password: z.string().min(8, 'Password must be at least 8 characters'),
+  })
 
   const form = useForm({
     defaultValues: {
@@ -58,12 +66,12 @@ function SignUpPage() {
           <p className="text-nd-ink-muted mt-2 font-sans text-sm">Get started with your workspace</p>
         </div>
 
-        <form 
+        <form
           onSubmit={(e) => {
             e.preventDefault()
             e.stopPropagation()
             form.handleSubmit()
-          }} 
+          }}
           className="space-y-6"
         >
           {error && (
@@ -77,6 +85,9 @@ function SignUpPage() {
           <div className="space-y-4">
             <form.Field
               name="name"
+              validators={{
+                onChange: signupSchema.shape.name,
+              }}
               children={(field) => (
                 <div className="space-y-2">
                   <Label htmlFor={field.name} className="text-xs font-mono uppercase tracking-wider text-nd-ink-muted">
@@ -88,16 +99,19 @@ function SignUpPage() {
                     value={field.state.value}
                     onBlur={field.handleBlur}
                     onChange={(e) => field.handleChange(e.target.value)}
-                    required
                     className="h-10 bg-nd-bg border-nd-border rounded-none text-nd-ink placeholder:text-nd-ink-muted/50 focus-visible:ring-nd-accent transition-colors font-sans"
                     placeholder="Your name"
                   />
+                  <FormError errors={field.state.meta.errors} />
                 </div>
               )}
             />
 
             <form.Field
               name="email"
+              validators={{
+                onChange: signupSchema.shape.email,
+              }}
               children={(field) => (
                 <div className="space-y-2">
                   <Label htmlFor={field.name} className="text-xs font-mono uppercase tracking-wider text-nd-ink-muted">
@@ -109,16 +123,19 @@ function SignUpPage() {
                     value={field.state.value}
                     onBlur={field.handleBlur}
                     onChange={(e) => field.handleChange(e.target.value)}
-                    required
                     className="h-10 bg-nd-bg border-nd-border rounded-none text-nd-ink placeholder:text-nd-ink-muted/50 focus-visible:ring-nd-accent transition-colors font-sans"
                     placeholder="you@example.com"
                   />
+                  <FormError errors={field.state.meta.errors} />
                 </div>
               )}
             />
 
             <form.Field
               name="password"
+              validators={{
+                onChange: signupSchema.shape.password,
+              }}
               children={(field) => (
                 <div className="space-y-2">
                   <Label htmlFor={field.name} className="text-xs font-mono uppercase tracking-wider text-nd-ink-muted">
@@ -130,11 +147,10 @@ function SignUpPage() {
                     value={field.state.value}
                     onBlur={field.handleBlur}
                     onChange={(e) => field.handleChange(e.target.value)}
-                    required
-                    minLength={8}
                     className="h-10 bg-nd-bg border-nd-border rounded-none text-nd-ink placeholder:text-nd-ink-muted/50 focus-visible:ring-nd-accent transition-colors font-sans"
                     placeholder="••••••••"
                   />
+                  <FormError errors={field.state.meta.errors} />
                   <p className="text-[10px] font-mono tracking-wider text-nd-ink-muted mt-2 uppercase">At least 8 characters</p>
                 </div>
               )}

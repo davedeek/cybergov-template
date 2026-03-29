@@ -7,6 +7,8 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Alert, AlertDescription } from '@/components/ui/alert'
+import { z } from 'zod'
+import { FormError } from '@/components/ui/form-error'
 
 export const Route = createFileRoute('/signin')({
   component: SignInPage,
@@ -17,7 +19,12 @@ function SignInPage() {
   const queryClient = useQueryClient()
   const [error, setError] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
-
+ 
+  const signinSchema = z.object({
+    email: z.string().email('Valid email is required'),
+    password: z.string().min(1, 'Password is required'),
+  })
+ 
   const form = useForm({
     defaultValues: {
       email: '',
@@ -56,12 +63,12 @@ function SignInPage() {
           <p className="text-nd-ink-muted mt-2 font-sans text-sm">Sign in to your account</p>
         </div>
 
-        <form 
+        <form
           onSubmit={(e) => {
             e.preventDefault()
             e.stopPropagation()
             form.handleSubmit()
-          }} 
+          }}
           className="space-y-6"
         >
           {error && (
@@ -75,6 +82,9 @@ function SignInPage() {
           <div className="space-y-4">
             <form.Field
               name="email"
+              validators={{
+                onChange: signinSchema.shape.email,
+              }}
               children={(field) => (
                 <div className="space-y-2">
                   <Label htmlFor={field.name} className="text-xs font-mono uppercase tracking-wider text-nd-ink-muted">
@@ -86,16 +96,19 @@ function SignInPage() {
                     value={field.state.value}
                     onBlur={field.handleBlur}
                     onChange={(e) => field.handleChange(e.target.value)}
-                    required
                     className="h-10 bg-nd-bg border-nd-border rounded-none text-nd-ink placeholder:text-nd-ink-muted/50 focus-visible:ring-nd-accent transition-colors font-sans"
                     placeholder="you@example.com"
                   />
+                  <FormError errors={field.state.meta.errors} />
                 </div>
               )}
             />
 
             <form.Field
               name="password"
+              validators={{
+                onChange: signinSchema.shape.password,
+              }}
               children={(field) => (
                 <div className="space-y-2">
                   <Label htmlFor={field.name} className="text-xs font-mono uppercase tracking-wider text-nd-ink-muted">
@@ -107,10 +120,10 @@ function SignInPage() {
                     value={field.state.value}
                     onBlur={field.handleBlur}
                     onChange={(e) => field.handleChange(e.target.value)}
-                    required
                     className="h-10 bg-nd-bg border-nd-border rounded-none text-nd-ink placeholder:text-nd-ink-muted/50 focus-visible:ring-nd-accent transition-colors font-sans"
                     placeholder="••••••••"
                   />
+                  <FormError errors={field.state.meta.errors} />
                 </div>
               )}
             />

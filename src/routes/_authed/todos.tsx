@@ -1,5 +1,7 @@
 import { createFileRoute, useSearch } from '@tanstack/react-router'
 import { useForm } from '@tanstack/react-form'
+import { z } from 'zod'
+import { FormError } from '@/components/ui/form-error'
 import { Plus, Trash2, CheckCircle, ListTodo } from 'lucide-react'
 import { useTRPC } from '@/integrations/trpc/react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
@@ -46,12 +48,19 @@ function TodosPage() {
     }),
   )
 
+  const todoSchema = z.object({
+    name: z.string().trim().min(3, 'Task description must be at least 3 characters'),
+  })
+
   const form = useForm({
     defaultValues: {
       name: '',
     },
+    validators: {
+      onChange: todoSchema,
+    },
     onSubmit: async ({ value }) => {
-      if (!value.name.trim() || !orgId) return
+      if (!orgId) return
       await addMutation.mutateAsync({ organizationId: orgId, name: value.name })
       form.reset()
     },
@@ -105,13 +114,16 @@ function TodosPage() {
             <form.Field
               name="name"
               children={(field) => (
-                <Input
-                  value={field.state.value}
-                  onBlur={field.handleBlur}
-                  onChange={(e) => field.handleChange(e.target.value)}
-                  placeholder="Enter task description..."
-                  className="flex-1 bg-nd-bg border-2 border-nd-border focus:border-nd-ink rounded-none font-serif h-12 shadow-inner"
-                />
+                <div className="flex-1 space-y-2">
+                  <Input
+                    value={field.state.value}
+                    onBlur={field.handleBlur}
+                    onChange={(e) => field.handleChange(e.target.value)}
+                    placeholder="Enter task description..."
+                    className="w-full bg-nd-bg border-2 border-nd-border focus:border-nd-ink rounded-none font-serif h-12 shadow-inner"
+                  />
+                  <FormError errors={field.state.meta.errors} />
+                </div>
               )}
             />
             <form.Subscribe

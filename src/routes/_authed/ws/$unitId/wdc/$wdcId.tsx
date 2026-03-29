@@ -10,6 +10,8 @@ import { ArrowLeft, ArrowRight, AlertCircle, FileText, HelpCircle, UserPlus, Plu
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { z } from 'zod'
+import { FormError } from '@/components/ui/form-error'
 
 export const Route = createFileRoute('/_authed/ws/$unitId/wdc/$wdcId')({
   component: WdcPage,
@@ -66,19 +68,28 @@ function WdcPage() {
   const [addingActivity, setAddingActivity] = useState(false)
   const [activeCell, setActiveCell] = useState<{ actId: number, empId: number } | null>(null)
 
+  const empSchema = z.object({
+    name: z.string().trim().min(2, 'Name must be at least 2 characters'),
+    role: z.string().trim(),
+    fte: z.string().refine(v => !isNaN(Number(v)) && Number(v) > 0, 'FTE must be a positive number'),
+  })
+
   const empForm = useForm({
     defaultValues: {
       name: '',
       role: '',
       fte: '1.0',
     },
+    validators: {
+      onChange: empSchema,
+    },
     onSubmit: async ({ value }) => {
-      if (!value.name.trim() || !orgId) return
+      if (!orgId) return
       await addEmpMutation.mutateAsync({
         organizationId: orgId, 
         wdcId: pWdcId,
-        name: value.name.trim(), 
-        role: value.role.trim() || undefined, 
+        name: value.name, 
+        role: value.role || undefined, 
         fte: value.fte
       })
       empForm.reset()
@@ -87,16 +98,23 @@ function WdcPage() {
     },
   })
 
+  const actSchema = z.object({
+    name: z.string().trim().min(3, 'Activity name must be at least 3 characters'),
+  })
+
   const actForm = useForm({
     defaultValues: {
       name: '',
     },
+    validators: {
+      onChange: actSchema,
+    },
     onSubmit: async ({ value }) => {
-      if (!value.name.trim() || !orgId) return
+      if (!orgId) return
       await addActMutation.mutateAsync({ 
         organizationId: orgId, 
         wdcId: pWdcId, 
-        name: value.name.trim() 
+        name: value.name 
       })
       actForm.reset()
       setAddingActivity(false)
@@ -104,13 +122,21 @@ function WdcPage() {
     },
   })
 
+  const taskSchema = z.object({
+    taskName: z.string().trim().min(3, 'Task name must be at least 3 characters'),
+    hours: z.string().refine(v => !isNaN(Number(v)) && Number(v) > 0, 'Hours must be a positive number'),
+  })
+
   const taskForm = useForm({
     defaultValues: {
       taskName: '',
       hours: '',
     },
+    validators: {
+      onChange: taskSchema,
+    },
     onSubmit: async ({ value }) => {
-      if (!activeCell || !value.taskName.trim() || !value.hours || !orgId) return
+      if (!activeCell || !orgId) return
       await addTaskMutation.mutateAsync({
         organizationId: orgId, 
         wdcId: pWdcId,
@@ -292,14 +318,17 @@ function WdcPage() {
                     <empForm.Field
                       name="name"
                       children={(field) => (
-                        <Input 
-                          placeholder="Name" 
-                          className="w-[120px] font-mono text-xs h-8 border-nd-border rounded-none focus-visible:ring-1 focus-visible:ring-nd-accent" 
-                          value={field.state.value} 
-                          onBlur={field.handleBlur}
-                          onChange={e => field.handleChange(e.target.value)} 
-                          autoFocus 
-                        />
+                        <div className="flex flex-col gap-1">
+                          <Input 
+                            placeholder="Name" 
+                            className="w-[120px] font-mono text-xs h-8 border-nd-border rounded-none focus-visible:ring-1 focus-visible:ring-nd-accent" 
+                            value={field.state.value} 
+                            onBlur={field.handleBlur}
+                            onChange={e => field.handleChange(e.target.value)} 
+                            autoFocus 
+                          />
+                          <FormError errors={field.state.meta.errors} />
+                        </div>
                       )}
                     />
                     <empForm.Field
@@ -366,14 +395,17 @@ function WdcPage() {
                     <actForm.Field
                       name="name"
                       children={(field) => (
-                        <Input 
-                          placeholder="Activity Name" 
-                          className="w-[200px] font-mono text-xs h-8 border-nd-border rounded-none focus-visible:ring-1 focus-visible:ring-nd-accent" 
-                          value={field.state.value} 
-                          onBlur={field.handleBlur}
-                          onChange={e => field.handleChange(e.target.value)} 
-                          autoFocus 
-                        />
+                        <div className="flex flex-col gap-1">
+                          <Input 
+                            placeholder="Activity Name" 
+                            className="w-[200px] font-mono text-xs h-8 border-nd-border rounded-none focus-visible:ring-1 focus-visible:ring-nd-accent" 
+                            value={field.state.value} 
+                            onBlur={field.handleBlur}
+                            onChange={e => field.handleChange(e.target.value)} 
+                            autoFocus 
+                          />
+                          <FormError errors={field.state.meta.errors} />
+                        </div>
                       )}
                     />
                     <actForm.Subscribe
@@ -419,27 +451,33 @@ function WdcPage() {
                     <taskForm.Field
                       name="taskName"
                       children={(field) => (
-                        <Input 
-                          placeholder="Task description..." 
-                          className="w-[240px] font-mono text-xs h-8 border-nd-border rounded-none focus-visible:ring-1 focus-visible:ring-nd-accent shadow-inner outline-none" 
-                          value={field.state.value} 
-                          onBlur={field.handleBlur}
-                          onChange={e => field.handleChange(e.target.value)} 
-                          autoFocus 
-                        />
+                        <div className="flex flex-col gap-1">
+                          <Input 
+                            placeholder="Task description..." 
+                            className="w-[240px] font-mono text-xs h-8 border-nd-border rounded-none focus-visible:ring-1 focus-visible:ring-nd-accent shadow-inner outline-none" 
+                            value={field.state.value} 
+                            onBlur={field.handleBlur}
+                            onChange={e => field.handleChange(e.target.value)} 
+                            autoFocus 
+                          />
+                          <FormError errors={field.state.meta.errors} />
+                        </div>
                       )}
                     />
                     <taskForm.Field
                       name="hours"
                       children={(field) => (
-                        <Input 
-                          type="number" 
-                          placeholder="hrs/wk" 
-                          className="w-[80px] font-mono text-xs h-8 border-nd-border rounded-none text-right focus-visible:ring-1 focus-visible:ring-nd-accent shadow-inner outline-none" 
-                          value={field.state.value} 
-                          onBlur={field.handleBlur}
-                          onChange={e => field.handleChange(e.target.value)} 
-                        />
+                        <div className="flex flex-col gap-1">
+                          <Input 
+                            type="number" 
+                            placeholder="hrs/wk" 
+                            className="w-[80px] font-mono text-xs h-8 border-nd-border rounded-none text-right focus-visible:ring-1 focus-visible:ring-nd-accent shadow-inner outline-none" 
+                            value={field.state.value} 
+                            onBlur={field.handleBlur}
+                            onChange={e => field.handleChange(e.target.value)} 
+                          />
+                          <FormError errors={field.state.meta.errors} />
+                        </div>
                       )}
                     />
                     <taskForm.Subscribe

@@ -6,6 +6,7 @@ import { useLiveQuery } from '@tanstack/react-db'
 import { useStepsCollection } from '@/db-collections'
 import mermaid from 'mermaid'
 import { SymbolType, fmtMinutes } from '@/components/ws/SymbolMeta'
+import { z } from 'zod'
 
 export function useProcessChart(orgId: number | undefined, pPcId: number) {
   const trpc = useTRPC()
@@ -37,6 +38,14 @@ export function useProcessChart(orgId: number | undefined, pPcId: number) {
   // -- Local State --
   const [activeTab, setActiveTab] = useState('ledger')
   
+  const stepSchema = z.object({
+    symbol: z.enum(['operation', 'transportation', 'storage', 'inspection']),
+    description: z.string().trim().min(3, 'Description must be at least 3 characters'),
+    who: z.string().trim(),
+    minutes: z.string().refine(v => v === '' || !isNaN(Number(v)), 'Must be a number'),
+    feet: z.string().refine(v => v === '' || !isNaN(Number(v)), 'Must be a number'),
+  })
+
   const addStepForm = useForm({
     defaultValues: {
       symbol: 'operation' as SymbolType,
@@ -45,8 +54,11 @@ export function useProcessChart(orgId: number | undefined, pPcId: number) {
       minutes: '',
       feet: '',
     },
+    validators: {
+      onChange: stepSchema,
+    },
     onSubmit: async ({ value }) => {
-      if (!orgId || !value.description.trim()) return
+      if (!orgId) return
       await addStepMutation.mutateAsync({
         organizationId: orgId, 
         processChartId: pPcId,
@@ -69,6 +81,9 @@ export function useProcessChart(orgId: number | undefined, pPcId: number) {
       who: '',
       minutes: '',
       feet: '',
+    },
+    validators: {
+      onChange: stepSchema,
     },
     onSubmit: async ({ value }) => {
       if (!editingId || !orgId) return

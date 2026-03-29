@@ -3,6 +3,8 @@ import { createFileRoute } from '@tanstack/react-router'
 import { useForm } from '@tanstack/react-form'
 import { Send, Square } from 'lucide-react'
 import { Streamdown } from 'streamdown'
+import { z } from 'zod'
+import { FormError } from '@/components/ui/form-error'
 
 import { useAIChat } from '@/lib/ai-chat-hook'
 import type { ChatMessages } from '@/lib/ai-chat-hook'
@@ -107,15 +109,20 @@ function ChatPage() {
     }
   }, [messages])
 
+  const chatSchema = z.object({
+    input: z.string().trim().min(1, 'Please enter a command or inquiry'),
+  })
+
   const form = useForm({
     defaultValues: {
       input: '',
     },
+    validators: {
+      onChange: chatSchema,
+    },
     onSubmit: async ({ value }) => {
-      if (value.input.trim()) {
-        sendMessage(value.input)
-        form.reset()
-      }
+      sendMessage(value.input)
+      form.reset()
     },
   })
 
@@ -166,6 +173,7 @@ function ChatPage() {
                         }
                       }}
                     />
+                    <FormError errors={field.state.meta.errors} />
                   </div>
                 )}
               />

@@ -12,6 +12,8 @@ import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { z } from 'zod'
+import { FormError } from '@/components/ui/form-error'
 
 export const Route = createFileRoute('/_authed/ws/')({
   component: UnitsLandingPage,
@@ -31,8 +33,13 @@ function UnitsLandingPage() {
   )
 
   const createUnitMutation = useMutation(trpc.ws.units.create.mutationOptions())
-
+ 
   const [isCreateOpen, setIsCreateOpen] = useState(false)
+ 
+  const unitSchema = z.object({
+    name: z.string().min(3, 'Unit name must be at least 3 characters'),
+    description: z.string(),
+  })
 
   const form = useForm({
     defaultValues: {
@@ -40,7 +47,7 @@ function UnitsLandingPage() {
       description: '',
     },
     onSubmit: async ({ value }) => {
-      if (!orgId || !value.name.trim()) return
+      if (!orgId) return
 
       await createUnitMutation.mutateAsync({
         organizationId: orgId,
@@ -98,6 +105,9 @@ function UnitsLandingPage() {
               <div className="grid gap-4 py-4">
                 <form.Field
                   name="name"
+                  validators={{
+                    onChange: unitSchema.shape.name,
+                  }}
                   children={(field) => (
                     <div className="flex flex-col gap-2">
                       <Label htmlFor={field.name}>Unit Name</Label>
@@ -109,11 +119,15 @@ function UnitsLandingPage() {
                         placeholder="e.g., Records Processing"
                         autoFocus
                       />
+                      <FormError errors={field.state.meta.errors} />
                     </div>
                   )}
                 />
                 <form.Field
                   name="description"
+                  validators={{
+                    onChange: unitSchema.shape.description,
+                  }}
                   children={(field) => (
                     <div className="flex flex-col gap-2">
                       <Label htmlFor={field.name}>Description (optional)</Label>
@@ -124,6 +138,7 @@ function UnitsLandingPage() {
                         onChange={(e) => field.handleChange(e.target.value)}
                         placeholder="Brief description of the unit's function"
                       />
+                      <FormError errors={field.state.meta.errors} />
                     </div>
                   )}
                 />

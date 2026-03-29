@@ -12,6 +12,8 @@ import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { z } from 'zod'
+import { FormError } from '@/components/ui/form-error'
 
 export const Route = createFileRoute('/_authed/ws/$unitId/')({
   component: UnitDashboardPage,
@@ -52,18 +54,22 @@ function UnitDashboardPage() {
   // Create WDC Mutation
   const [isWdcOpen, setIsWdcOpen] = useState(false)
   const createWdcMutation = useMutation(trpc.ws.wdc.create.mutationOptions())
-
+ 
+  const wdcSchema = z.object({
+    name: z.string().min(3, 'Chart name must be at least 3 characters'),
+  })
+ 
   const wdcForm = useForm({
     defaultValues: {
       name: '',
     },
     onSubmit: async ({ value }) => {
-      if (!orgId || !value.name.trim()) return
+      if (!orgId) return
 
       const newChart = await createWdcMutation.mutateAsync({
         organizationId: orgId,
         unitId: parsedUnitId,
-        name: value.name.trim(),
+        name: value.name,
       })
 
       wdcForm.reset()
@@ -76,13 +82,17 @@ function UnitDashboardPage() {
   // Create PC Mutation
   const [isPcOpen, setIsPcOpen] = useState(false)
   const createPcMutation = useMutation(trpc.ws.processChart.create.mutationOptions())
-
+ 
+  const pcSchema = z.object({
+    name: z.string().min(3, 'Process name must be at least 3 characters'),
+  })
+ 
   const pcForm = useForm({
     defaultValues: {
       name: '',
     },
     onSubmit: async ({ value }) => {
-      if (!orgId || !value.name.trim()) return
+      if (!orgId) return
 
       const newChart = await createPcMutation.mutateAsync({
         organizationId: orgId,
@@ -171,6 +181,9 @@ function UnitDashboardPage() {
                   <div className="flex flex-col gap-2 py-4">
                     <wdcForm.Field
                       name="name"
+                      validators={{
+                        onChange: wdcSchema.shape.name,
+                      }}
                       children={(field) => (
                         <>
                           <Label htmlFor={field.name}>Chart Name</Label>
@@ -182,6 +195,7 @@ function UnitDashboardPage() {
                             placeholder="e.g., Q3 2026 Snapshot"
                             autoFocus
                           />
+                          <FormError errors={field.state.meta.errors} />
                         </>
                       )}
                     />
@@ -270,6 +284,9 @@ function UnitDashboardPage() {
                   <div className="flex flex-col gap-2 py-4">
                     <pcForm.Field
                       name="name"
+                      validators={{
+                        onChange: pcSchema.shape.name,
+                      }}
                       children={(field) => (
                         <>
                           <Label htmlFor={field.name}>Process Name</Label>
@@ -281,6 +298,7 @@ function UnitDashboardPage() {
                             placeholder="e.g., Mail Sorting Procedure"
                             autoFocus
                           />
+                          <FormError errors={field.state.meta.errors} />
                         </>
                       )}
                     />

@@ -16,6 +16,8 @@ import {
 } from '@/components/ui/select'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { z } from 'zod'
+import { FormError } from '@/components/ui/form-error'
 
 export const Route = createFileRoute('/_authed/settings')({
   component: SettingsPage,
@@ -45,6 +47,11 @@ function SettingsPage() {
       },
     }),
   )
+
+  const inviteSchema = z.object({
+    email: z.string().email('Valid email is required'),
+    role: z.enum(['member', 'admin']),
+  })
 
   const form = useForm({
     defaultValues: {
@@ -114,6 +121,9 @@ function SettingsPage() {
           >
             <form.Field
               name="email"
+              validators={{
+                onChange: inviteSchema.shape.email,
+              }}
               children={(field) => (
                 <div className="flex-1 w-full space-y-2">
                   <Label htmlFor={field.name} className="text-[10px] font-mono uppercase tracking-[0.2em] text-nd-ink-muted">
@@ -128,11 +138,15 @@ function SettingsPage() {
                     placeholder="representative@domain.gov"
                     className="h-12 bg-nd-bg border-2 border-nd-border rounded-none text-nd-ink placeholder:text-nd-ink-muted/50 focus:border-nd-ink transition-all font-mono text-sm shadow-inner"
                   />
+                  <FormError errors={field.state.meta.errors} />
                 </div>
               )}
             />
             <form.Field
               name="role"
+              validators={{
+                onChange: inviteSchema.shape.role,
+              }}
               children={(field) => (
                 <div className="w-full md:w-[160px] space-y-2">
                   <Label className="text-[10px] font-mono uppercase tracking-[0.2em] text-nd-ink-muted">
@@ -150,6 +164,7 @@ function SettingsPage() {
                       <SelectItem value="admin" className="font-mono text-xs uppercase tracking-widest">Administrator</SelectItem>
                     </SelectContent>
                   </Select>
+                  <FormError errors={field.state.meta.errors} />
                 </div>
               )}
             />

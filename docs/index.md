@@ -15,6 +15,7 @@ Target users: first-line supervisors managing 3–10 people in government, utili
 |-------|-----------|
 | Framework | TanStack Start (Vite + Nitro SSR) |
 | Routing | TanStack Router (file-based, `src/routes/`) |
+| Data Layer | **TanStack DB** (reactive collections + `useLiveQuery`) |
 | API | tRPC v11 with superjson transformer |
 | Auth | Better Auth with credential provider + Drizzle adapter |
 | Database | SQLite via better-sqlite3 + Drizzle ORM |
@@ -104,6 +105,47 @@ Sub-routers in `src/integrations/trpc/router.ts`:
 - `todos` — sample tenant-scoped CRUD
 - `ws` — Work Simplification domain (WDC + Process Chart CRUD)
 - `share` — public read-only sharing
+
+## Data Layer (TanStack DB)
+
+CyberGov uses **TanStack DB** for a reactive, local-first data experience. Instead of raw `useQuery`, most data-fetching views use collections defined in `src/db-collections/index.ts`.
+
+### How it Works (tRPC + React Query + TanStack DB)
+
+The data layer is built as a three-tier stack:
+
+1.  **tRPC (The Pipe)**: Defines the API endpoints and data fetchers. We use dedicated `list` procedures (e.g., `ws.processChart.listSteps`) that return simple arrays, which are compatible with TanStack DB collections.
+2.  **React Query (The Cache)**: Acts as the underlying storage. Every TanStack DB collection is mapped to a React Query `queryKey`. When a collection is queried, it checks this cache first.
+3.  **TanStack DB (The Reactive Observer)**: Sits on top of the React Query cache. It provides "live" collections that components can subscribe to via `useLiveQuery`.
+
+### Key Patterns
+
+- **Reactivity**: `useLiveQuery` hooks automatically synchronize the UI when the underlying cache is invalidated.
+- **Cache Isolation**: To prevent infinite render loops, collection queries use unique keys (backed by dedicated `list` procedures) that are distinct from the full-object metadata queries.
+- **Instant Sync**: When a mutation occurs (e.g., `addStep`), we invalidate both the main object query and the specific list collection query. This triggers an immediate background refetch and UI update.
+
+```tsx
+// src/db-collections/index.ts
+const queryOptions = trpc.ws.processChart.listSteps.queryOptions({ ... })
+
+return createCollection(
+  queryCollectionOptions({
+    queryClient,
+    queryKey: queryOptions.queryKey,
+    queryFn: (ctx) => queryOptions.queryFn(ctx),
+    getKey: (step) => step.id,
+  })
+)
+```
+
+```tsx
+// UI Component usage
+const stepsCollection = useStepsCollection(orgId, pcId)
+const { data: steps = [] } = useLiveQuery(
+  (q) => q.from({ step: stepsCollection }).select(({ step }) => step),
+  [stepsCollection]
+)
+```
  
 ## Auth Flow
  
@@ -114,10 +156,11 @@ Sub-routers in `src/integrations/trpc/router.ts`:
  
 ## How to Add a New Feature
  
-1. **Schema**: Add tables to `src/db/schema.ts`, run `npx drizzle-kit push` (dev) or `npx drizzle-kit migrate` (prod)
-2. **tRPC Router**: Add procedures in `src/integrations/trpc/routers/`. Use `orgScopedProcedure` for tenant-scoped data
-3. **Route**: Create `.tsx` in `src/routes/_authed/` for authenticated pages
-4. **Client**: Use `const trpc = useTRPC()` for mutations, `@tanstack/react-query` for queries
+1. **Schema**: Add tables to `src/db/schema.ts`, run `npx drizzle-kit push`
+2. **tRPC Router**: Add procedures in `src/integrations/trpc/routers/`. Use `orgScopedProcedure` and create dedicated `list` procedures for collection entities.
+3. **Collection**: Define a new hook in `src/db-collections/index.ts` using `createCollection` and `queryCollectionOptions`.
+4. **Route**: Create `.tsx` in `src/routes/_authed/` and use `useLiveQuery` with your new collection.
+5. **Mutation**: Ensure mutations use `invalidateQueries` on both the main object and the list collection.
  
 ## Key Commands
  

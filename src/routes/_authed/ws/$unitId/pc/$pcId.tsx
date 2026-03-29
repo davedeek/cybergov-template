@@ -9,7 +9,7 @@ import { ProcessChartLedger } from '@/components/ws/ProcessChartLedger'
 import { ProcessChartListView } from '@/components/ws/ProcessChartListView'
 import { ProcessChartMermaidView } from '@/components/ws/ProcessChartMermaidView'
 import { ProcessChartSidebar } from '@/components/ws/ProcessChartSidebar'
-import { AddStepForm } from '@/components/ws/AddStepForm'
+import { AddStepForm } from '@/components/forms/AddStepForm'
 
 export const Route = createFileRoute('/_authed/ws/$unitId/pc/$pcId')({
   component: ProcessChartPageComponent,
@@ -72,7 +72,7 @@ function ProcessChartPageComponent() {
           </div>
           <p className="text-sm font-mono text-nd-ink-muted uppercase tracking-widest pl-11">Work Simplification · Process Chart</p>
         </div>
-        
+
         <div className="flex gap-4">
           <Button variant="outline" className="rounded-none border-2 border-nd-ink font-mono text-[10px] uppercase tracking-widest"><Share2 className="w-3 h-3 mr-2" /> Share</Button>
           <Button variant="outline" onClick={() => window.print()} className="rounded-none border-2 border-nd-ink bg-nd-ink text-nd-bg hover:bg-nd-ink/90 font-mono text-[10px] uppercase tracking-widest">Generate PDF</Button>
@@ -100,25 +100,25 @@ function ProcessChartPageComponent() {
               </div>
 
               <TabsContent value="ledger" className="m-0 border-none mt-0 p-0 ring-offset-transparent focus-visible:ring-0">
-                <ProcessChartLedger 
+                <ProcessChartLedger
                   steps={steps} editingId={editingId} editForm={editStepForm}
-                  startEdit={startEdit} commitEdit={commitEdit} setEditingId={setEditingId} 
+                  startEdit={startEdit} commitEdit={commitEdit} setEditingId={setEditingId}
                   handleRemoveStep={handleRemoveStep} storageWarn={storageWarn} distWarn={distWarn}
                   copyCSV={copyCSV} copiedCsv={copiedCsv}
                 />
               </TabsContent>
 
               <TabsContent value="flow" className="m-0 border-none mt-0 p-0 ring-offset-transparent focus-visible:ring-0">
-                <ProcessChartListView 
+                <ProcessChartListView
                   steps={steps} dragId={dragId} setDragId={setDragId} dropIdx={dropIdx} setDropIdx={setDropIdx}
-                  handleReorder={handleReorder} handleRemoveStep={handleRemoveStep} 
+                  handleReorder={handleReorder} handleRemoveStep={handleRemoveStep}
                   storageWarn={storageWarn} distWarn={distWarn} endPoint={chart.endPoint}
                 />
               </TabsContent>
 
               <TabsContent value="mermaid" className="m-0 border-none mt-0 p-0 ring-offset-transparent focus-visible:ring-0">
-                <ProcessChartMermaidView 
-                  mermaidSvg={mermaidSvg} mermaidSrc={mermaidSrc} copyMermaid={copyMermaid} 
+                <ProcessChartMermaidView
+                  mermaidSvg={mermaidSvg} mermaidSrc={mermaidSrc} copyMermaid={copyMermaid}
                   copiedMermaid={copiedMermaid} stepsCount={steps.length}
                 />
               </TabsContent>

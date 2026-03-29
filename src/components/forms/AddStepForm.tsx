@@ -2,7 +2,7 @@ import { Plus } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { SymbolIcon, SYMBOL_META, SymbolType } from './SymbolMeta'
+import { SymbolIcon, SYMBOL_META, SymbolType } from '../ws/SymbolMeta'
 import { FormError } from '@/components/ui/form-error'
 
 interface AddStepFormProps {
@@ -11,12 +11,12 @@ interface AddStepFormProps {
 
 export function AddStepForm({ form }: AddStepFormProps) {
   return (
-    <form 
+    <form
       onSubmit={(e) => {
         e.preventDefault()
         e.stopPropagation()
         form.handleSubmit()
-      }} 
+      }}
       className="grid grid-cols-1 md:grid-cols-12 gap-1 items-end bg-nd-ink border-2 border-nd-ink shadow-[4px_4px_0px_0px_rgba(26,26,24,0.3)] print:hidden"
     >
       <form.Field
@@ -51,9 +51,9 @@ export function AddStepForm({ form }: AddStepFormProps) {
         children={(field: any) => (
           <div className="md:col-span-4">
             <label className="block text-[9px] font-mono uppercase tracking-[0.1em] text-nd-bg/60 mb-1 ml-2 mt-1">Step Description</label>
-            <Input 
-              placeholder="What happens?" 
-              value={field.state.value} 
+            <Input
+              placeholder="What happens?"
+              value={field.state.value}
               onBlur={field.handleBlur}
               onChange={(e: React.ChangeEvent<HTMLInputElement>) => field.handleChange(e.target.value)}
               className="h-10 bg-nd-ink text-nd-bg border-none hover:bg-white/5 rounded-none placeholder:text-nd-bg/30 focus-visible:ring-0 text-sm"
@@ -70,9 +70,9 @@ export function AddStepForm({ form }: AddStepFormProps) {
         children={(field: any) => (
           <div className="md:col-span-2">
             <label className="block text-[9px] font-mono uppercase tracking-[0.1em] text-nd-bg/60 mb-1 ml-2 mt-1">Person/Machine</label>
-            <Input 
-              placeholder="Who/What?" 
-              value={field.state.value} 
+            <Input
+              placeholder="Who/What?"
+              value={field.state.value}
               onBlur={field.handleBlur}
               onChange={(e: React.ChangeEvent<HTMLInputElement>) => field.handleChange(e.target.value)}
               className="h-10 bg-nd-ink text-nd-bg border-none hover:bg-white/5 rounded-none placeholder:text-nd-bg/30 font-mono text-xs focus-visible:ring-0"
@@ -93,10 +93,10 @@ export function AddStepForm({ form }: AddStepFormProps) {
               children={(symbol: any) => (
                 <>
                   <label className="block text-[9px] font-mono uppercase tracking-[0.1em] text-nd-bg/60 mb-1 ml-2 mt-1">{symbol === 'storage' ? 'Wait(m)' : 'Min'}</label>
-                  <Input 
-                    type="number" 
-                    placeholder="0" 
-                    value={field.state.value} 
+                  <Input
+                    type="number"
+                    placeholder="0"
+                    value={field.state.value}
                     onBlur={field.handleBlur}
                     onChange={(e: React.ChangeEvent<HTMLInputElement>) => field.handleChange(e.target.value)}
                     className="h-10 bg-nd-ink text-nd-bg border-none hover:bg-white/5 rounded-none placeholder:text-nd-bg/30 font-mono text-xs focus-visible:ring-0 text-right"
@@ -117,10 +117,10 @@ export function AddStepForm({ form }: AddStepFormProps) {
               children={(symbol: any) => (
                 <>
                   <label className="block text-[9px] font-mono uppercase tracking-[0.1em] text-nd-bg/60 mb-1 ml-2 mt-1">{symbol === 'transportation' ? 'Dist(ft)' : 'Feet'}</label>
-                  <Input 
-                    type="number" 
-                    placeholder="0" 
-                    value={field.state.value} 
+                  <Input
+                    type="number"
+                    placeholder="0"
+                    value={field.state.value}
                     onBlur={field.handleBlur}
                     onChange={(e: React.ChangeEvent<HTMLInputElement>) => field.handleChange(e.target.value)}
                     className="h-10 bg-nd-ink text-nd-bg border-none hover:bg-white/5 rounded-none placeholder:text-nd-bg/30 font-mono text-xs focus-visible:ring-0 text-right"
@@ -136,8 +136,8 @@ export function AddStepForm({ form }: AddStepFormProps) {
         <form.Subscribe
           selector={(state: any) => [state.canSubmit, state.isSubmitting, state.values.description]}
           children={([canSubmit, isSubmitting, description]: any[]) => (
-            <Button 
-              type="submit" 
+            <Button
+              type="submit"
               disabled={!canSubmit || isSubmitting || !(description as string).trim()}
               className="w-full h-10 bg-nd-accent text-nd-bg hover:bg-nd-accent/90 rounded-none font-mono text-[10px] tracking-[0.15em] uppercase border-none disabled:bg-nd-bg/20"
             >

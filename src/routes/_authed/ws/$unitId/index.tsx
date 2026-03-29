@@ -1,5 +1,6 @@
 import { createFileRoute, Link, useNavigate, useSearch } from '@tanstack/react-router'
 import { useState } from 'react'
+import { useForm } from '@tanstack/react-form'
 import { useTRPC } from '@/integrations/trpc/react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useLiveQuery } from '@tanstack/react-db'
@@ -50,45 +51,51 @@ function UnitDashboardPage() {
 
   // Create WDC Mutation
   const [isWdcOpen, setIsWdcOpen] = useState(false)
-  const [newWdcName, setNewWdcName] = useState('')
   const createWdcMutation = useMutation(trpc.ws.wdc.create.mutationOptions())
 
-  const handleCreateWdc = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!orgId || !newWdcName.trim()) return
+  const wdcForm = useForm({
+    defaultValues: {
+      name: '',
+    },
+    onSubmit: async ({ value }) => {
+      if (!orgId || !value.name.trim()) return
 
-    const newChart = await createWdcMutation.mutateAsync({
-      organizationId: orgId,
-      unitId: parsedUnitId,
-      name: newWdcName.trim(),
-    })
+      const newChart = await createWdcMutation.mutateAsync({
+        organizationId: orgId,
+        unitId: parsedUnitId,
+        name: value.name.trim(),
+      })
 
-    setNewWdcName('')
-    setIsWdcOpen(false)
-    queryClient.invalidateQueries(trpc.ws.wdc.listByUnit.queryFilter())
-    navigate({ to: '/ws/$unitId/wdc/$wdcId', params: { unitId, wdcId: newChart.id.toString() }, search: { orgId } })
-  }
+      wdcForm.reset()
+      setIsWdcOpen(false)
+      queryClient.invalidateQueries(trpc.ws.wdc.listByUnit.queryFilter())
+      navigate({ to: '/ws/$unitId/wdc/$wdcId', params: { unitId, wdcId: newChart.id.toString() }, search: { orgId } })
+    },
+  })
 
   // Create PC Mutation
   const [isPcOpen, setIsPcOpen] = useState(false)
-  const [newPcName, setNewPcName] = useState('')
   const createPcMutation = useMutation(trpc.ws.processChart.create.mutationOptions())
 
-  const handleCreatePc = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!orgId || !newPcName.trim()) return
+  const pcForm = useForm({
+    defaultValues: {
+      name: '',
+    },
+    onSubmit: async ({ value }) => {
+      if (!orgId || !value.name.trim()) return
 
-    const newChart = await createPcMutation.mutateAsync({
-      organizationId: orgId,
-      unitId: parsedUnitId,
-      name: newPcName.trim(),
-    })
+      const newChart = await createPcMutation.mutateAsync({
+        organizationId: orgId,
+        unitId: parsedUnitId,
+        name: value.name.trim(),
+      })
 
-    setNewPcName('')
-    setIsPcOpen(false)
-    queryClient.invalidateQueries(trpc.ws.processChart.listByUnit.queryFilter())
-    navigate({ to: '/ws/$unitId/pc/$pcId', params: { unitId, pcId: newChart.id.toString() }, search: { orgId } })
-  }
+      pcForm.reset()
+      setIsPcOpen(false)
+      queryClient.invalidateQueries(trpc.ws.processChart.listByUnit.queryFilter())
+      navigate({ to: '/ws/$unitId/pc/$pcId', params: { unitId, pcId: newChart.id.toString() }, search: { orgId } })
+    },
+  })
 
   if (unitLoading || wdcLoading || pcLoading) {
     return (
@@ -148,7 +155,13 @@ function UnitDashboardPage() {
                 </Button>
               </DialogTrigger>
               <DialogContent className="sm:max-w-[425px]">
-                <form onSubmit={handleCreateWdc}>
+                <form 
+                  onSubmit={(e) => {
+                    e.preventDefault()
+                    e.stopPropagation()
+                    wdcForm.handleSubmit()
+                  }}
+                >
                   <DialogHeader>
                     <DialogTitle>New Work Distribution Chart</DialogTitle>
                     <DialogDescription>
@@ -156,20 +169,36 @@ function UnitDashboardPage() {
                     </DialogDescription>
                   </DialogHeader>
                   <div className="flex flex-col gap-2 py-4">
-                    <Label htmlFor="wdcName">Chart Name</Label>
-                    <Input
-                      id="wdcName"
-                      value={newWdcName}
-                      onChange={(e) => setNewWdcName(e.target.value)}
-                      placeholder="e.g., Q3 2026 Snapshot"
-                      autoFocus
+                    <wdcForm.Field
+                      name="name"
+                      children={(field) => (
+                        <>
+                          <Label htmlFor={field.name}>Chart Name</Label>
+                          <Input
+                            id={field.name}
+                            value={field.state.value}
+                            onBlur={field.handleBlur}
+                            onChange={(e) => field.handleChange(e.target.value)}
+                            placeholder="e.g., Q3 2026 Snapshot"
+                            autoFocus
+                          />
+                        </>
+                      )}
                     />
                   </div>
                   <DialogFooter>
-                    <Button type="button" variant="outline" onClick={() => setIsWdcOpen(false)}>Cancel</Button>
-                    <Button type="submit" disabled={!newWdcName.trim() || createWdcMutation.isPending} className="bg-nd-accent hover:bg-nd-accent-hover text-white">
-                      Create Chart
-                    </Button>
+                    <Button type="button" variant="outline" onClick={() => {
+                      setIsWdcOpen(false)
+                      wdcForm.reset()
+                    }}>Cancel</Button>
+                    <wdcForm.Subscribe
+                      selector={(state) => [state.canSubmit, state.isSubmitting]}
+                      children={([canSubmit, isSubmitting]) => (
+                        <Button type="submit" disabled={!canSubmit || isSubmitting || createWdcMutation.isPending} className="bg-nd-accent hover:bg-nd-accent-hover text-white">
+                          {createWdcMutation.isPending || isSubmitting ? 'Creating...' : 'Create Chart'}
+                        </Button>
+                      )}
+                    />
                   </DialogFooter>
                 </form>
               </DialogContent>
@@ -225,7 +254,13 @@ function UnitDashboardPage() {
                 </Button>
               </DialogTrigger>
               <DialogContent className="sm:max-w-[425px]">
-                <form onSubmit={handleCreatePc}>
+                <form 
+                  onSubmit={(e) => {
+                    e.preventDefault()
+                    e.stopPropagation()
+                    pcForm.handleSubmit()
+                  }}
+                >
                   <DialogHeader>
                     <DialogTitle>New Process Chart</DialogTitle>
                     <DialogDescription>
@@ -233,20 +268,36 @@ function UnitDashboardPage() {
                     </DialogDescription>
                   </DialogHeader>
                   <div className="flex flex-col gap-2 py-4">
-                    <Label htmlFor="pcName">Process Name</Label>
-                    <Input
-                      id="pcName"
-                      value={newPcName}
-                      onChange={(e) => setNewPcName(e.target.value)}
-                      placeholder="e.g., Mail Sorting Procedure"
-                      autoFocus
+                    <pcForm.Field
+                      name="name"
+                      children={(field) => (
+                        <>
+                          <Label htmlFor={field.name}>Process Name</Label>
+                          <Input
+                            id={field.name}
+                            value={field.state.value}
+                            onBlur={field.handleBlur}
+                            onChange={(e) => field.handleChange(e.target.value)}
+                            placeholder="e.g., Mail Sorting Procedure"
+                            autoFocus
+                          />
+                        </>
+                      )}
                     />
                   </div>
                   <DialogFooter>
-                    <Button type="button" variant="outline" onClick={() => setIsPcOpen(false)}>Cancel</Button>
-                    <Button type="submit" disabled={!newPcName.trim() || createPcMutation.isPending} className="bg-nd-accent hover:bg-nd-accent-hover text-white">
-                      Create Chart
-                    </Button>
+                    <Button type="button" variant="outline" onClick={() => {
+                      setIsPcOpen(false)
+                      pcForm.reset()
+                    }}>Cancel</Button>
+                    <pcForm.Subscribe
+                      selector={(state) => [state.canSubmit, state.isSubmitting]}
+                      children={([canSubmit, isSubmitting]) => (
+                        <Button type="submit" disabled={!canSubmit || isSubmitting || createPcMutation.isPending} className="bg-nd-accent hover:bg-nd-accent-hover text-white">
+                          {createPcMutation.isPending || isSubmitting ? 'Creating...' : 'Create Chart'}
+                        </Button>
+                      )}
+                    />
                   </DialogFooter>
                 </form>
               </DialogContent>

@@ -1,5 +1,6 @@
 import { createFileRoute, Link, useSearch } from '@tanstack/react-router'
 import { useState, useMemo } from 'react'
+import { useForm } from '@tanstack/react-form'
 import { useTRPC } from '@/integrations/trpc/react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useLiveQuery } from '@tanstack/react-db'
@@ -62,13 +63,66 @@ function WdcPage() {
   // -- Local State --
   const [activeTab, setActiveTab] = useState('chart')
   const [addingEmployee, setAddingEmployee] = useState(false)
-  const [newEmployee, setNewEmployee] = useState({ name: '', role: '', fte: '1.0' })
-  
   const [addingActivity, setAddingActivity] = useState(false)
-  const [newActivity, setNewActivity] = useState('')
-
   const [activeCell, setActiveCell] = useState<{ actId: number, empId: number } | null>(null)
-  const [newTask, setNewTask] = useState({ taskName: '', hours: '' })
+
+  const empForm = useForm({
+    defaultValues: {
+      name: '',
+      role: '',
+      fte: '1.0',
+    },
+    onSubmit: async ({ value }) => {
+      if (!value.name.trim() || !orgId) return
+      await addEmpMutation.mutateAsync({
+        organizationId: orgId, 
+        wdcId: pWdcId,
+        name: value.name.trim(), 
+        role: value.role.trim() || undefined, 
+        fte: value.fte
+      })
+      empForm.reset()
+      setAddingEmployee(false)
+      invalidateWdc()
+    },
+  })
+
+  const actForm = useForm({
+    defaultValues: {
+      name: '',
+    },
+    onSubmit: async ({ value }) => {
+      if (!value.name.trim() || !orgId) return
+      await addActMutation.mutateAsync({ 
+        organizationId: orgId, 
+        wdcId: pWdcId, 
+        name: value.name.trim() 
+      })
+      actForm.reset()
+      setAddingActivity(false)
+      invalidateWdc()
+    },
+  })
+
+  const taskForm = useForm({
+    defaultValues: {
+      taskName: '',
+      hours: '',
+    },
+    onSubmit: async ({ value }) => {
+      if (!activeCell || !value.taskName.trim() || !value.hours || !orgId) return
+      await addTaskMutation.mutateAsync({
+        organizationId: orgId, 
+        wdcId: pWdcId,
+        employeeId: activeCell.empId, 
+        activityId: activeCell.actId,
+        taskName: value.taskName.trim(), 
+        hoursPerWeek: Number(value.hours)
+      })
+      taskForm.reset()
+      invalidateWdc()
+    },
+  })
 
   const invalidateWdc = () => {
     queryClient.invalidateQueries(trpc.ws.wdc.get.queryFilter({ wdcId: pWdcId }))
@@ -78,34 +132,22 @@ function WdcPage() {
   }
 
   // Actions
-  const handleAddEmployee = async () => {
-    if (!newEmployee.name.trim() || !orgId) return
-    await addEmpMutation.mutateAsync({
-      organizationId: orgId, wdcId: pWdcId,
-      name: newEmployee.name.trim(), role: newEmployee.role.trim() || undefined, fte: newEmployee.fte
-    })
-    setNewEmployee({ name: '', role: '', fte: '1.0' })
-    setAddingEmployee(false)
-    invalidateWdc()
+  const handleAddEmployee = async (e?: React.FormEvent) => {
+    e?.preventDefault()
+    e?.stopPropagation()
+    empForm.handleSubmit()
   }
 
-  const handleAddActivity = async () => {
-    if (!newActivity.trim() || !orgId) return
-    await addActMutation.mutateAsync({ organizationId: orgId, wdcId: pWdcId, name: newActivity.trim() })
-    setNewActivity('')
-    setAddingActivity(false)
-    invalidateWdc()
+  const handleAddActivity = async (e?: React.FormEvent) => {
+    e?.preventDefault()
+    e?.stopPropagation()
+    actForm.handleSubmit()
   }
 
-  const handleAddTask = async () => {
-    if (!activeCell || !newTask.taskName.trim() || !newTask.hours || !orgId) return
-    await addTaskMutation.mutateAsync({
-      organizationId: orgId, wdcId: pWdcId,
-      employeeId: activeCell.empId, activityId: activeCell.actId,
-      taskName: newTask.taskName.trim(), hoursPerWeek: Number(newTask.hours)
-    })
-    setNewTask({ taskName: '', hours: '' })
-    invalidateWdc()
+  const handleAddTask = async (e?: React.FormEvent) => {
+    e?.preventDefault()
+    e?.stopPropagation()
+    taskForm.handleSubmit()
   }
 
   const handleRemoveTask = async (taskId: number) => {
@@ -243,13 +285,73 @@ function WdcPage() {
               {/* Toolbar */}
               <div className="flex flex-wrap gap-3 mb-5 items-start print:hidden">
                 {addingEmployee ? (
-                  <div className="flex items-center gap-2 bg-nd-surface px-3 py-2 border border-nd-border shadow-sm">
-                    <Input placeholder="Name" className="w-[120px] font-mono text-xs h-8 border-nd-border rounded-none focus-visible:ring-1 focus-visible:ring-nd-accent" value={newEmployee.name} onChange={e => setNewEmployee(p => ({ ...p, name: e.target.value }))} autoFocus />
-                    <Input placeholder="Role" className="w-[140px] font-mono text-xs h-8 border-nd-border rounded-none focus-visible:ring-1 focus-visible:ring-nd-accent" value={newEmployee.role} onChange={e => setNewEmployee(p => ({ ...p, role: e.target.value }))} />
-                    <Input placeholder="FTE (e.g. 1.0)" className="w-[90px] font-mono text-xs h-8 border-nd-border rounded-none focus-visible:ring-1 focus-visible:ring-nd-accent" value={newEmployee.fte} onChange={e => setNewEmployee(p => ({ ...p, fte: e.target.value }))} />
-                    <Button onClick={handleAddEmployee} disabled={addEmpMutation.isPending} size="sm" className="h-8 rounded-none bg-nd-accent hover:bg-nd-accent-hover text-white font-serif tracking-wide px-4">Add</Button>
-                    <Button onClick={() => setAddingEmployee(false)} size="sm" variant="ghost" className="h-8 rounded-none text-nd-ink-muted hover:text-nd-ink font-serif hover:bg-transparent">Cancel</Button>
-                  </div>
+                  <form 
+                    onSubmit={handleAddEmployee}
+                    className="flex items-center gap-2 bg-nd-surface px-3 py-2 border border-nd-border shadow-sm"
+                  >
+                    <empForm.Field
+                      name="name"
+                      children={(field) => (
+                        <Input 
+                          placeholder="Name" 
+                          className="w-[120px] font-mono text-xs h-8 border-nd-border rounded-none focus-visible:ring-1 focus-visible:ring-nd-accent" 
+                          value={field.state.value} 
+                          onBlur={field.handleBlur}
+                          onChange={e => field.handleChange(e.target.value)} 
+                          autoFocus 
+                        />
+                      )}
+                    />
+                    <empForm.Field
+                      name="role"
+                      children={(field) => (
+                        <Input 
+                          placeholder="Role" 
+                          className="w-[140px] font-mono text-xs h-8 border-nd-border rounded-none focus-visible:ring-1 focus-visible:ring-nd-accent" 
+                          value={field.state.value} 
+                          onBlur={field.handleBlur}
+                          onChange={e => field.handleChange(e.target.value)} 
+                        />
+                      )}
+                    />
+                    <empForm.Field
+                      name="fte"
+                      children={(field) => (
+                        <Input 
+                          placeholder="FTE (e.g. 1.0)" 
+                          className="w-[90px] font-mono text-xs h-8 border-nd-border rounded-none focus-visible:ring-1 focus-visible:ring-nd-accent" 
+                          value={field.state.value} 
+                          onBlur={field.handleBlur}
+                          onChange={e => field.handleChange(e.target.value)} 
+                        />
+                      )}
+                    />
+                    <empForm.Subscribe
+                      selector={(state) => [state.canSubmit, state.isSubmitting]}
+                      children={([canSubmit, isSubmitting]) => (
+                        <Button 
+                          type="submit"
+                          disabled={!canSubmit || isSubmitting || addEmpMutation.isPending} 
+                          size="sm" 
+                          className="h-8 rounded-none bg-nd-accent hover:bg-nd-accent-hover text-white font-serif tracking-wide px-4"
+                        >
+                          {isSubmitting || addEmpMutation.isPending ? '...' : 'Add'}
+                        </Button>
+                      )}
+                    />
+                    <Button 
+                      type="button"
+                      onClick={() => {
+                        setAddingEmployee(false)
+                        empForm.reset()
+                      }} 
+                      size="sm" 
+                      variant="ghost" 
+                      className="h-8 rounded-none text-nd-ink-muted hover:text-nd-ink font-serif hover:bg-transparent"
+                    >
+                      Cancel
+                    </Button>
+                  </form>
                 ) : (
                   <Button onClick={() => setAddingEmployee(true)} variant="outline" className="border-nd-border bg-nd-surface hover:bg-nd-surface hover:border-nd-accent hover:text-nd-accent font-serif tracking-wide rounded-none text-nd-ink-muted shadow-sm h-9">
                     <UserPlus className="w-4 h-4 mr-2" /> Add Employee
@@ -257,11 +359,49 @@ function WdcPage() {
                 )}
                 
                 {addingActivity ? (
-                  <div className="flex items-center gap-2 bg-nd-surface px-3 py-2 border border-nd-border shadow-sm">
-                    <Input placeholder="Activity Name" className="w-[200px] font-mono text-xs h-8 border-nd-border rounded-none focus-visible:ring-1 focus-visible:ring-nd-accent" value={newActivity} onChange={e => setNewActivity(e.target.value)} autoFocus />
-                    <Button onClick={handleAddActivity} disabled={addActMutation.isPending} size="sm" className="h-8 rounded-none bg-nd-accent hover:bg-nd-accent-hover text-white font-serif tracking-wide px-4">Add</Button>
-                    <Button onClick={() => setAddingActivity(false)} size="sm" variant="ghost" className="h-8 rounded-none text-nd-ink-muted hover:text-nd-ink font-serif hover:bg-transparent">Cancel</Button>
-                  </div>
+                  <form 
+                    onSubmit={handleAddActivity}
+                    className="flex items-center gap-2 bg-nd-surface px-3 py-2 border border-nd-border shadow-sm"
+                  >
+                    <actForm.Field
+                      name="name"
+                      children={(field) => (
+                        <Input 
+                          placeholder="Activity Name" 
+                          className="w-[200px] font-mono text-xs h-8 border-nd-border rounded-none focus-visible:ring-1 focus-visible:ring-nd-accent" 
+                          value={field.state.value} 
+                          onBlur={field.handleBlur}
+                          onChange={e => field.handleChange(e.target.value)} 
+                          autoFocus 
+                        />
+                      )}
+                    />
+                    <actForm.Subscribe
+                      selector={(state) => [state.canSubmit, state.isSubmitting]}
+                      children={([canSubmit, isSubmitting]) => (
+                        <Button 
+                          type="submit"
+                          disabled={!canSubmit || isSubmitting || addActMutation.isPending} 
+                          size="sm" 
+                          className="h-8 rounded-none bg-nd-accent hover:bg-nd-accent-hover text-white font-serif tracking-wide px-4"
+                        >
+                          {isSubmitting || addActMutation.isPending ? '...' : 'Add'}
+                        </Button>
+                      )}
+                    />
+                    <Button 
+                      type="button"
+                      onClick={() => {
+                        setAddingActivity(false)
+                        actForm.reset()
+                      }} 
+                      size="sm" 
+                      variant="ghost" 
+                      className="h-8 rounded-none text-nd-ink-muted hover:text-nd-ink font-serif hover:bg-transparent"
+                    >
+                      Cancel
+                    </Button>
+                  </form>
                 ) : (
                   <Button onClick={() => setAddingActivity(true)} variant="outline" className="border-nd-border bg-nd-surface hover:bg-nd-surface hover:border-nd-accent hover:text-nd-accent font-serif tracking-wide rounded-none text-nd-ink-muted shadow-sm h-9">
                     <Plus className="w-4 h-4 mr-2" /> Add Activity Row
@@ -269,15 +409,65 @@ function WdcPage() {
                 )}
 
                 {activeCell && (
-                  <div className="flex items-center gap-2 bg-nd-surface px-4 py-2 border-2 border-nd-accent shadow-sm ml-auto animate-in fade-in zoom-in-95 duration-200">
+                  <form 
+                    onSubmit={handleAddTask}
+                    className="flex items-center gap-2 bg-nd-surface px-4 py-2 border-2 border-nd-accent shadow-sm ml-auto animate-in fade-in zoom-in-95 duration-200"
+                  >
                     <span className="text-[10px] font-mono text-nd-accent tracking-widest uppercase flex items-center gap-1">
                       Editing Cell <ArrowRight className="w-3 h-3" />
                     </span>
-                    <Input placeholder="Task description..." className="w-[240px] font-mono text-xs h-8 border-nd-border rounded-none focus-visible:ring-1 focus-visible:ring-nd-accent shadow-inner outline-none" value={newTask.taskName} onChange={e => setNewTask(p => ({ ...p, taskName: e.target.value }))} autoFocus onKeyDown={e => e.key === 'Enter' && handleAddTask()} />
-                    <Input type="number" placeholder="hrs/wk" className="w-[80px] font-mono text-xs h-8 border-nd-border rounded-none text-right focus-visible:ring-1 focus-visible:ring-nd-accent shadow-inner outline-none" value={newTask.hours} onChange={e => setNewTask(p => ({ ...p, hours: e.target.value }))} onKeyDown={e => e.key === 'Enter' && handleAddTask()} />
-                    <Button onClick={handleAddTask} disabled={addTaskMutation.isPending} size="sm" className="h-8 rounded-none bg-nd-accent hover:bg-nd-accent-hover text-white font-serif uppercase text-xs tracking-wider px-4 shadow-sm active:translate-y-[1px]">Add</Button>
-                    <Button onClick={() => setActiveCell(null)} size="sm" variant="ghost" className="h-8 rounded-none text-nd-ink-muted hover:text-nd-ink font-serif hover:bg-transparent px-2">Done</Button>
-                  </div>
+                    <taskForm.Field
+                      name="taskName"
+                      children={(field) => (
+                        <Input 
+                          placeholder="Task description..." 
+                          className="w-[240px] font-mono text-xs h-8 border-nd-border rounded-none focus-visible:ring-1 focus-visible:ring-nd-accent shadow-inner outline-none" 
+                          value={field.state.value} 
+                          onBlur={field.handleBlur}
+                          onChange={e => field.handleChange(e.target.value)} 
+                          autoFocus 
+                        />
+                      )}
+                    />
+                    <taskForm.Field
+                      name="hours"
+                      children={(field) => (
+                        <Input 
+                          type="number" 
+                          placeholder="hrs/wk" 
+                          className="w-[80px] font-mono text-xs h-8 border-nd-border rounded-none text-right focus-visible:ring-1 focus-visible:ring-nd-accent shadow-inner outline-none" 
+                          value={field.state.value} 
+                          onBlur={field.handleBlur}
+                          onChange={e => field.handleChange(e.target.value)} 
+                        />
+                      )}
+                    />
+                    <taskForm.Subscribe
+                      selector={(state) => [state.canSubmit, state.isSubmitting]}
+                      children={([canSubmit, isSubmitting]) => (
+                        <Button 
+                          type="submit"
+                          disabled={!canSubmit || isSubmitting || addTaskMutation.isPending} 
+                          size="sm" 
+                          className="h-8 rounded-none bg-nd-accent hover:bg-nd-accent-hover text-white font-serif uppercase text-xs tracking-wider px-4 shadow-sm active:translate-y-[1px]"
+                        >
+                          {isSubmitting || addTaskMutation.isPending ? '...' : 'Add'}
+                        </Button>
+                      )}
+                    />
+                    <Button 
+                      type="button"
+                      onClick={() => {
+                        setActiveCell(null)
+                        taskForm.reset()
+                      }} 
+                      size="sm" 
+                      variant="ghost" 
+                      className="h-8 rounded-none text-nd-ink-muted hover:text-nd-ink font-serif hover:bg-transparent px-2"
+                    >
+                      Done
+                    </Button>
+                  </form>
                 )}
               </div>
 

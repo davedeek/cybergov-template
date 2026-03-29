@@ -7,8 +7,7 @@ import { SymbolIcon, SYMBOL_META, SymbolType } from './SymbolMeta'
 interface ProcessChartLedgerProps {
   steps: any[]
   editingId: number | null
-  editVals: any
-  setEditVals: (vals: any) => void
+  editForm: any
   startEdit: (step: any) => void
   commitEdit: () => void
   setEditingId: (id: number | null) => void
@@ -20,7 +19,7 @@ interface ProcessChartLedgerProps {
 }
 
 export function ProcessChartLedger({
-  steps, editingId, editVals, setEditVals, startEdit, commitEdit, setEditingId,
+  steps, editingId, editForm, startEdit, commitEdit, setEditingId,
   handleRemoveStep, storageWarn, distWarn, copyCSV, copiedCsv
 }: ProcessChartLedgerProps) {
   const thClass = "bg-nd-ink text-nd-bg font-mono text-xs uppercase tracking-wider p-3 text-left border-r border-[#2E2E2C] whitespace-nowrap align-middle select-none"
@@ -68,17 +67,22 @@ export function ProcessChartLedger({
                   </td>
                   <td className={tdClass}>
                     {isEditing ? (
-                      <Select value={editVals.symbol} onValueChange={(v) => setEditVals((p: any) => ({ ...p, symbol: v as SymbolType }))}>
-                        <SelectTrigger className="h-7 text-xs font-mono rounded-none">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent className="font-mono text-xs">
-                          <SelectItem value="operation">Operation</SelectItem>
-                          <SelectItem value="transportation">Transport</SelectItem>
-                          <SelectItem value="storage">Storage</SelectItem>
-                          <SelectItem value="inspection">Inspection</SelectItem>
-                        </SelectContent>
-                      </Select>
+                      <editForm.Field
+                        name="symbol"
+                        children={(field: any) => (
+                          <Select value={field.state.value} onValueChange={(v: string) => field.handleChange(v as SymbolType)}>
+                            <SelectTrigger className="h-7 text-xs font-mono rounded-none">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent className="font-mono text-xs">
+                              <SelectItem value="operation">Operation</SelectItem>
+                              <SelectItem value="transportation">Transport</SelectItem>
+                              <SelectItem value="storage">Storage</SelectItem>
+                              <SelectItem value="inspection">Inspection</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        )}
+                      />
                     ) : (
                       <div className="flex items-center gap-2">
                         <SymbolIcon type={step.symbol as SymbolType} size={14} />
@@ -90,7 +94,22 @@ export function ProcessChartLedger({
                   </td>
                   <td className={tdClass}>
                     {isEditing ? (
-                      <Input autoFocus value={editVals.description} onChange={e => setEditVals((p: any) => ({ ...p, description: e.target.value }))} onKeyDown={e => { if (e.key === 'Enter') commitEdit(); if (e.key === 'Escape') setEditingId(null) }} className="h-7 text-sm rounded-none border-nd-border focus-visible:ring-nd-accent" />
+                      <editForm.Field
+                        name="description"
+                        children={(field: any) => (
+                          <Input 
+                            autoFocus 
+                            value={field.state.value} 
+                            onBlur={field.handleBlur}
+                            onChange={(e: React.ChangeEvent<HTMLInputElement>) => field.handleChange(e.target.value)} 
+                            onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => { 
+                              if (e.key === 'Enter') commitEdit(); 
+                              if (e.key === 'Escape') setEditingId(null) 
+                            }} 
+                            className="h-7 text-sm rounded-none border-nd-border focus-visible:ring-nd-accent" 
+                          />
+                        )}
+                      />
                     ) : (
                       <div className="flex justify-between items-center">
                         <span className="text-[13px]">{step.description}</span>
@@ -100,14 +119,52 @@ export function ProcessChartLedger({
                   </td>
                   <td className={tdClass}>
                     {isEditing ? (
-                      <Input value={editVals.who} onChange={e => setEditVals((p: any) => ({ ...p, who: e.target.value }))} onKeyDown={e => { if (e.key === 'Enter') commitEdit(); if (e.key === 'Escape') setEditingId(null) }} className="h-7 text-xs font-mono rounded-none border-nd-border focus-visible:ring-nd-accent" />
+                      <editForm.Field
+                        name="who"
+                        children={(field: any) => (
+                          <Input 
+                            value={field.state.value} 
+                            onBlur={field.handleBlur}
+                            onChange={(e: React.ChangeEvent<HTMLInputElement>) => field.handleChange(e.target.value)} 
+                            onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => { 
+                              if (e.key === 'Enter') commitEdit(); 
+                              if (e.key === 'Escape') setEditingId(null) 
+                            }} 
+                            className="h-7 text-xs font-mono rounded-none border-nd-border focus-visible:ring-nd-accent" 
+                          />
+                        )}
+                      />
                     ) : (
                       <span className="text-xs font-mono text-nd-ink/80">{step.who || '—'}</span>
                     )}
                   </td>
                   <td className={`${tdClass} text-right font-mono`}>
-                    {isEditing && editVals.symbol === 'storage' ? (
-                      <Input type="number" value={editVals.minutes} onChange={e => setEditVals((p: any) => ({ ...p, minutes: e.target.value }))} onKeyDown={e => { if (e.key === 'Enter') commitEdit(); if (e.key === 'Escape') setEditingId(null) }} className="h-7 text-xs font-mono text-right rounded-none border-nd-border focus-visible:ring-nd-accent" />
+                    {isEditing ? (
+                      <editForm.Subscribe
+                        selector={(stateDetail: any) => stateDetail.values.symbol}
+                        children={(symbol: string) => (
+                          symbol === 'storage' ? (
+                            <editForm.Field
+                              name="minutes"
+                              children={(field: any) => (
+                                <Input 
+                                  type="number" 
+                                  value={field.state.value} 
+                                  onBlur={field.handleBlur}
+                                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => field.handleChange(e.target.value)} 
+                                  onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => { 
+                                    if (e.key === 'Enter') commitEdit(); 
+                                    if (e.key === 'Escape') setEditingId(null) 
+                                  }} 
+                                  className="h-7 text-xs font-mono text-right rounded-none border-nd-border focus-visible:ring-nd-accent" 
+                                />
+                              )}
+                            />
+                          ) : (
+                            <span className="text-[11px] text-nd-ink-muted/50">—</span>
+                          )
+                        )}
+                      />
                     ) : step.minutes ? (
                       <span className={`text-[11px] px-1.5 py-0.5 ${warnMin ? 'bg-[#FDFAED] text-[#9A7000] border border-[#D4A017]' : 'text-nd-ink'}`}>
                         {step.minutes}{warnMin && ' ⚑'}
@@ -117,8 +174,32 @@ export function ProcessChartLedger({
                     )}
                   </td>
                   <td className={`${tdClass} border-none text-right font-mono`}>
-                    {isEditing && editVals.symbol === 'transportation' ? (
-                      <Input type="number" value={editVals.feet} onChange={e => setEditVals((p: any) => ({ ...p, feet: e.target.value }))} onKeyDown={e => { if (e.key === 'Enter') commitEdit(); if (e.key === 'Escape') setEditingId(null) }} className="h-7 text-xs font-mono text-right rounded-none border-nd-border focus-visible:ring-nd-accent" />
+                    {isEditing ? (
+                      <editForm.Subscribe
+                        selector={(stateDetail: any) => stateDetail.values.symbol}
+                        children={(symbol: string) => (
+                          symbol === 'transportation' ? (
+                            <editForm.Field
+                              name="feet"
+                              children={(field: any) => (
+                                <Input 
+                                  type="number" 
+                                  value={field.state.value} 
+                                  onBlur={field.handleBlur}
+                                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => field.handleChange(e.target.value)} 
+                                  onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => { 
+                                    if (e.key === 'Enter') commitEdit(); 
+                                    if (e.key === 'Escape') setEditingId(null) 
+                                  }} 
+                                  className="h-7 text-xs font-mono text-right rounded-none border-nd-border focus-visible:ring-nd-accent" 
+                                />
+                              )}
+                            />
+                          ) : (
+                            <span className="text-[11px] text-nd-ink-muted/50">—</span>
+                          )
+                        )}
+                      />
                     ) : step.feet ? (
                       <span className={`text-[11px] px-1.5 py-0.5 ${warnFt ? 'bg-[#EDF1FB] text-[#2B5EA7] border border-[#2B5EA7]/30' : 'text-nd-ink'}`}>
                         {step.feet}{warnFt && ' ⚑'}

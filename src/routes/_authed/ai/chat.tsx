@@ -1,11 +1,13 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef } from 'react'
 import { createFileRoute } from '@tanstack/react-router'
+import { useForm } from '@tanstack/react-form'
 import { Send, Square } from 'lucide-react'
 import { Streamdown } from 'streamdown'
 
 import { useAIChat } from '@/lib/ai-chat-hook'
 import type { ChatMessages } from '@/lib/ai-chat-hook'
 import { Button } from '@/components/ui/button'
+import { Textarea } from '@/components/ui/textarea'
 
 import './chat.css'
 
@@ -96,9 +98,26 @@ function Messages({ messages }: { messages: ChatMessages }) {
 }
 
 function ChatPage() {
-  const [input, setInput] = useState('')
-
   const { messages, sendMessage, isLoading, stop } = useAIChat()
+  const scrollRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollTop = scrollRef.current.scrollHeight
+    }
+  }, [messages])
+
+  const form = useForm({
+    defaultValues: {
+      input: '',
+    },
+    onSubmit: async ({ value }) => {
+      if (value.input.trim()) {
+        sendMessage(value.input)
+        form.reset()
+      }
+    },
+  })
 
   const Layout = messages.length ? ChattingLayout : InitialLayout
 
@@ -121,49 +140,47 @@ function ChatPage() {
                 </Button>
               </div>
             )}
-            <form
-              onSubmit={(e) => {
+            <form 
+              onSubmit={(e: React.FormEvent) => {
                 e.preventDefault()
-                if (input.trim()) {
-                  sendMessage(input)
-                  setInput('')
-                }
-              }}
+                e.stopPropagation()
+                form.handleSubmit()
+              }} 
+              className="flex gap-4 items-end"
             >
-              <div className="relative max-w-xl mx-auto flex items-center gap-2">
-                <div className="relative flex-1">
-                  <textarea
-                    value={input}
-                    onChange={(e) => setInput(e.target.value)}
-                    placeholder="Type your message..."
-                    className="w-full rounded-none border-2 border-nd-ink bg-nd-bg pl-4 pr-14 py-4 text-sm text-nd-ink font-serif font-medium placeholder:text-nd-ink-muted focus:outline-none transition-colors focus:border-nd-accent focus:bg-nd-surface resize-none overflow-hidden shadow-[4px_4px_0px_#1A1A18]"
-                    rows={1}
-                    style={{ minHeight: '56px', maxHeight: '200px' }}
-                    disabled={isLoading}
-                    onInput={(e) => {
-                      const target = e.target as HTMLTextAreaElement
-                      target.style.height = 'auto'
-                      target.style.height =
-                        Math.min(target.scrollHeight, 200) + 'px'
-                    }}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter' && !e.shiftKey && input.trim()) {
-                        e.preventDefault()
-                        sendMessage(input)
-                        setInput('')
-                      }
-                    }}
-                  />
-                  <Button
-                    type="submit"
-                    disabled={!input.trim() || isLoading}
-                    size="icon"
-                    className="absolute right-3 top-1/2 -translate-y-1/2 bg-nd-ink hover:bg-nd-accent text-nd-bg transition-colors rounded-none"
+              <form.Field
+                name="input"
+                children={(field: any) => (
+                  <div className="flex-1">
+                    <Textarea
+                      value={field.state.value}
+                      onBlur={field.handleBlur}
+                      onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => field.handleChange(e.target.value)}
+                      placeholder="Enter command or inquiry..."
+                      className="min-h-[60px] max-h-[200px] bg-nd-bg border-2 border-nd-border focus:border-nd-ink rounded-none font-mono text-sm resize-none shadow-inner p-4"
+                      disabled={isLoading}
+                      onKeyDown={(e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+                        if (e.key === 'Enter' && !e.shiftKey) {
+                          e.preventDefault()
+                          form.handleSubmit()
+                        }
+                      }}
+                    />
+                  </div>
+                )}
+              />
+              <form.Subscribe
+                selector={(state: any) => [state.canSubmit, state.isSubmitting]}
+                children={([canSubmit, isSubmitting]: any[]) => (
+                  <Button 
+                    type="submit" 
+                    disabled={!canSubmit || isSubmitting || isLoading}
+                    className="h-[60px] px-8 bg-nd-ink hover:bg-nd-accent text-nd-bg rounded-none transition-all border-2 border-nd-ink shadow-[4px_4px_0px_#C94A1E]"
                   >
-                    <Send className="w-4 h-4" />
+                    <Send className="w-5 h-5" />
                   </Button>
-                </div>
-              </div>
+                )}
+              />
             </form>
           </div>
         </Layout>

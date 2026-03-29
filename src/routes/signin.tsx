@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
+import { useForm } from '@tanstack/react-form'
 import { authClient } from '@/lib/auth-client'
 import { useQueryClient } from '@tanstack/react-query'
 import { Button } from '@/components/ui/button'
@@ -14,34 +15,37 @@ export const Route = createFileRoute('/signin')({
 function SignInPage() {
   const navigate = useNavigate()
   const queryClient = useQueryClient()
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setError(null)
-    setIsLoading(true)
+  const form = useForm({
+    defaultValues: {
+      email: '',
+      password: '',
+    },
+    onSubmit: async ({ value }) => {
+      setError(null)
+      setIsLoading(true)
 
-    try {
-      const result = await authClient.signIn.email({
-        email,
-        password,
-      })
+      try {
+        const result = await authClient.signIn.email({
+          email: value.email,
+          password: value.password,
+        })
 
-      if (result.error) {
-        setError(result.error.message || 'Invalid credentials')
-      } else {
-        await queryClient.invalidateQueries()
-        navigate({ to: '/dashboard' })
+        if (result.error) {
+          setError(result.error.message || 'Invalid credentials')
+        } else {
+          await queryClient.invalidateQueries()
+          navigate({ to: '/dashboard' })
+        }
+      } catch {
+        setError('Something went wrong. Please try again.')
+      } finally {
+        setIsLoading(false)
       }
-    } catch {
-      setError('Something went wrong. Please try again.')
-    } finally {
-      setIsLoading(false)
-    }
-  }
+    },
+  })
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-nd-bg px-4 py-12">
@@ -52,7 +56,14 @@ function SignInPage() {
           <p className="text-nd-ink-muted mt-2 font-sans text-sm">Sign in to your account</p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form 
+          onSubmit={(e) => {
+            e.preventDefault()
+            e.stopPropagation()
+            form.handleSubmit()
+          }} 
+          className="space-y-6"
+        >
           {error && (
             <Alert variant="destructive" className="rounded-none border-2 border-nd-flag-red bg-nd-flag-red/5">
               <AlertDescription className="font-serif">
@@ -62,44 +73,61 @@ function SignInPage() {
           )}
 
           <div className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="email" className="text-xs font-mono uppercase tracking-wider text-nd-ink-muted">
-                Email
-              </Label>
-              <Input
-                id="email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                className="h-10 bg-nd-bg border-nd-border rounded-none text-nd-ink placeholder:text-nd-ink-muted/50 focus-visible:ring-nd-accent transition-colors font-sans"
-                placeholder="you@example.com"
-              />
-            </div>
+            <form.Field
+              name="email"
+              children={(field) => (
+                <div className="space-y-2">
+                  <Label htmlFor={field.name} className="text-xs font-mono uppercase tracking-wider text-nd-ink-muted">
+                    Email
+                  </Label>
+                  <Input
+                    id={field.name}
+                    type="email"
+                    value={field.state.value}
+                    onBlur={field.handleBlur}
+                    onChange={(e) => field.handleChange(e.target.value)}
+                    required
+                    className="h-10 bg-nd-bg border-nd-border rounded-none text-nd-ink placeholder:text-nd-ink-muted/50 focus-visible:ring-nd-accent transition-colors font-sans"
+                    placeholder="you@example.com"
+                  />
+                </div>
+              )}
+            />
 
-            <div className="space-y-2">
-              <Label htmlFor="password" className="text-xs font-mono uppercase tracking-wider text-nd-ink-muted">
-                Password
-              </Label>
-              <Input
-                id="password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                className="h-10 bg-nd-bg border-nd-border rounded-none text-nd-ink placeholder:text-nd-ink-muted/50 focus-visible:ring-nd-accent transition-colors font-sans"
-                placeholder="••••••••"
-              />
-            </div>
+            <form.Field
+              name="password"
+              children={(field) => (
+                <div className="space-y-2">
+                  <Label htmlFor={field.name} className="text-xs font-mono uppercase tracking-wider text-nd-ink-muted">
+                    Password
+                  </Label>
+                  <Input
+                    id={field.name}
+                    type="password"
+                    value={field.state.value}
+                    onBlur={field.handleBlur}
+                    onChange={(e) => field.handleChange(e.target.value)}
+                    required
+                    className="h-10 bg-nd-bg border-nd-border rounded-none text-nd-ink placeholder:text-nd-ink-muted/50 focus-visible:ring-nd-accent transition-colors font-sans"
+                    placeholder="••••••••"
+                  />
+                </div>
+              )}
+            />
           </div>
 
-          <Button
-            type="submit"
-            disabled={isLoading}
-            className="w-full h-12 bg-nd-ink hover:bg-nd-ink/90 text-nd-bg font-serif font-bold tracking-wide transition-colors rounded-none"
-          >
-            {isLoading ? 'Signing in...' : 'Sign in'}
-          </Button>
+          <form.Subscribe
+            selector={(state) => [state.canSubmit, state.isSubmitting]}
+            children={([canSubmit, isSubmitting]) => (
+              <Button
+                type="submit"
+                disabled={!canSubmit || isSubmitting || isLoading}
+                className="w-full h-12 bg-nd-ink hover:bg-nd-ink/90 text-nd-bg font-serif font-bold tracking-wide transition-colors rounded-none"
+              >
+                {isLoading || isSubmitting ? 'Signing in...' : 'Sign in'}
+              </Button>
+            )}
+          />
         </form>
 
         <p className="mt-8 pt-6 border-t border-nd-border/50 text-center text-sm text-nd-ink-muted">

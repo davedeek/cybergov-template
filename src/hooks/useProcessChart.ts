@@ -1,4 +1,5 @@
 import { useState, useMemo, useEffect } from 'react'
+import { useForm } from '@tanstack/react-form'
 import { useTRPC } from '@/integrations/trpc/react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useLiveQuery } from '@tanstack/react-db'
@@ -35,11 +36,58 @@ export function useProcessChart(orgId: number | undefined, pPcId: number) {
 
   // -- Local State --
   const [activeTab, setActiveTab] = useState('ledger')
-  const [newStep, setNewStep] = useState<{ symbol: SymbolType, description: string, who: string, minutes: string, feet: string }>({ 
-    symbol: 'operation', description: '', who: '', minutes: '', feet: '' 
+  
+  const addStepForm = useForm({
+    defaultValues: {
+      symbol: 'operation' as SymbolType,
+      description: '',
+      who: '',
+      minutes: '',
+      feet: '',
+    },
+    onSubmit: async ({ value }) => {
+      if (!orgId || !value.description.trim()) return
+      await addStepMutation.mutateAsync({
+        organizationId: orgId, 
+        processChartId: pPcId,
+        symbol: value.symbol,
+        description: value.description.trim(),
+        who: value.who.trim() || undefined,
+        minutes: Number(value.minutes) || undefined,
+        feet: Number(value.feet) || undefined
+      })
+      addStepForm.reset()
+      invalidatePc()
+    },
   })
   const [editingId, setEditingId] = useState<number | null>(null)
-  const [editVals, setEditVals] = useState({ description: '', who: '', minutes: '', feet: '', symbol: 'operation' as SymbolType })
+  
+  const editStepForm = useForm({
+    defaultValues: {
+      symbol: 'operation' as SymbolType,
+      description: '',
+      who: '',
+      minutes: '',
+      feet: '',
+    },
+    onSubmit: async ({ value }) => {
+      if (!editingId || !orgId) return
+      const step = steps.find(s => s.id === editingId)
+      if (!step) return
+
+      await updateStepMutation.mutateAsync({
+        organizationId: orgId, 
+        stepId: editingId,
+        symbol: value.symbol,
+        description: value.description.trim() || step.description,
+        who: value.who.trim() || undefined,
+        minutes: value.minutes ? Number(value.minutes) : undefined,
+        feet: value.feet ? Number(value.feet) : undefined,
+      })
+      setEditingId(null)
+      invalidatePc()
+    },
+  })
   const [copiedCsv, setCopiedCsv] = useState(false)
   const [copiedMermaid, setCopiedMermaid] = useState(false)
   const [mermaidSvg, setMermaidSvg] = useState<string | null>(null)
@@ -116,43 +164,23 @@ export function useProcessChart(orgId: number | undefined, pPcId: number) {
 
   const handleAddStep = async (e?: React.FormEvent) => {
     e?.preventDefault()
-    if (!orgId || !newStep.description.trim()) return
-    await addStepMutation.mutateAsync({
-      organizationId: orgId, processChartId: pPcId,
-      symbol: newStep.symbol,
-      description: newStep.description.trim(),
-      who: newStep.who.trim() || undefined,
-      minutes: Number(newStep.minutes) || undefined,
-      feet: Number(newStep.feet) || undefined
-    })
-    setNewStep({ symbol: 'operation', description: '', who: '', minutes: '', feet: '' })
-    invalidatePc()
+    e?.stopPropagation()
+    addStepForm.handleSubmit()
   }
 
   const startEdit = (step: any) => {
     setEditingId(step.id)
-    setEditVals({ 
-      description: step.description, who: step.who || '', 
-      minutes: step.minutes?.toString() || '', feet: step.feet?.toString() || '',
+    editStepForm.reset({ 
+      description: step.description, 
+      who: step.who || '', 
+      minutes: step.minutes?.toString() || '', 
+      feet: step.feet?.toString() || '',
       symbol: step.symbol as SymbolType
     })
   }
 
   const commitEdit = async () => {
-    if (!editingId || !orgId) return
-    const step = steps.find(s => s.id === editingId)
-    if (!step) return
-
-    await updateStepMutation.mutateAsync({
-      organizationId: orgId, stepId: editingId,
-      symbol: editVals.symbol,
-      description: editVals.description.trim() || step.description,
-      who: editVals.who.trim() || undefined,
-      minutes: editVals.symbol === 'storage' && editVals.minutes ? Number(editVals.minutes) : undefined,
-      feet: editVals.symbol === 'transportation' && editVals.feet ? Number(editVals.feet) : undefined,
-    })
-    setEditingId(null)
-    invalidatePc()
+    editStepForm.handleSubmit()
   }
 
   const handleRemoveStep = async (stepId: number) => {
@@ -164,9 +192,9 @@ export function useProcessChart(orgId: number | undefined, pPcId: number) {
   return {
     chart, steps, isLoading,
     activeTab, setActiveTab,
-    newStep, setNewStep,
+    addStepForm,
+    editStepForm,
     editingId, setEditingId,
-    editVals, setEditVals,
     copiedCsv, setCopiedCsv,
     copiedMermaid, setCopiedMermaid,
     mermaidSvg, mermaidSrc,

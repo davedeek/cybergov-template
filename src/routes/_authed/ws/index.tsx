@@ -1,5 +1,6 @@
 import { createFileRoute, Link, useSearch } from '@tanstack/react-router'
 import { useState } from 'react'
+import { useForm } from '@tanstack/react-form'
 import { useTRPC } from '@/integrations/trpc/react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useLiveQuery } from '@tanstack/react-db'
@@ -32,24 +33,26 @@ function UnitsLandingPage() {
   const createUnitMutation = useMutation(trpc.ws.units.create.mutationOptions())
 
   const [isCreateOpen, setIsCreateOpen] = useState(false)
-  const [newUnitName, setNewUnitName] = useState('')
-  const [newUnitDesc, setNewUnitDesc] = useState('')
 
-  const handleCreateUnit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!orgId || !newUnitName.trim()) return
+  const form = useForm({
+    defaultValues: {
+      name: '',
+      description: '',
+    },
+    onSubmit: async ({ value }) => {
+      if (!orgId || !value.name.trim()) return
 
-    await createUnitMutation.mutateAsync({
-      organizationId: orgId,
-      name: newUnitName.trim(),
-      description: newUnitDesc.trim() || undefined,
-    })
+      await createUnitMutation.mutateAsync({
+        organizationId: orgId,
+        name: value.name.trim(),
+        description: value.description.trim() || undefined,
+      })
 
-    setNewUnitName('')
-    setNewUnitDesc('')
-    setIsCreateOpen(false)
-    queryClient.invalidateQueries(trpc.ws.units.list.queryFilter())
-  }
+      form.reset()
+      setIsCreateOpen(false)
+      queryClient.invalidateQueries(trpc.ws.units.list.queryFilter())
+    },
+  })
 
   if (isLoading) {
     return (
@@ -79,7 +82,13 @@ function UnitsLandingPage() {
             </Button>
           </DialogTrigger>
           <DialogContent className="sm:max-w-[425px]">
-            <form onSubmit={handleCreateUnit}>
+            <form 
+              onSubmit={(e) => {
+                e.preventDefault()
+                e.stopPropagation()
+                form.handleSubmit()
+              }}
+            >
               <DialogHeader>
                 <DialogTitle>Create New Unit</DialogTitle>
                 <DialogDescription>
@@ -87,41 +96,61 @@ function UnitsLandingPage() {
                 </DialogDescription>
               </DialogHeader>
               <div className="grid gap-4 py-4">
-                <div className="flex flex-col gap-2">
-                  <Label htmlFor="name">Unit Name</Label>
-                  <Input
-                    id="name"
-                    value={newUnitName}
-                    onChange={(e) => setNewUnitName(e.target.value)}
-                    placeholder="e.g., Records Processing"
-                    autoFocus
-                  />
-                </div>
-                <div className="flex flex-col gap-2">
-                  <Label htmlFor="description">Description (optional)</Label>
-                  <Input
-                    id="description"
-                    value={newUnitDesc}
-                    onChange={(e) => setNewUnitDesc(e.target.value)}
-                    placeholder="Brief description of the unit's function"
-                  />
-                </div>
+                <form.Field
+                  name="name"
+                  children={(field) => (
+                    <div className="flex flex-col gap-2">
+                      <Label htmlFor={field.name}>Unit Name</Label>
+                      <Input
+                        id={field.name}
+                        value={field.state.value}
+                        onBlur={field.handleBlur}
+                        onChange={(e) => field.handleChange(e.target.value)}
+                        placeholder="e.g., Records Processing"
+                        autoFocus
+                      />
+                    </div>
+                  )}
+                />
+                <form.Field
+                  name="description"
+                  children={(field) => (
+                    <div className="flex flex-col gap-2">
+                      <Label htmlFor={field.name}>Description (optional)</Label>
+                      <Input
+                        id={field.name}
+                        value={field.state.value}
+                        onBlur={field.handleBlur}
+                        onChange={(e) => field.handleChange(e.target.value)}
+                        placeholder="Brief description of the unit's function"
+                      />
+                    </div>
+                  )}
+                />
               </div>
               <DialogFooter>
                 <Button
                   type="button"
                   variant="outline"
-                  onClick={() => setIsCreateOpen(false)}
+                  onClick={() => {
+                    setIsCreateOpen(false)
+                    form.reset()
+                  }}
                 >
                   Cancel
                 </Button>
-                <Button
-                  type="submit"
-                  disabled={!newUnitName.trim() || createUnitMutation.isPending}
-                  className="bg-nd-accent hover:bg-nd-accent-hover text-white"
-                >
-                  {createUnitMutation.isPending ? 'Creating...' : 'Create Unit'}
-                </Button>
+                <form.Subscribe
+                  selector={(state) => [state.canSubmit, state.isSubmitting]}
+                  children={([canSubmit, isSubmitting]) => (
+                    <Button
+                      type="submit"
+                      disabled={!canSubmit || isSubmitting || createUnitMutation.isPending}
+                      className="bg-nd-accent hover:bg-nd-accent-hover text-white"
+                    >
+                      {createUnitMutation.isPending || isSubmitting ? 'Creating...' : 'Create Unit'}
+                    </Button>
+                  )}
+                />
               </DialogFooter>
             </form>
           </DialogContent>

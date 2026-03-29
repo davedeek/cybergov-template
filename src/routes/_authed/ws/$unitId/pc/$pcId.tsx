@@ -24,15 +24,15 @@ function ProcessChartPageComponent() {
   const {
     chart, steps, isLoading,
     activeTab, setActiveTab,
-    newStep, setNewStep,
+    addStepForm,
+    editStepForm,
     editingId, setEditingId,
-    editVals, setEditVals,
     copiedCsv, setCopiedCsv,
     copiedMermaid, setCopiedMermaid,
     mermaidSvg, mermaidSrc,
     dragId, setDragId,
     dropIdx, setDropIdx,
-    handleReorder, handleAddStep, startEdit, commitEdit, handleRemoveStep,
+    handleReorder, startEdit, commitEdit, handleRemoveStep,
   } = useProcessChart(orgId, pPcId)
 
   if (isLoading) return (
@@ -82,7 +82,7 @@ function ProcessChartPageComponent() {
       <div className="p-8 max-w-[1600px] mx-auto">
         <div className="flex flex-col lg:flex-row gap-12">
           <div className="flex-1 space-y-12">
-            <AddStepForm newStep={newStep} setNewStep={setNewStep} handleAddStep={handleAddStep} />
+            <AddStepForm form={addStepForm} />
 
             <Tabs value={activeTab} onValueChange={setActiveTab} className="p-0 border-none">
               <div className="flex items-center justify-between mb-8 border-b-2 border-nd-ink print:hidden">
@@ -101,7 +101,7 @@ function ProcessChartPageComponent() {
 
               <TabsContent value="ledger" className="m-0 border-none mt-0 p-0 ring-offset-transparent focus-visible:ring-0">
                 <ProcessChartLedger 
-                  steps={steps} editingId={editingId} editVals={editVals} setEditVals={setEditVals} 
+                  steps={steps} editingId={editingId} editForm={editStepForm}
                   startEdit={startEdit} commitEdit={commitEdit} setEditingId={setEditingId} 
                   handleRemoveStep={handleRemoveStep} storageWarn={storageWarn} distWarn={distWarn}
                   copyCSV={copyCSV} copiedCsv={copiedCsv}

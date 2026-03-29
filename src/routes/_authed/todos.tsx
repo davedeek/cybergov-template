@@ -1,5 +1,5 @@
-import { useState } from 'react'
 import { createFileRoute, useSearch } from '@tanstack/react-router'
+import { useForm } from '@tanstack/react-form'
 import { Plus, Trash2, CheckCircle, ListTodo } from 'lucide-react'
 import { useTRPC } from '@/integrations/trpc/react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
@@ -15,7 +15,6 @@ export const Route = createFileRoute('/_authed/todos')({
 })
 
 function TodosPage() {
-  const [newTodo, setNewTodo] = useState('')
   const trpc = useTRPC()
   const queryClient = useQueryClient()
   const search = useSearch({ strict: false }) as { orgId?: number }
@@ -43,10 +42,20 @@ function TodosPage() {
     trpc.todos.add.mutationOptions({
       onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: trpc.todos.list.queryKey() })
-        setNewTodo('')
       },
     }),
   )
+
+  const form = useForm({
+    defaultValues: {
+      name: '',
+    },
+    onSubmit: async ({ value }) => {
+      if (!value.name.trim() || !orgId) return
+      await addMutation.mutateAsync({ organizationId: orgId, name: value.name })
+      form.reset()
+    },
+  })
 
   const toggleMutation = useMutation(
     trpc.todos.update.mutationOptions({
@@ -66,8 +75,8 @@ function TodosPage() {
 
   const handleAdd = (e: React.FormEvent) => {
     e.preventDefault()
-    if (!newTodo.trim() || !orgId) return
-    addMutation.mutate({ organizationId: orgId, name: newTodo })
+    e.stopPropagation()
+    form.handleSubmit()
   }
 
   return (
@@ -93,20 +102,33 @@ function TodosPage() {
         </CardHeader>
         <CardContent className="pt-6">
           <form onSubmit={handleAdd} className="flex gap-3">
-            <Input
-              value={newTodo}
-              onChange={(e) => setNewTodo(e.target.value)}
-              placeholder="Enter task description..."
-              className="flex-1 bg-nd-bg border-2 border-nd-border focus:border-nd-ink rounded-none font-serif h-12 shadow-inner"
+            <form.Field
+              name="name"
+              children={(field) => (
+                <Input
+                  value={field.state.value}
+                  onBlur={field.handleBlur}
+                  onChange={(e) => field.handleChange(e.target.value)}
+                  placeholder="Enter task description..."
+                  className="flex-1 bg-nd-bg border-2 border-nd-border focus:border-nd-ink rounded-none font-serif h-12 shadow-inner"
+                />
+              )}
             />
-            <Button 
-              type="submit" 
-              className="bg-nd-ink hover:bg-nd-accent text-nd-bg px-8 h-12 rounded-none transition-all shadow-[2px_2px_0px_#C94A1E]"
-              disabled={!newTodo.trim() || addMutation.isPending}
-            >
-              <Plus className="w-5 h-5 mr-2" />
-              <span className="font-bold uppercase tracking-widest text-xs">Append</span>
-            </Button>
+            <form.Subscribe
+              selector={(state) => [state.canSubmit, state.isSubmitting]}
+              children={([canSubmit, isSubmitting]) => (
+                <Button 
+                  type="submit" 
+                  className="bg-nd-ink hover:bg-nd-accent text-nd-bg px-8 h-12 rounded-none transition-all shadow-[2px_2px_0px_#C94A1E]"
+                  disabled={!canSubmit || isSubmitting || addMutation.isPending}
+                >
+                  <Plus className="w-5 h-5 mr-2" />
+                  <span className="font-bold uppercase tracking-widest text-xs">
+                    {isSubmitting || addMutation.isPending ? 'Appending...' : 'Append'}
+                  </span>
+                </Button>
+              )}
+            />
           </form>
         </CardContent>
       </Card>

@@ -1,5 +1,5 @@
-import { useState } from 'react'
 import { createFileRoute, useSearch } from '@tanstack/react-router'
+import { useForm } from '@tanstack/react-form'
 import { Settings, UserPlus, Shield } from 'lucide-react'
 import { useTRPC } from '@/integrations/trpc/react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
@@ -22,8 +22,6 @@ export const Route = createFileRoute('/_authed/settings')({
 })
 
 function SettingsPage() {
-  const [inviteEmail, setInviteEmail] = useState('')
-  const [inviteRole, setInviteRole] = useState<'member' | 'admin'>('member')
   const trpc = useTRPC()
   const queryClient = useQueryClient()
   const search = useSearch({ strict: false }) as { orgId?: number }
@@ -44,20 +42,25 @@ function SettingsPage() {
     trpc.organization.invite.mutationOptions({
       onSuccess: () => {
         queryClient.invalidateQueries()
-        setInviteEmail('')
       },
     }),
   )
 
-  const handleInvite = (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!inviteEmail.trim() || !orgId) return
-    inviteMutation.mutate({
-      organizationId: orgId,
-      email: inviteEmail,
-      role: inviteRole,
-    })
-  }
+  const form = useForm({
+    defaultValues: {
+      email: '',
+      role: 'member' as 'member' | 'admin',
+    },
+    onSubmit: async ({ value }) => {
+      if (!value.email.trim() || !orgId) return
+      await inviteMutation.mutateAsync({
+        organizationId: orgId,
+        email: value.email,
+        role: value.role,
+      })
+      form.reset()
+    },
+  })
 
   return (
     <div className="p-6 lg:p-8 max-w-3xl mx-auto font-sans">
@@ -101,44 +104,67 @@ function SettingsPage() {
           </CardTitle>
         </CardHeader>
         <CardContent className="p-8">
-          <form onSubmit={handleInvite} className="flex flex-col md:flex-row gap-4 items-end">
-            <div className="flex-1 w-full space-y-2">
-              <Label htmlFor="invite-email" className="text-[10px] font-mono uppercase tracking-[0.2em] text-nd-ink-muted">
-                Member Transmission Endpoint (Email)
-              </Label>
-              <Input
-                id="invite-email"
-                type="email"
-                value={inviteEmail}
-                onChange={(e) => setInviteEmail(e.target.value)}
-                placeholder="representative@domain.gov"
-                className="h-12 bg-nd-bg border-2 border-nd-border rounded-none text-nd-ink placeholder:text-nd-ink-muted/50 focus:border-nd-ink transition-all font-mono text-sm shadow-inner"
-              />
-            </div>
-            <div className="w-full md:w-[160px] space-y-2">
-              <Label className="text-[10px] font-mono uppercase tracking-[0.2em] text-nd-ink-muted">
-                Authorization Tier
-              </Label>
-              <Select 
-                value={inviteRole} 
-                onValueChange={(v) => setInviteRole(v as 'member' | 'admin')}
-              >
-                <SelectTrigger className="h-12 w-full bg-nd-bg border-2 border-nd-border rounded-none text-nd-ink font-mono text-xs focus:ring-nd-ink shadow-inner uppercase">
-                  <SelectValue placeholder="Select Tier" />
-                </SelectTrigger>
-                <SelectContent className="rounded-none border-2 border-nd-ink bg-nd-surface">
-                  <SelectItem value="member" className="font-mono text-xs uppercase tracking-widest">Member</SelectItem>
-                  <SelectItem value="admin" className="font-mono text-xs uppercase tracking-widest">Administrator</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <Button
-              type="submit"
-              disabled={!inviteEmail.trim() || inviteMutation.isPending}
-              className="h-12 bg-nd-ink hover:bg-nd-accent text-nd-bg font-serif font-bold tracking-widest rounded-none transition-all border-2 border-nd-ink whitespace-nowrap px-8 uppercase shadow-[3px_3px_0px_#C94A1E]"
-            >
-              {inviteMutation.isPending ? 'Invoking...' : 'Induct User'}
-            </Button>
+          <form 
+            onSubmit={(e) => {
+              e.preventDefault()
+              e.stopPropagation()
+              form.handleSubmit()
+            }} 
+            className="flex flex-col md:flex-row gap-4 items-end"
+          >
+            <form.Field
+              name="email"
+              children={(field) => (
+                <div className="flex-1 w-full space-y-2">
+                  <Label htmlFor={field.name} className="text-[10px] font-mono uppercase tracking-[0.2em] text-nd-ink-muted">
+                    Member Transmission Endpoint (Email)
+                  </Label>
+                  <Input
+                    id={field.name}
+                    type="email"
+                    value={field.state.value}
+                    onBlur={field.handleBlur}
+                    onChange={(e) => field.handleChange(e.target.value)}
+                    placeholder="representative@domain.gov"
+                    className="h-12 bg-nd-bg border-2 border-nd-border rounded-none text-nd-ink placeholder:text-nd-ink-muted/50 focus:border-nd-ink transition-all font-mono text-sm shadow-inner"
+                  />
+                </div>
+              )}
+            />
+            <form.Field
+              name="role"
+              children={(field) => (
+                <div className="w-full md:w-[160px] space-y-2">
+                  <Label className="text-[10px] font-mono uppercase tracking-[0.2em] text-nd-ink-muted">
+                    Authorization Tier
+                  </Label>
+                  <Select 
+                    value={field.state.value} 
+                    onValueChange={(v) => field.handleChange(v as 'member' | 'admin')}
+                  >
+                    <SelectTrigger className="h-12 w-full bg-nd-bg border-2 border-nd-border rounded-none text-nd-ink font-mono text-xs focus:ring-nd-ink shadow-inner uppercase">
+                      <SelectValue placeholder="Select Tier" />
+                    </SelectTrigger>
+                    <SelectContent className="rounded-none border-2 border-nd-ink bg-nd-surface">
+                      <SelectItem value="member" className="font-mono text-xs uppercase tracking-widest">Member</SelectItem>
+                      <SelectItem value="admin" className="font-mono text-xs uppercase tracking-widest">Administrator</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
+            />
+            <form.Subscribe
+              selector={(state) => [state.canSubmit, state.isSubmitting]}
+              children={([canSubmit, isSubmitting]) => (
+                <Button
+                  type="submit"
+                  disabled={!canSubmit || isSubmitting || inviteMutation.isPending}
+                  className="h-12 bg-nd-ink hover:bg-nd-accent text-nd-bg font-serif font-bold tracking-widest rounded-none transition-all border-2 border-nd-ink whitespace-nowrap px-8 uppercase shadow-[3px_3px_0px_#C94A1E]"
+                >
+                  {inviteMutation.isPending || isSubmitting ? 'Invoking...' : 'Induct User'}
+                </Button>
+              )}
+            />
           </form>
           {inviteMutation.isSuccess && (
             <div className="mt-6 p-3 bg-nd-flag-blue/5 border border-nd-flag-blue border-dashed text-nd-flag-blue font-mono text-[10px] uppercase tracking-widest font-bold flex items-center gap-2">

@@ -2,7 +2,7 @@ import { createFileRoute, Link, useSearch } from '@tanstack/react-router'
 import { useState } from 'react'
 import { useForm } from '@tanstack/react-form'
 import { useTRPC } from '@/integrations/trpc/react'
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { useQuery } from '@tanstack/react-query'
 import { useLiveQuery } from '@tanstack/react-db'
 import { useUnitsCollection } from '@/db-collections'
 import { Plus, FolderTree, Activity, ArrowRight } from 'lucide-react'
@@ -21,7 +21,6 @@ export const Route = createFileRoute('/_authed/ws/')({
 
 function UnitsLandingPage() {
   const trpc = useTRPC()
-  const queryClient = useQueryClient()
   const search = useSearch({ strict: false }) as { orgId?: number }
   const { data: currentOrg } = useQuery(trpc.organization.getOrCreateCurrent.queryOptions())
   const orgId = search?.orgId ?? currentOrg?.organization.id
@@ -32,8 +31,6 @@ function UnitsLandingPage() {
     [unitsCollection],
   )
 
-  const createUnitMutation = useMutation(trpc.ws.units.create.mutationOptions())
- 
   const [isCreateOpen, setIsCreateOpen] = useState(false)
  
   const unitSchema = z.object({
@@ -49,15 +46,13 @@ function UnitsLandingPage() {
     onSubmit: async ({ value }) => {
       if (!orgId) return
 
-      await createUnitMutation.mutateAsync({
-        organizationId: orgId,
+      await unitsCollection.insert({
         name: value.name.trim(),
-        description: value.description.trim() || undefined,
-      })
+        description: value.description.trim() || null,
+      } as any)
 
       form.reset()
       setIsCreateOpen(false)
-      queryClient.invalidateQueries(trpc.ws.units.list.queryFilter())
     },
   })
 
@@ -159,10 +154,10 @@ function UnitsLandingPage() {
                   children={([canSubmit, isSubmitting]) => (
                     <Button
                       type="submit"
-                      disabled={!canSubmit || isSubmitting || createUnitMutation.isPending}
+                      disabled={!canSubmit || isSubmitting}
                       className="bg-nd-accent hover:bg-nd-accent-hover text-white"
                     >
-                      {createUnitMutation.isPending || isSubmitting ? 'Creating...' : 'Create Unit'}
+                      {isSubmitting ? 'Creating...' : 'Create Unit'}
                     </Button>
                   )}
                 />

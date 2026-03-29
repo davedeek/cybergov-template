@@ -1,19 +1,29 @@
-import { useMemo } from 'react'
 import { createCollection } from '@tanstack/react-db'
 import { queryCollectionOptions } from '@tanstack/query-db-collection'
 import { useTRPC } from '@/integrations/trpc/react'
 import { useQueryClient } from '@tanstack/react-query'
+import { trpcClient } from '@/integrations/tanstack-query/root-provider'
+
+// Singleton-like cache for collections to ensure reusability across views
+const collectionsCache = new Map<string, any>()
+
+function getCachedCollection<T>(key: string, factory: () => T): T {
+  if (!collectionsCache.has(key)) {
+    collectionsCache.set(key, factory())
+  }
+  return collectionsCache.get(key)
+}
 
 export function useTodosCollection(orgId?: number) {
   const trpc = useTRPC()
   const queryClient = useQueryClient()
 
-  return useMemo(() => {
-    const queryOptions = trpc.todos.list.queryOptions({
-      organizationId: orgId ?? -1,
-    })
+  const queryOptions = trpc.todos.list.queryOptions({
+    organizationId: orgId ?? -1,
+  })
 
-    return createCollection(
+  return getCachedCollection(`todos-${orgId}`, () => 
+    createCollection(
       queryCollectionOptions({
         queryClient,
         queryKey: queryOptions.queryKey,
@@ -22,21 +32,53 @@ export function useTodosCollection(orgId?: number) {
           return queryOptions.queryFn(ctx)
         },
         getKey: (todo: any) => todo.id,
+        onInsert: async ({ transaction }) => {
+          if (!orgId) return
+          const results = []
+          for (const m of transaction.mutations) {
+            const res = await trpcClient.todos.add.mutate({
+              organizationId: orgId,
+              name: m.modified.name,
+            })
+            results.push(res)
+          }
+          return results[0]
+        },
+        onUpdate: async ({ transaction }) => {
+          if (!orgId) return
+          for (const m of transaction.mutations) {
+            const { id, organizationId, ...rest } = m.modified
+            await trpcClient.todos.update.mutate({
+              organizationId: orgId,
+              id: m.key as number,
+              ...rest,
+            })
+          }
+        },
+        onDelete: async ({ transaction }) => {
+          if (!orgId) return
+          for (const m of transaction.mutations) {
+            await trpcClient.todos.delete.mutate({
+              organizationId: orgId,
+              id: m.key as number,
+            })
+          }
+        },
       })
     )
-  }, [orgId, queryClient, trpc])
+  )
 }
 
 export function useMembersCollection(orgId?: number) {
   const trpc = useTRPC()
   const queryClient = useQueryClient()
 
-  return useMemo(() => {
-    const queryOptions = trpc.organization.listMembers.queryOptions({
-      organizationId: orgId ?? -1,
-    })
+  const queryOptions = trpc.organization.listMembers.queryOptions({
+    organizationId: orgId ?? -1,
+  })
 
-    return createCollection(
+  return getCachedCollection(`members-${orgId}`, () =>
+    createCollection(
       queryCollectionOptions({
         queryClient,
         queryKey: queryOptions.queryKey,
@@ -47,17 +89,17 @@ export function useMembersCollection(orgId?: number) {
         getKey: (member: any) => member.id,
       })
     )
-  }, [orgId, queryClient, trpc])
+  )
 }
 
 export function useOrganizationsCollection() {
   const trpc = useTRPC()
   const queryClient = useQueryClient()
 
-  return useMemo(() => {
-    const queryOptions = trpc.organization.listMine.queryOptions()
+  const queryOptions = trpc.organization.listMine.queryOptions()
 
-    return createCollection(
+  return getCachedCollection(`organizations`, () =>
+    createCollection(
       queryCollectionOptions({
         queryClient,
         queryKey: queryOptions.queryKey,
@@ -68,19 +110,19 @@ export function useOrganizationsCollection() {
         getKey: (org: any) => org.organization.id,
       })
     )
-  }, [queryClient, trpc])
+  )
 }
 
 export function useUnitsCollection(orgId?: number) {
   const trpc = useTRPC()
   const queryClient = useQueryClient()
 
-  return useMemo(() => {
-    const queryOptions = trpc.ws.units.list.queryOptions({
-      organizationId: orgId ?? -1,
-    })
+  const queryOptions = trpc.ws.units.list.queryOptions({
+    organizationId: orgId ?? -1,
+  })
 
-    return createCollection(
+  return getCachedCollection(`units-${orgId}`, () =>
+    createCollection(
       queryCollectionOptions({
         queryClient,
         queryKey: queryOptions.queryKey,
@@ -89,22 +131,35 @@ export function useUnitsCollection(orgId?: number) {
           return queryOptions.queryFn(ctx)
         },
         getKey: (unit: any) => unit.id,
+        onInsert: async ({ transaction }) => {
+          if (!orgId) return
+          const results = []
+          for (const m of transaction.mutations) {
+            const res = await trpcClient.ws.units.create.mutate({
+              organizationId: orgId,
+              name: m.modified.name,
+              description: m.modified.description ?? undefined,
+            })
+            results.push(res)
+          }
+          return results[0]
+        },
       })
     )
-  }, [orgId, queryClient, trpc])
+  )
 }
 
 export function useProcessChartsCollection(orgId?: number, unitId?: number) {
   const trpc = useTRPC()
   const queryClient = useQueryClient()
 
-  return useMemo(() => {
-    const queryOptions = trpc.ws.processChart.listByUnit.queryOptions({
-      organizationId: orgId ?? -1,
-      unitId: unitId ?? -1,
-    })
+  const queryOptions = trpc.ws.processChart.listByUnit.queryOptions({
+    organizationId: orgId ?? -1,
+    unitId: unitId ?? -1,
+  })
 
-    return createCollection(
+  return getCachedCollection(`pc-${orgId}-${unitId}`, () =>
+    createCollection(
       queryCollectionOptions({
         queryClient,
         queryKey: queryOptions.queryKey,
@@ -113,21 +168,34 @@ export function useProcessChartsCollection(orgId?: number, unitId?: number) {
           return queryOptions.queryFn(ctx)
         },
         getKey: (chart: any) => chart.id,
+        onInsert: async ({ transaction }) => {
+          if (!orgId || !unitId) return
+          const results = []
+          for (const m of transaction.mutations) {
+            const res = await trpcClient.ws.processChart.create.mutate({
+              organizationId: orgId,
+              unitId,
+              name: m.modified.name,
+            })
+            results.push(res)
+          }
+          return results[0]
+        },
       })
     )
-  }, [orgId, unitId, queryClient, trpc])
+  )
 }
 
 export function useAllProcessChartsCollection(orgId?: number) {
   const trpc = useTRPC()
   const queryClient = useQueryClient()
 
-  return useMemo(() => {
-    const queryOptions = trpc.ws.processChart.listAll.queryOptions({
-      organizationId: orgId ?? -1,
-    })
+  const queryOptions = trpc.ws.processChart.listAll.queryOptions({
+    organizationId: orgId ?? -1,
+  })
 
-    return createCollection(
+  return getCachedCollection(`pc-all-${orgId}`, () =>
+    createCollection(
       queryCollectionOptions({
         queryClient,
         queryKey: queryOptions.queryKey,
@@ -138,20 +206,20 @@ export function useAllProcessChartsCollection(orgId?: number) {
         getKey: (chart: any) => chart.id,
       })
     )
-  }, [orgId, queryClient, trpc])
+  )
 }
 
 export function useWDCChartsCollection(orgId?: number, unitId?: number) {
   const trpc = useTRPC()
   const queryClient = useQueryClient()
 
-  return useMemo(() => {
-    const queryOptions = trpc.ws.wdc.listByUnit.queryOptions({
-      organizationId: orgId ?? -1,
-      unitId: unitId ?? -1,
-    })
+  const queryOptions = trpc.ws.wdc.listByUnit.queryOptions({
+    organizationId: orgId ?? -1,
+    unitId: unitId ?? -1,
+  })
 
-    return createCollection(
+  return getCachedCollection(`wdc-${orgId}-${unitId}`, () =>
+    createCollection(
       queryCollectionOptions({
         queryClient,
         queryKey: queryOptions.queryKey,
@@ -160,21 +228,34 @@ export function useWDCChartsCollection(orgId?: number, unitId?: number) {
           return queryOptions.queryFn(ctx)
         },
         getKey: (chart: any) => chart.id,
+        onInsert: async ({ transaction }) => {
+          if (!orgId || !unitId) return
+          const results = []
+          for (const m of transaction.mutations) {
+            const res = await trpcClient.ws.wdc.create.mutate({
+              organizationId: orgId,
+              unitId,
+              name: m.modified.name,
+            })
+            results.push(res)
+          }
+          return results[0]
+        },
       })
     )
-  }, [orgId, unitId, queryClient, trpc])
+  )
 }
 
 export function useAllWDCChartsCollection(orgId?: number) {
   const trpc = useTRPC()
   const queryClient = useQueryClient()
 
-  return useMemo(() => {
-    const queryOptions = trpc.ws.wdc.listAll.queryOptions({
-      organizationId: orgId ?? -1,
-    })
+  const queryOptions = trpc.ws.wdc.listAll.queryOptions({
+    organizationId: orgId ?? -1,
+  })
 
-    return createCollection(
+  return getCachedCollection(`wdc-all-${orgId}`, () =>
+    createCollection(
       queryCollectionOptions({
         queryClient,
         queryKey: queryOptions.queryKey,
@@ -185,20 +266,20 @@ export function useAllWDCChartsCollection(orgId?: number) {
         getKey: (chart: any) => chart.id,
       })
     )
-  }, [orgId, queryClient, trpc])
+  )
 }
 
 export function useStepsCollection(orgId?: number, pcId?: number) {
   const trpc = useTRPC()
   const queryClient = useQueryClient()
 
-  return useMemo(() => {
-    const queryOptions = trpc.ws.processChart.listSteps.queryOptions({
-      organizationId: orgId ?? -1,
-      processChartId: pcId ?? -1,
-    })
+  const queryOptions = trpc.ws.processChart.listSteps.queryOptions({
+    organizationId: orgId ?? -1,
+    processChartId: pcId ?? -1,
+  })
 
-    return createCollection(
+  return getCachedCollection(`steps-${orgId}-${pcId}`, () =>
+    createCollection(
       queryCollectionOptions({
         queryClient,
         queryKey: queryOptions.queryKey,
@@ -207,22 +288,62 @@ export function useStepsCollection(orgId?: number, pcId?: number) {
           return queryOptions.queryFn(ctx)
         },
         getKey: (step: any) => step.id,
+        onInsert: async ({ transaction }) => {
+          if (!orgId || !pcId) return
+          const results = []
+          for (const m of transaction.mutations) {
+            const res = await trpcClient.ws.processChart.addStep.mutate({
+              organizationId: orgId,
+              processChartId: pcId,
+              symbol: m.modified.symbol,
+              description: m.modified.description,
+              who: m.modified.who ?? undefined,
+              minutes: m.modified.minutes ?? undefined,
+              feet: m.modified.feet ?? undefined,
+            })
+            results.push(res)
+          }
+          return results[0]
+        },
+        onUpdate: async ({ transaction }) => {
+          if (!orgId) return
+          for (const m of transaction.mutations) {
+            const { id, processChartId, sequenceNumber, ...rest } = m.modified
+            await trpcClient.ws.processChart.updateStep.mutate({
+              organizationId: orgId,
+              stepId: m.key as number,
+              ...rest,
+              who: rest.who ?? undefined,
+              minutes: rest.minutes ?? undefined,
+              feet: rest.feet ?? undefined,
+            })
+          }
+        },
+        onDelete: async ({ transaction }) => {
+          if (!orgId) return
+          for (const m of transaction.mutations) {
+            await trpcClient.ws.processChart.removeStep.mutate({
+              organizationId: orgId,
+              stepId: m.key as number,
+            })
+          }
+        },
       })
     )
-  }, [orgId, pcId, queryClient, trpc])
+  )
 }
 
 export function useWDCEmployeesCollection(orgId?: number, wdcId?: number) {
   const trpc = useTRPC()
   const queryClient = useQueryClient()
 
-  return useMemo(() => {
-    const queryOptions = trpc.ws.wdc.listEmployees.queryOptions({
-      organizationId: orgId ?? -1,
-      wdcId: wdcId ?? -1,
-    })
+  const queryOptions = trpc.ws.wdc.listEmployees.queryOptions({
+    organizationId: orgId ?? -1,
+    wdcId: wdcId ?? -1,
+  })
 
-    return createCollection(
+  return getCachedCollection(`wdc-employees-${orgId}-${wdcId}`, () =>
+    createCollection(
       queryCollectionOptions({
         queryClient,
         queryKey: queryOptions.queryKey,
@@ -233,20 +354,20 @@ export function useWDCEmployeesCollection(orgId?: number, wdcId?: number) {
         getKey: (emp: any) => emp.id,
       })
     )
-  }, [orgId, wdcId, queryClient, trpc])
+  )
 }
 
 export function useWDCActivitiesCollection(orgId?: number, wdcId?: number) {
   const trpc = useTRPC()
   const queryClient = useQueryClient()
 
-  return useMemo(() => {
-    const queryOptions = trpc.ws.wdc.listActivities.queryOptions({
-      organizationId: orgId ?? -1,
-      wdcId: wdcId ?? -1,
-    })
+  const queryOptions = trpc.ws.wdc.listActivities.queryOptions({
+    organizationId: orgId ?? -1,
+    wdcId: wdcId ?? -1,
+  })
 
-    return createCollection(
+  return getCachedCollection(`wdc-activities-${orgId}-${wdcId}`, () =>
+    createCollection(
       queryCollectionOptions({
         queryClient,
         queryKey: queryOptions.queryKey,
@@ -257,20 +378,20 @@ export function useWDCActivitiesCollection(orgId?: number, wdcId?: number) {
         getKey: (act: any) => act.id,
       })
     )
-  }, [orgId, wdcId, queryClient, trpc])
+  )
 }
 
 export function useWDCTasksCollection(orgId?: number, wdcId?: number) {
   const trpc = useTRPC()
   const queryClient = useQueryClient()
 
-  return useMemo(() => {
-    const queryOptions = trpc.ws.wdc.listTasks.queryOptions({
-      organizationId: orgId ?? -1,
-      wdcId: wdcId ?? -1,
-    })
+  const queryOptions = trpc.ws.wdc.listTasks.queryOptions({
+    organizationId: orgId ?? -1,
+    wdcId: wdcId ?? -1,
+  })
 
-    return createCollection(
+  return getCachedCollection(`wdc-tasks-${orgId}-${wdcId}`, () =>
+    createCollection(
       queryCollectionOptions({
         queryClient,
         queryKey: queryOptions.queryKey,
@@ -281,5 +402,6 @@ export function useWDCTasksCollection(orgId?: number, wdcId?: number) {
         getKey: (task: any) => task.id,
       })
     )
-  }, [orgId, wdcId, queryClient, trpc])
+  )
 }
+

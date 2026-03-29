@@ -4,7 +4,7 @@ import { z } from 'zod'
 import { FormError } from '@/components/ui/form-error'
 import { Plus, Trash2, CheckCircle, ListTodo } from 'lucide-react'
 import { useTRPC } from '@/integrations/trpc/react'
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { useQuery } from '@tanstack/react-query'
 import { useLiveQuery } from '@tanstack/react-db'
 import { useTodosCollection } from '@/db-collections'
 import { Button } from '@/components/ui/button'
@@ -18,7 +18,6 @@ export const Route = createFileRoute('/_authed/todos')({
 
 function TodosPage() {
   const trpc = useTRPC()
-  const queryClient = useQueryClient()
   const search = useSearch({ strict: false }) as { orgId?: number }
 
   const { data: currentOrg } = useQuery(
@@ -40,14 +39,6 @@ function TodosPage() {
   
   const todos = liveTodos as any[]
 
-  const addMutation = useMutation(
-    trpc.todos.add.mutationOptions({
-      onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: trpc.todos.list.queryKey() })
-      },
-    }),
-  )
-
   const todoSchema = z.object({
     name: z.string().trim().min(3, 'Task description must be at least 3 characters'),
   })
@@ -61,26 +52,10 @@ function TodosPage() {
     },
     onSubmit: async ({ value }) => {
       if (!orgId) return
-      await addMutation.mutateAsync({ organizationId: orgId, name: value.name })
+      todosCollection.insert({ name: value.name } as any)
       form.reset()
     },
   })
-
-  const toggleMutation = useMutation(
-    trpc.todos.update.mutationOptions({
-      onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: trpc.todos.list.queryKey() })
-      },
-    }),
-  )
-
-  const deleteMutation = useMutation(
-    trpc.todos.delete.mutationOptions({
-      onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: trpc.todos.list.queryKey() })
-      },
-    }),
-  )
 
   const handleAdd = (e: React.FormEvent) => {
     e.preventDefault()
@@ -132,11 +107,11 @@ function TodosPage() {
                 <Button 
                   type="submit" 
                   className="bg-nd-ink hover:bg-nd-accent text-nd-bg px-8 h-12 rounded-none transition-all shadow-[2px_2px_0px_#C94A1E]"
-                  disabled={!canSubmit || isSubmitting || addMutation.isPending}
+                  disabled={!canSubmit || isSubmitting}
                 >
                   <Plus className="w-5 h-5 mr-2" />
                   <span className="font-bold uppercase tracking-widest text-xs">
-                    {isSubmitting || addMutation.isPending ? 'Appending...' : 'Append'}
+                    {isSubmitting ? 'Appending...' : 'Append'}
                   </span>
                 </Button>
               )}
@@ -176,11 +151,9 @@ function TodosPage() {
               >
                 <button
                   onClick={() =>
-                    toggleMutation.mutate({
-                      organizationId: orgId!,
-                      id: todo.id,
+                    todosCollection.update(todo.id, {
                       completedAt: todo.completedAt ? null : new Date(),
-                    })
+                    } as any)
                   }
                   className={`flex-shrink-0 w-6 h-6 border-2 flex items-center justify-center transition-colors ${todo.completedAt ? 'bg-nd-ink border-nd-ink text-nd-bg' : 'bg-nd-bg border-nd-ink hover:border-nd-accent'}`}
                 >
@@ -204,12 +177,7 @@ function TodosPage() {
                   <Button
                     variant="ghost"
                     size="icon"
-                    onClick={() =>
-                      deleteMutation.mutate({
-                        organizationId: orgId!,
-                        id: todo.id,
-                      })
-                    }
+                    onClick={() => todosCollection.delete(todo.id)}
                     className="h-9 w-9 text-nd-ink-muted hover:text-nd-accent hover:bg-nd-accent-light rounded-none transition-colors border border-transparent hover:border-nd-accent"
                   >
                     <Trash2 className="w-4 h-4" />

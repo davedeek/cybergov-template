@@ -2,7 +2,7 @@ import { createFileRoute, Link, useNavigate, useSearch } from '@tanstack/react-r
 import { useState } from 'react'
 import { useForm } from '@tanstack/react-form'
 import { useTRPC } from '@/integrations/trpc/react'
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { useQuery } from '@tanstack/react-query'
 import { useLiveQuery } from '@tanstack/react-db'
 import { useProcessChartsCollection, useWDCChartsCollection } from '@/db-collections'
 import { ArrowLeft, Plus, FileSpreadsheet, GitBranch, Calendar } from 'lucide-react'
@@ -24,7 +24,6 @@ function UnitDashboardPage() {
   const search = useSearch({ strict: false }) as { orgId?: number }
   const navigate = useNavigate()
   const trpc = useTRPC()
-  const queryClient = useQueryClient()
 
   const { data: currentOrg } = useQuery(trpc.organization.getOrCreateCurrent.queryOptions())
   const orgId = search?.orgId ?? currentOrg?.organization.id
@@ -53,7 +52,6 @@ function UnitDashboardPage() {
 
   // Create WDC Mutation
   const [isWdcOpen, setIsWdcOpen] = useState(false)
-  const createWdcMutation = useMutation(trpc.ws.wdc.create.mutationOptions())
  
   const wdcSchema = z.object({
     name: z.string().min(3, 'Chart name must be at least 3 characters'),
@@ -66,22 +64,18 @@ function UnitDashboardPage() {
     onSubmit: async ({ value }) => {
       if (!orgId) return
 
-      const newChart = await createWdcMutation.mutateAsync({
-        organizationId: orgId,
-        unitId: parsedUnitId,
+      const newChart = await wdcCollection.insert({
         name: value.name,
-      })
+      } as any)
 
       wdcForm.reset()
       setIsWdcOpen(false)
-      queryClient.invalidateQueries(trpc.ws.wdc.listByUnit.queryFilter())
       navigate({ to: '/ws/$unitId/wdc/$wdcId', params: { unitId, wdcId: newChart.id.toString() }, search: { orgId } })
     },
   })
 
   // Create PC Mutation
   const [isPcOpen, setIsPcOpen] = useState(false)
-  const createPcMutation = useMutation(trpc.ws.processChart.create.mutationOptions())
  
   const pcSchema = z.object({
     name: z.string().min(3, 'Process name must be at least 3 characters'),
@@ -94,15 +88,12 @@ function UnitDashboardPage() {
     onSubmit: async ({ value }) => {
       if (!orgId) return
 
-      const newChart = await createPcMutation.mutateAsync({
-        organizationId: orgId,
-        unitId: parsedUnitId,
+      const newChart = await pcCollection.insert({
         name: value.name.trim(),
-      })
+      } as any)
 
       pcForm.reset()
       setIsPcOpen(false)
-      queryClient.invalidateQueries(trpc.ws.processChart.listByUnit.queryFilter())
       navigate({ to: '/ws/$unitId/pc/$pcId', params: { unitId, pcId: newChart.id.toString() }, search: { orgId } })
     },
   })
@@ -208,8 +199,8 @@ function UnitDashboardPage() {
                     <wdcForm.Subscribe
                       selector={(state) => [state.canSubmit, state.isSubmitting]}
                       children={([canSubmit, isSubmitting]) => (
-                        <Button type="submit" disabled={!canSubmit || isSubmitting || createWdcMutation.isPending} className="bg-nd-accent hover:bg-nd-accent-hover text-white">
-                          {createWdcMutation.isPending || isSubmitting ? 'Creating...' : 'Create Chart'}
+                        <Button type="submit" disabled={!canSubmit || isSubmitting} className="bg-nd-accent hover:bg-nd-accent-hover text-white">
+                          {isSubmitting ? 'Creating...' : 'Create Chart'}
                         </Button>
                       )}
                     />
@@ -311,8 +302,8 @@ function UnitDashboardPage() {
                     <pcForm.Subscribe
                       selector={(state) => [state.canSubmit, state.isSubmitting]}
                       children={([canSubmit, isSubmitting]) => (
-                        <Button type="submit" disabled={!canSubmit || isSubmitting || createPcMutation.isPending} className="bg-nd-accent hover:bg-nd-accent-hover text-white">
-                          {createPcMutation.isPending || isSubmitting ? 'Creating...' : 'Create Chart'}
+                        <Button type="submit" disabled={!canSubmit || isSubmitting} className="bg-nd-accent hover:bg-nd-accent-hover text-white">
+                          {isSubmitting ? 'Creating...' : 'Create Chart'}
                         </Button>
                       )}
                     />

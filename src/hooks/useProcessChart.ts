@@ -30,9 +30,6 @@ export function useProcessChart(orgId: number | undefined, pPcId: number) {
   const isLoading = pcLoading || stepsLoading
 
   // -- Mutations --
-  const addStepMutation = useMutation(trpc.ws.processChart.addStep.mutationOptions())
-  const updateStepMutation = useMutation(trpc.ws.processChart.updateStep.mutationOptions())
-  const removeStepMutation = useMutation(trpc.ws.processChart.removeStep.mutationOptions())
   const reorderStepsMutation = useMutation(trpc.ws.processChart.reorderSteps.mutationOptions())
 
   // -- Local State --
@@ -59,17 +56,14 @@ export function useProcessChart(orgId: number | undefined, pPcId: number) {
     },
     onSubmit: async ({ value }) => {
       if (!orgId) return
-      await addStepMutation.mutateAsync({
-        organizationId: orgId, 
-        processChartId: pPcId,
+      stepsCollection.insert({
         symbol: value.symbol,
         description: value.description.trim(),
-        who: value.who.trim() || undefined,
-        minutes: Number(value.minutes) || undefined,
-        feet: Number(value.feet) || undefined
-      })
+        who: value.who.trim() || null,
+        minutes: value.minutes ? Number(value.minutes) : null,
+        feet: value.feet ? Number(value.feet) : null
+      } as any)
       addStepForm.reset()
-      invalidatePc()
     },
   })
   const [editingId, setEditingId] = useState<number | null>(null)
@@ -90,17 +84,14 @@ export function useProcessChart(orgId: number | undefined, pPcId: number) {
       const step = steps.find(s => s.id === editingId)
       if (!step) return
 
-      await updateStepMutation.mutateAsync({
-        organizationId: orgId, 
-        stepId: editingId,
+      stepsCollection.update(editingId, {
         symbol: value.symbol,
         description: value.description.trim() || step.description,
-        who: value.who.trim() || undefined,
-        minutes: value.minutes ? Number(value.minutes) : undefined,
-        feet: value.feet ? Number(value.feet) : undefined,
-      })
+        who: value.who.trim() || null,
+        minutes: value.minutes ? Number(value.minutes) : null,
+        feet: value.feet ? Number(value.feet) : null,
+      } as any)
       setEditingId(null)
-      invalidatePc()
     },
   })
   const [copiedCsv, setCopiedCsv] = useState(false)
@@ -113,7 +104,6 @@ export function useProcessChart(orgId: number | undefined, pPcId: number) {
 
   const invalidatePc = () => {
     queryClient.invalidateQueries(trpc.ws.processChart.get.queryFilter({ processChartId: pPcId }))
-    queryClient.invalidateQueries(trpc.ws.processChart.listSteps.queryFilter({ processChartId: pPcId }))
   }
 
   // Mermaid Generation
@@ -200,8 +190,7 @@ export function useProcessChart(orgId: number | undefined, pPcId: number) {
 
   const handleRemoveStep = async (stepId: number) => {
     if (!orgId) return
-    await removeStepMutation.mutateAsync({ organizationId: orgId, stepId })
-    invalidatePc()
+    stepsCollection.delete(stepId)
   }
 
   return {

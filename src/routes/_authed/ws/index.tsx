@@ -1,6 +1,5 @@
 import { createFileRoute, Link, useSearch } from '@tanstack/react-router'
 import { useState } from 'react'
-import { useForm } from '@tanstack/react-form'
 import { useTRPC } from '@/integrations/trpc/react'
 import { useQuery } from '@tanstack/react-query'
 import { useLiveQuery } from '@tanstack/react-db'
@@ -9,11 +8,8 @@ import { Plus, FolderTree, Activity, ArrowRight } from 'lucide-react'
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { z } from 'zod'
-import { FormError } from '@/components/ui/form-error'
+import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog'
+import { CreateUnitForm } from '@/components/forms/CreateUnitForm'
 
 export const Route = createFileRoute('/_authed/ws/')({
   component: UnitsLandingPage,
@@ -32,29 +28,6 @@ function UnitsLandingPage() {
   )
 
   const [isCreateOpen, setIsCreateOpen] = useState(false)
- 
-  const unitSchema = z.object({
-    name: z.string().min(3, 'Unit name must be at least 3 characters'),
-    description: z.string(),
-  })
-
-  const form = useForm({
-    defaultValues: {
-      name: '',
-      description: '',
-    },
-    onSubmit: async ({ value }) => {
-      if (!orgId) return
-
-      await unitsCollection.insert({
-        name: value.name.trim(),
-        description: value.description.trim() || null,
-      } as any)
-
-      form.reset()
-      setIsCreateOpen(false)
-    },
-  })
 
   if (isLoading) {
     return (
@@ -84,85 +57,14 @@ function UnitsLandingPage() {
             </Button>
           </DialogTrigger>
           <DialogContent className="sm:max-w-[425px]">
-            <form 
-              onSubmit={(e) => {
-                e.preventDefault()
-                e.stopPropagation()
-                form.handleSubmit()
-              }}
-            >
-              <DialogHeader>
-                <DialogTitle>Create New Unit</DialogTitle>
-                <DialogDescription>
-                  A unit is a logical grouping of team members who work together on shared processes.
-                </DialogDescription>
-              </DialogHeader>
-              <div className="grid gap-4 py-4">
-                <form.Field
-                  name="name"
-                  validators={{
-                    onChange: unitSchema.shape.name,
-                  }}
-                  children={(field) => (
-                    <div className="flex flex-col gap-2">
-                      <Label htmlFor={field.name}>Unit Name</Label>
-                      <Input
-                        id={field.name}
-                        value={field.state.value}
-                        onBlur={field.handleBlur}
-                        onChange={(e) => field.handleChange(e.target.value)}
-                        placeholder="e.g., Records Processing"
-                        autoFocus
-                      />
-                      <FormError errors={field.state.meta.errors} />
-                    </div>
-                  )}
-                />
-                <form.Field
-                  name="description"
-                  validators={{
-                    onChange: unitSchema.shape.description,
-                  }}
-                  children={(field) => (
-                    <div className="flex flex-col gap-2">
-                      <Label htmlFor={field.name}>Description (optional)</Label>
-                      <Input
-                        id={field.name}
-                        value={field.state.value}
-                        onBlur={field.handleBlur}
-                        onChange={(e) => field.handleChange(e.target.value)}
-                        placeholder="Brief description of the unit's function"
-                      />
-                      <FormError errors={field.state.meta.errors} />
-                    </div>
-                  )}
-                />
-              </div>
-              <DialogFooter>
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => {
-                    setIsCreateOpen(false)
-                    form.reset()
-                  }}
-                >
-                  Cancel
-                </Button>
-                <form.Subscribe
-                  selector={(state) => [state.canSubmit, state.isSubmitting]}
-                  children={([canSubmit, isSubmitting]) => (
-                    <Button
-                      type="submit"
-                      disabled={!canSubmit || isSubmitting}
-                      className="bg-nd-accent hover:bg-nd-accent-hover text-white"
-                    >
-                      {isSubmitting ? 'Creating...' : 'Create Unit'}
-                    </Button>
-                  )}
-                />
-              </DialogFooter>
-            </form>
+            {orgId && (
+              <CreateUnitForm 
+                unitsCollection={unitsCollection} 
+                orgId={orgId} 
+                onSuccess={() => setIsCreateOpen(false)} 
+                onCancel={() => setIsCreateOpen(false)} 
+              />
+            )}
           </DialogContent>
         </Dialog>
       </div>

@@ -1,6 +1,5 @@
 import { createFileRoute, Link, useSearch } from '@tanstack/react-router'
 import { useState, useMemo } from 'react'
-import { useForm } from '@tanstack/react-form'
 import { useTRPC } from '@/integrations/trpc/react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useLiveQuery } from '@tanstack/react-db'
@@ -11,13 +10,13 @@ import {
   ColumnDef 
 } from '@tanstack/react-table'
 import { useWDCEmployeesCollection, useWDCActivitiesCollection, useWDCTasksCollection } from '@/db-collections'
-import { ArrowLeft, ArrowRight, AlertCircle, FileText, HelpCircle, UserPlus, Plus, Flag } from 'lucide-react'
+import { ArrowLeft, AlertCircle, FileText, HelpCircle, UserPlus, Plus, Flag } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { z } from 'zod'
-import { FormError } from '@/components/ui/form-error'
+import { AddEmployeeForm } from '@/components/forms/AddEmployeeForm'
+import { AddActivityForm } from '@/components/forms/AddActivityForm'
+import { AddTaskForm } from '@/components/forms/AddTaskForm'
 
 import {
   Table,
@@ -72,9 +71,6 @@ function WdcPage() {
   const isLoading = wdcLoading || empLoading || actLoading || tasksLoading
 
   // -- Mutations --
-  const addEmpMutation = useMutation(trpc.ws.wdc.addEmployee.mutationOptions())
-  const addActMutation = useMutation(trpc.ws.wdc.addActivity.mutationOptions())
-  const addTaskMutation = useMutation(trpc.ws.wdc.addTask.mutationOptions())
   const removeTaskMutation = useMutation(trpc.ws.wdc.removeTask.mutationOptions())
 
   // -- Local State --
@@ -83,112 +79,11 @@ function WdcPage() {
   const [addingActivity, setAddingActivity] = useState(false)
   const [activeCell, setActiveCell] = useState<{ actId: number, empId: number } | null>(null)
 
-  const empSchema = z.object({
-    name: z.string().trim().min(2, 'Name must be at least 2 characters'),
-    role: z.string().trim(),
-    fte: z.string().refine(v => !isNaN(Number(v)) && Number(v) > 0, 'FTE must be a positive number'),
-  })
-
-  const empForm = useForm({
-    defaultValues: {
-      name: '',
-      role: '',
-      fte: '1.0',
-    },
-    validators: {
-      onChange: empSchema,
-    },
-    onSubmit: async ({ value }) => {
-      if (!orgId) return
-      await addEmpMutation.mutateAsync({
-        organizationId: orgId, 
-        wdcId: pWdcId,
-        name: value.name, 
-        role: value.role || undefined, 
-        fte: value.fte
-      })
-      empForm.reset()
-      setAddingEmployee(false)
-      invalidateWdc()
-    },
-  })
-
-  const actSchema = z.object({
-    name: z.string().trim().min(3, 'Activity name must be at least 3 characters'),
-  })
-
-  const actForm = useForm({
-    defaultValues: {
-      name: '',
-    },
-    validators: {
-      onChange: actSchema,
-    },
-    onSubmit: async ({ value }) => {
-      if (!orgId) return
-      await addActMutation.mutateAsync({ 
-        organizationId: orgId, 
-        wdcId: pWdcId, 
-        name: value.name 
-      })
-      actForm.reset()
-      setAddingActivity(false)
-      invalidateWdc()
-    },
-  })
-
-  const taskSchema = z.object({
-    taskName: z.string().trim().min(3, 'Task name must be at least 3 characters'),
-    hours: z.string().refine(v => !isNaN(Number(v)) && Number(v) > 0, 'Hours must be a positive number'),
-  })
-
-  const taskForm = useForm({
-    defaultValues: {
-      taskName: '',
-      hours: '',
-    },
-    validators: {
-      onChange: taskSchema,
-    },
-    onSubmit: async ({ value }) => {
-      if (!activeCell || !orgId) return
-      await addTaskMutation.mutateAsync({
-        organizationId: orgId, 
-        wdcId: pWdcId,
-        employeeId: activeCell.empId, 
-        activityId: activeCell.actId,
-        taskName: value.taskName.trim(), 
-        hoursPerWeek: Number(value.hours)
-      })
-      taskForm.reset()
-      invalidateWdc()
-    },
-  })
-
   const invalidateWdc = () => {
     queryClient.invalidateQueries(trpc.ws.wdc.get.queryFilter({ wdcId: pWdcId }))
     queryClient.invalidateQueries(trpc.ws.wdc.listEmployees.queryFilter({ wdcId: pWdcId }))
     queryClient.invalidateQueries(trpc.ws.wdc.listActivities.queryFilter({ wdcId: pWdcId }))
     queryClient.invalidateQueries(trpc.ws.wdc.listTasks.queryFilter({ wdcId: pWdcId }))
-  }
-
-  // Actions
-  const handleAddEmployee = async (e?: React.FormEvent) => {
-    e?.preventDefault()
-    e?.stopPropagation()
-    empForm.handleSubmit()
-  }
-
-  const handleAddActivity = async (e?: React.FormEvent) => {
-    e?.preventDefault()
-    e?.stopPropagation()
-    actForm.handleSubmit()
-  }
-
-  const handleAddTask = async (e?: React.FormEvent) => {
-    e?.preventDefault()
-    e?.stopPropagation()
-    taskForm.handleSubmit()
   }
 
   const handleRemoveTask = async (taskId: number) => {
@@ -326,76 +221,15 @@ function WdcPage() {
               {/* Toolbar */}
               <div className="flex flex-wrap gap-3 mb-5 items-start print:hidden">
                 {addingEmployee ? (
-                  <form 
-                    onSubmit={handleAddEmployee}
-                    className="flex items-center gap-2 bg-nd-surface px-3 py-2 border border-nd-border shadow-sm"
-                  >
-                    <empForm.Field
-                      name="name"
-                      children={(field) => (
-                        <div className="flex flex-col gap-1">
-                          <Input 
-                            placeholder="Name" 
-                            className="w-[120px] font-mono text-xs h-8 border-nd-border rounded-none focus-visible:ring-1 focus-visible:ring-nd-accent" 
-                            value={field.state.value} 
-                            onBlur={field.handleBlur}
-                            onChange={e => field.handleChange(e.target.value)} 
-                            autoFocus 
-                          />
-                          <FormError errors={field.state.meta.errors} />
-                        </div>
-                      )}
-                    />
-                    <empForm.Field
-                      name="role"
-                      children={(field) => (
-                        <Input 
-                          placeholder="Role" 
-                          className="w-[140px] font-mono text-xs h-8 border-nd-border rounded-none focus-visible:ring-1 focus-visible:ring-nd-accent" 
-                          value={field.state.value} 
-                          onBlur={field.handleBlur}
-                          onChange={e => field.handleChange(e.target.value)} 
-                        />
-                      )}
-                    />
-                    <empForm.Field
-                      name="fte"
-                      children={(field) => (
-                        <Input 
-                          placeholder="FTE (e.g. 1.0)" 
-                          className="w-[90px] font-mono text-xs h-8 border-nd-border rounded-none focus-visible:ring-1 focus-visible:ring-nd-accent" 
-                          value={field.state.value} 
-                          onBlur={field.handleBlur}
-                          onChange={e => field.handleChange(e.target.value)} 
-                        />
-                      )}
-                    />
-                    <empForm.Subscribe
-                      selector={(state) => [state.canSubmit, state.isSubmitting]}
-                      children={([canSubmit, isSubmitting]) => (
-                        <Button 
-                          type="submit"
-                          disabled={!canSubmit || isSubmitting || addEmpMutation.isPending} 
-                          size="sm" 
-                          className="h-8 rounded-none bg-nd-accent hover:bg-nd-accent-hover text-white font-serif tracking-wide px-4"
-                        >
-                          {isSubmitting || addEmpMutation.isPending ? '...' : 'Add'}
-                        </Button>
-                      )}
-                    />
-                    <Button 
-                      type="button"
-                      onClick={() => {
-                        setAddingEmployee(false)
-                        empForm.reset()
-                      }} 
-                      size="sm" 
-                      variant="ghost" 
-                      className="h-8 rounded-none text-nd-ink-muted hover:text-nd-ink font-serif hover:bg-transparent"
-                    >
-                      Cancel
-                    </Button>
-                  </form>
+                  <AddEmployeeForm 
+                    orgId={orgId!} 
+                    wdcId={pWdcId} 
+                    onSuccess={() => {
+                      setAddingEmployee(false)
+                      invalidateWdc()
+                    }} 
+                    onCancel={() => setAddingEmployee(false)} 
+                  />
                 ) : (
                   <Button onClick={() => setAddingEmployee(true)} variant="outline" className="border-nd-border bg-nd-surface hover:bg-nd-surface hover:border-nd-accent hover:text-nd-accent font-serif tracking-wide rounded-none text-nd-ink-muted shadow-sm h-9">
                     <UserPlus className="w-4 h-4 mr-2" /> Add Employee
@@ -403,52 +237,15 @@ function WdcPage() {
                 )}
                 
                 {addingActivity ? (
-                  <form 
-                    onSubmit={handleAddActivity}
-                    className="flex items-center gap-2 bg-nd-surface px-3 py-2 border border-nd-border shadow-sm"
-                  >
-                    <actForm.Field
-                      name="name"
-                      children={(field) => (
-                        <div className="flex flex-col gap-1">
-                          <Input 
-                            placeholder="Activity Name" 
-                            className="w-[200px] font-mono text-xs h-8 border-nd-border rounded-none focus-visible:ring-1 focus-visible:ring-nd-accent" 
-                            value={field.state.value} 
-                            onBlur={field.handleBlur}
-                            onChange={e => field.handleChange(e.target.value)} 
-                            autoFocus 
-                          />
-                          <FormError errors={field.state.meta.errors} />
-                        </div>
-                      )}
-                    />
-                    <actForm.Subscribe
-                      selector={(state) => [state.canSubmit, state.isSubmitting]}
-                      children={([canSubmit, isSubmitting]) => (
-                        <Button 
-                          type="submit"
-                          disabled={!canSubmit || isSubmitting || addActMutation.isPending} 
-                          size="sm" 
-                          className="h-8 rounded-none bg-nd-accent hover:bg-nd-accent-hover text-white font-serif tracking-wide px-4"
-                        >
-                          {isSubmitting || addActMutation.isPending ? '...' : 'Add'}
-                        </Button>
-                      )}
-                    />
-                    <Button 
-                      type="button"
-                      onClick={() => {
-                        setAddingActivity(false)
-                        actForm.reset()
-                      }} 
-                      size="sm" 
-                      variant="ghost" 
-                      className="h-8 rounded-none text-nd-ink-muted hover:text-nd-ink font-serif hover:bg-transparent"
-                    >
-                      Cancel
-                    </Button>
-                  </form>
+                  <AddActivityForm 
+                    orgId={orgId!} 
+                    wdcId={pWdcId} 
+                    onSuccess={() => {
+                      setAddingActivity(false)
+                      invalidateWdc()
+                    }} 
+                    onCancel={() => setAddingActivity(false)} 
+                  />
                 ) : (
                   <Button onClick={() => setAddingActivity(true)} variant="outline" className="border-nd-border bg-nd-surface hover:bg-nd-surface hover:border-nd-accent hover:text-nd-accent font-serif tracking-wide rounded-none text-nd-ink-muted shadow-sm h-9">
                     <Plus className="w-4 h-4 mr-2" /> Add Activity Row
@@ -456,71 +253,16 @@ function WdcPage() {
                 )}
 
                 {activeCell && (
-                  <form 
-                    onSubmit={handleAddTask}
-                    className="flex items-center gap-2 bg-nd-surface px-4 py-2 border-2 border-nd-accent shadow-sm ml-auto animate-in fade-in zoom-in-95 duration-200"
-                  >
-                    <span className="text-[10px] font-mono text-nd-accent tracking-widest uppercase flex items-center gap-1">
-                      Editing Cell <ArrowRight className="w-3 h-3" />
-                    </span>
-                    <taskForm.Field
-                      name="taskName"
-                      children={(field) => (
-                        <div className="flex flex-col gap-1">
-                          <Input 
-                            placeholder="Task description..." 
-                            className="w-[240px] font-mono text-xs h-8 border-nd-border rounded-none focus-visible:ring-1 focus-visible:ring-nd-accent shadow-inner outline-none" 
-                            value={field.state.value} 
-                            onBlur={field.handleBlur}
-                            onChange={e => field.handleChange(e.target.value)} 
-                            autoFocus 
-                          />
-                          <FormError errors={field.state.meta.errors} />
-                        </div>
-                      )}
-                    />
-                    <taskForm.Field
-                      name="hours"
-                      children={(field) => (
-                        <div className="flex flex-col gap-1">
-                          <Input 
-                            type="number" 
-                            placeholder="hrs/wk" 
-                            className="w-[80px] font-mono text-xs h-8 border-nd-border rounded-none text-right focus-visible:ring-1 focus-visible:ring-nd-accent shadow-inner outline-none" 
-                            value={field.state.value} 
-                            onBlur={field.handleBlur}
-                            onChange={e => field.handleChange(e.target.value)} 
-                          />
-                          <FormError errors={field.state.meta.errors} />
-                        </div>
-                      )}
-                    />
-                    <taskForm.Subscribe
-                      selector={(state) => [state.canSubmit, state.isSubmitting]}
-                      children={([canSubmit, isSubmitting]) => (
-                        <Button 
-                          type="submit"
-                          disabled={!canSubmit || isSubmitting || addTaskMutation.isPending} 
-                          size="sm" 
-                          className="h-8 rounded-none bg-nd-accent hover:bg-nd-accent-hover text-white font-serif uppercase text-xs tracking-wider px-4 shadow-sm active:translate-y-[1px]"
-                        >
-                          {isSubmitting || addTaskMutation.isPending ? '...' : 'Add'}
-                        </Button>
-                      )}
-                    />
-                    <Button 
-                      type="button"
-                      onClick={() => {
-                        setActiveCell(null)
-                        taskForm.reset()
-                      }} 
-                      size="sm" 
-                      variant="ghost" 
-                      className="h-8 rounded-none text-nd-ink-muted hover:text-nd-ink font-serif hover:bg-transparent px-2"
-                    >
-                      Done
-                    </Button>
-                  </form>
+                  <AddTaskForm 
+                    orgId={orgId!} 
+                    wdcId={pWdcId} 
+                    activeCell={activeCell} 
+                    onSuccess={() => {
+                      setActiveCell(null)
+                      invalidateWdc()
+                    }} 
+                    onCancel={() => setActiveCell(null)} 
+                  />
                 )}
               </div>
 

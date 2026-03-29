@@ -1,0 +1,72 @@
+import { useForm } from '@tanstack/react-form'
+import { z } from 'zod'
+import { FormError } from '@/components/ui/form-error'
+import { Plus } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+
+interface AddTodoFormProps {
+  todosCollection: any
+  onSuccess?: () => void
+}
+
+const todoSchema = z.object({
+  name: z.string().trim().min(3, 'Task description must be at least 3 characters'),
+})
+
+export function AddTodoForm({ todosCollection, onSuccess }: AddTodoFormProps) {
+  const form = useForm({
+    defaultValues: {
+      name: '',
+    },
+    validators: {
+      onChange: todoSchema,
+    },
+    onSubmit: async ({ value }) => {
+      await todosCollection.insert({ name: value.name } as any)
+      form.reset()
+      onSuccess?.()
+    },
+  })
+
+  const handleAdd = (e: React.FormEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    form.handleSubmit()
+  }
+
+  return (
+    <form onSubmit={handleAdd} className="flex gap-3">
+      <form.Field
+        name="name"
+        children={(field) => (
+          <div className="flex-1 space-y-2">
+            <Input
+              value={field.state.value}
+              onBlur={field.handleBlur}
+              onChange={(e) => field.handleChange(e.target.value)}
+              placeholder="Enter task description..."
+              className="w-full bg-nd-bg border-2 border-nd-border focus:border-nd-ink rounded-none font-serif h-12 shadow-inner"
+            />
+            <FormError errors={field.state.meta.errors} />
+          </div>
+        )}
+      />
+      <form.Subscribe
+        selector={(state) => [state.canSubmit, state.isSubmitting]}
+        children={([canSubmit, isSubmitting]) => (
+          <Button 
+            type="submit" 
+            className="bg-nd-ink hover:bg-nd-accent text-nd-bg px-8 h-12 rounded-none transition-all shadow-[2px_2px_0px_#C94A1E]"
+            disabled={!canSubmit || isSubmitting}
+          >
+            <Plus className="w-5 h-5 mr-2" />
+            <span className="font-bold uppercase tracking-widest text-xs">
+              {isSubmitting ? 'Appending...' : 'Append'}
+            </span>
+          </Button>
+        )}
+      />
+    </form>
+  )
+}

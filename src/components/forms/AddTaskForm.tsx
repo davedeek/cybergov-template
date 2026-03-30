@@ -15,9 +15,10 @@ interface AddTaskFormProps {
 
 const taskSchema = z.object({
   taskName: shortTextField.min(3, 'Task name must be at least 3 characters'),
-  hours: z.string()
-    .refine(v => !isNaN(Number(v)) && Number(v) > 0, 'Hours must be a positive number')
-    .refine(v => Number(v) <= 168, 'Cannot exceed 168 hours per week'),
+  hours: z
+    .string()
+    .refine((v) => !isNaN(Number(v)) && Number(v) > 0, 'Hours must be a positive number')
+    .refine((v) => Number(v) <= 168, 'Cannot exceed 168 hours per week'),
 })
 
 export function AddTaskForm({ onSubmit, isPending: externalPending, onCancel }: AddTaskFormProps) {
@@ -42,7 +43,7 @@ export function AddTaskForm({ onSubmit, isPending: externalPending, onCancel }: 
   }
 
   return (
-    <form 
+    <form
       onSubmit={handleFormSubmit}
       className="flex items-center gap-2 bg-nd-surface px-4 py-2 border-2 border-nd-accent shadow-sm ml-auto animate-in fade-in zoom-in-95 duration-200"
     >
@@ -53,14 +54,16 @@ export function AddTaskForm({ onSubmit, isPending: externalPending, onCancel }: 
         name="taskName"
         children={(field) => (
           <div className="flex flex-col gap-1">
-            <Label htmlFor={field.name} className="sr-only">Task description</Label>
+            <Label htmlFor={field.name} className="sr-only">
+              Task description
+            </Label>
             <Input
               id={field.name}
-              placeholder="Task description..."
+              placeholder="e.g., Sort and distribute letters"
               className="w-[240px] font-mono text-xs h-8 border-nd-border rounded-none focus-visible:ring-1 focus-visible:ring-nd-accent shadow-inner outline-none"
               value={field.state.value}
               onBlur={field.handleBlur}
-              onChange={e => field.handleChange(e.target.value)}
+              onChange={(e) => field.handleChange(e.target.value)}
               autoFocus
             />
             <FormError errors={field.state.meta.errors} />
@@ -71,7 +74,9 @@ export function AddTaskForm({ onSubmit, isPending: externalPending, onCancel }: 
         name="hours"
         children={(field) => (
           <div className="flex flex-col gap-1">
-            <Label htmlFor={field.name} className="sr-only">Hours per week</Label>
+            <Label htmlFor={field.name} className="sr-only">
+              Hours per week
+            </Label>
             <Input
               id={field.name}
               type="number"
@@ -79,7 +84,7 @@ export function AddTaskForm({ onSubmit, isPending: externalPending, onCancel }: 
               className="w-[80px] font-mono text-xs h-8 border-nd-border rounded-none text-right focus-visible:ring-1 focus-visible:ring-nd-accent shadow-inner outline-none"
               value={field.state.value}
               onBlur={field.handleBlur}
-              onChange={e => field.handleChange(e.target.value)}
+              onChange={(e) => field.handleChange(e.target.value)}
             />
             <FormError errors={field.state.meta.errors} />
           </div>
@@ -88,24 +93,24 @@ export function AddTaskForm({ onSubmit, isPending: externalPending, onCancel }: 
       <form.Subscribe
         selector={(state) => [state.canSubmit, state.isSubmitting]}
         children={([canSubmit, isSubmitting]) => (
-          <Button 
+          <Button
             type="submit"
-            disabled={!canSubmit || isSubmitting || externalPending} 
-            size="sm" 
+            disabled={!canSubmit || isSubmitting || externalPending}
+            size="sm"
             className="h-8 rounded-none bg-nd-accent hover:bg-nd-accent-hover text-white font-serif tracking-wide px-4"
           >
             {isSubmitting || externalPending ? '...' : 'Add'}
           </Button>
         )}
       />
-      <Button 
+      <Button
         type="button"
         onClick={() => {
           onCancel()
           form.reset()
-        }} 
-        size="sm" 
-        variant="ghost" 
+        }}
+        size="sm"
+        variant="ghost"
         className="h-8 rounded-none text-nd-ink-muted hover:text-nd-ink font-serif hover:bg-transparent px-2"
       >
         Done

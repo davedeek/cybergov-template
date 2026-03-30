@@ -1,11 +1,4 @@
-const SIX_QUESTIONS = [
-  { q: 'What', prompt: 'What are the steps? Do I have them all? What does each task actually do?' },
-  { q: 'Why', prompt: 'Is this task necessary? Can a good result be obtained without it? Don\'t be misled by an excuse when you\'re looking for a reason.' },
-  { q: 'Where', prompt: 'Can this be done closer to where the output is needed? Can we reduce transportation by changing location of employees or equipment?' },
-  { q: 'When', prompt: 'Is this done in the right sequence? Can steps be combined or simplified by moving them earlier or later?' },
-  { q: 'Who', prompt: 'Is the right person doing this? Is there someone better placed — or should it be delegated?' },
-  { q: 'How', prompt: 'Can it be done better with different equipment, a form, or a different layout? Can we make the job easier for everyone involved?' },
-] as const
+import { SIX_QUESTIONS } from './six-questions'
 
 export function WdcLegend() {
   return (
@@ -13,7 +6,8 @@ export function WdcLegend() {
       <div className="p-8 pb-6 border-b border-nd-border bg-nd-surface-alt">
         <h2 className="text-2xl font-bold font-serif m-0 mb-1 text-nd-ink">The Six Questions</h2>
         <p className="text-xs font-mono text-nd-ink-muted m-0">
-          From the original Work Simplification program. Apply to every task and activity on your chart.
+          From the original Work Simplification program. Apply to every task and activity on your
+          chart.
         </p>
       </div>
       <div className="flex flex-col divide-y divide-nd-border">

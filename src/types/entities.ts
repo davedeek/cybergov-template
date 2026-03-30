@@ -6,6 +6,10 @@ import type {
   units,
   processCharts,
   processSteps,
+  stepAnnotations,
+  proposedChanges,
+  workCounts,
+  workCountEntries,
   wdcCharts,
   wdcEmployees,
   wdcActivities,
@@ -18,6 +22,10 @@ export type OrganizationMembership = InferSelectModel<typeof organizationMembers
 export type Unit = InferSelectModel<typeof units>
 export type ProcessChart = InferSelectModel<typeof processCharts>
 export type ProcessStep = InferSelectModel<typeof processSteps>
+export type StepAnnotation = InferSelectModel<typeof stepAnnotations>
+export type ProposedChange = InferSelectModel<typeof proposedChanges>
+export type WorkCount = InferSelectModel<typeof workCounts>
+export type WorkCountEntry = InferSelectModel<typeof workCountEntries>
 export type WdcChart = InferSelectModel<typeof wdcCharts>
 export type WdcEmployee = InferSelectModel<typeof wdcEmployees>
 export type WdcActivity = InferSelectModel<typeof wdcActivities>

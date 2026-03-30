@@ -3,13 +3,10 @@ import { z } from 'zod'
 import { FormError } from '@/components/ui/form-error'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { useMutation } from '@tanstack/react-query'
-import { useTRPC } from '@/integrations/trpc/react'
 
 interface AddEmployeeFormProps {
-  orgId: number
-  wdcId: number
-  onSuccess: () => void
+  onSubmit: (values: z.infer<typeof empSchema>) => Promise<void>
+  isPending?: boolean
   onCancel: () => void
 }
 
@@ -19,10 +16,7 @@ const empSchema = z.object({
   fte: z.string().refine(v => !isNaN(Number(v)) && Number(v) > 0, 'FTE must be a positive number'),
 })
 
-export function AddEmployeeForm({ orgId, wdcId, onSuccess, onCancel }: AddEmployeeFormProps) {
-  const trpc = useTRPC()
-  const addEmpMutation = useMutation(trpc.ws.wdc.addEmployee.mutationOptions())
-
+export function AddEmployeeForm({ onSubmit, isPending: externalPending, onCancel }: AddEmployeeFormProps) {
   const form = useForm({
     defaultValues: {
       name: '',
@@ -33,26 +27,20 @@ export function AddEmployeeForm({ orgId, wdcId, onSuccess, onCancel }: AddEmploy
       onChange: empSchema,
     },
     onSubmit: async ({ value }) => {
-      if (!orgId) return
-      await addEmpMutation.mutateAsync({
-        organizationId: orgId, 
-        wdcId: wdcId,
-        name: value.name, 
-        role: value.role || undefined, 
-        fte: value.fte
-      })
+      await onSubmit(value)
       form.reset()
-      onSuccess()
     },
   })
 
+  const handleFormSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    form.handleSubmit()
+  }
+
   return (
     <form 
-      onSubmit={(e) => {
-        e.preventDefault()
-        e.stopPropagation()
-        form.handleSubmit()
-      }}
+      onSubmit={handleFormSubmit}
       className="flex items-center gap-2 bg-nd-surface px-3 py-2 border border-nd-border shadow-sm"
     >
       <form.Field
@@ -100,11 +88,11 @@ export function AddEmployeeForm({ orgId, wdcId, onSuccess, onCancel }: AddEmploy
         children={([canSubmit, isSubmitting]) => (
           <Button 
             type="submit"
-            disabled={!canSubmit || isSubmitting || addEmpMutation.isPending} 
+            disabled={!canSubmit || isSubmitting || externalPending} 
             size="sm" 
             className="h-8 rounded-none bg-nd-accent hover:bg-nd-accent-hover text-white font-serif tracking-wide px-4"
           >
-            {isSubmitting || addEmpMutation.isPending ? '...' : 'Add'}
+            {isSubmitting || externalPending ? '...' : 'Add'}
           </Button>
         )}
       />

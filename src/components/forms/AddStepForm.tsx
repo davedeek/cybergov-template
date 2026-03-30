@@ -7,9 +7,10 @@ import { FormError } from '@/components/ui/form-error'
 
 interface AddStepFormProps {
   form: any
+  isPending?: boolean
 }
 
-export function AddStepForm({ form }: AddStepFormProps) {
+export function AddStepForm({ form, isPending: externalPending }: AddStepFormProps) {
   return (
     <form
       onSubmit={(e) => {
@@ -138,11 +139,11 @@ export function AddStepForm({ form }: AddStepFormProps) {
           children={([canSubmit, isSubmitting, description]: any[]) => (
             <Button
               type="submit"
-              disabled={!canSubmit || isSubmitting || !(description as string).trim()}
+              disabled={!canSubmit || isSubmitting || externalPending || !(description as string).trim()}
               className="w-full h-10 bg-nd-accent text-nd-bg hover:bg-nd-accent/90 rounded-none font-mono text-[10px] tracking-[0.15em] uppercase border-none disabled:bg-nd-bg/20"
             >
               <Plus className="w-4 h-4 mr-2" />
-              {isSubmitting ? 'Adding...' : 'Add Step'}
+              {isSubmitting || externalPending ? 'Adding...' : 'Add Step'}
             </Button>
           )}
         />

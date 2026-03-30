@@ -4,7 +4,8 @@ import { useTRPC } from '@/integrations/trpc/react'
 import { useQuery } from '@tanstack/react-query'
 import { useLiveQuery } from '@tanstack/react-db'
 import { useUnitsCollection } from '@/db-collections'
-import { Plus, FolderTree, Activity, ArrowRight } from 'lucide-react'
+import { useMutationHandler } from '@/hooks/use-mutation-handler'
+import { Plus, FolderTree, Activity, ArrowRight, AlertCircle } from 'lucide-react'
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -18,6 +19,7 @@ export const Route = createFileRoute('/_authed/ws/')({
 function UnitsLandingPage() {
   const trpc = useTRPC()
   const search = useSearch({ strict: false }) as { orgId?: number }
+  const { handleMutation, isPending, error: mutationError } = useMutationHandler()
   const { data: currentOrg } = useQuery(trpc.organization.getOrCreateCurrent.queryOptions())
   const orgId = search?.orgId ?? currentOrg?.organization.id
 
@@ -59,11 +61,27 @@ function UnitsLandingPage() {
           <DialogContent className="sm:max-w-[425px]">
             {orgId && (
               <CreateUnitForm 
-                unitsCollection={unitsCollection} 
-                orgId={orgId} 
-                onSuccess={() => setIsCreateOpen(false)} 
+                onSubmit={async (values) => {
+                  await handleMutation(
+                    () => unitsCollection.insert({
+                      name: values.name.trim(),
+                      description: values.description.trim() || null,
+                    } as any),
+                    { 
+                      label: 'Create Unit',
+                      onSuccess: () => setIsCreateOpen(false)
+                    }
+                  )
+                }} 
+                isPending={isPending}
                 onCancel={() => setIsCreateOpen(false)} 
               />
+            )}
+            {mutationError && (
+              <div className="mt-4 p-3 bg-nd-accent/10 border border-nd-accent text-nd-accent font-mono text-[10px] uppercase tracking-widest flex items-center gap-2">
+                <AlertCircle className="w-3 h-3" />
+                {mutationError}
+              </div>
             )}
           </DialogContent>
         </Dialog>

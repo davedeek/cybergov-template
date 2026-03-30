@@ -10,6 +10,7 @@ import {
   ColumnDef 
 } from '@tanstack/react-table'
 import { useWDCEmployeesCollection, useWDCActivitiesCollection, useWDCTasksCollection } from '@/db-collections'
+import { useMutationHandler } from '@/hooks/use-mutation-handler'
 import { ArrowLeft, AlertCircle, FileText, HelpCircle, UserPlus, Plus, Flag } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
@@ -36,6 +37,7 @@ function WdcPage() {
   const search = useSearch({ strict: false }) as { orgId?: number }
   const trpc = useTRPC()
   const queryClient = useQueryClient()
+  const { handleMutation, isPending, error: mutationError } = useMutationHandler()
 
   const { data: currentOrg } = useQuery(trpc.organization.getOrCreateCurrent.queryOptions())
   const orgId = search?.orgId ?? currentOrg?.organization.id
@@ -70,7 +72,10 @@ function WdcPage() {
 
   const isLoading = wdcLoading || empLoading || actLoading || tasksLoading
 
-  // -- Mutations --
+  // -- Mutations (Legacy, using async handlers now) --
+  const addEmpMutation = useMutation(trpc.ws.wdc.addEmployee.mutationOptions())
+  const addActivityMutation = useMutation(trpc.ws.wdc.addActivity.mutationOptions())
+  const addTaskMutation = useMutation(trpc.ws.wdc.addTask.mutationOptions())
   const removeTaskMutation = useMutation(trpc.ws.wdc.removeTask.mutationOptions())
 
   // -- Local State --
@@ -88,8 +93,13 @@ function WdcPage() {
 
   const handleRemoveTask = async (taskId: number) => {
     if (!orgId) return
-    await removeTaskMutation.mutateAsync({ organizationId: orgId, taskId })
-    invalidateWdc()
+    await handleMutation(
+      () => removeTaskMutation.mutateAsync({ organizationId: orgId, taskId }),
+      { 
+        label: 'Remove Task',
+        onSuccess: () => invalidateWdc()
+      }
+    )
   }
 
   // Derived Data
@@ -195,6 +205,12 @@ function WdcPage() {
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           {/* Tab Navigation */}
           <div className="bg-[#EDE8E0] border-b border-nd-border px-8 print:hidden">
+            {mutationError && (
+              <div className="py-2 px-4 bg-nd-accent text-nd-bg font-mono text-[10px] uppercase tracking-widest flex items-center gap-3">
+                <AlertCircle className="w-3 h-3" />
+                <span>Critical Sync Error: {mutationError}</span>
+              </div>
+            )}
             <TabsList className="bg-transparent h-auto p-0 gap-6">
               <TabsTrigger value="chart" className="data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-nd-accent rounded-none shadow-none px-2 py-3 font-serif font-semibold text-nd-ink text-sm data-[state=inactive]:text-nd-ink-muted">
                 <FileText className="w-4 h-4 mr-2" />
@@ -222,12 +238,26 @@ function WdcPage() {
               <div className="flex flex-wrap gap-3 mb-5 items-start print:hidden">
                 {addingEmployee ? (
                   <AddEmployeeForm 
-                    orgId={orgId!} 
-                    wdcId={pWdcId} 
-                    onSuccess={() => {
-                      setAddingEmployee(false)
-                      invalidateWdc()
+                    onSubmit={async (values) => {
+                      if (!orgId) return
+                      await handleMutation(
+                        () => addEmpMutation.mutateAsync({
+                          organizationId: orgId,
+                          wdcId: pWdcId,
+                          name: values.name,
+                          role: values.role || undefined,
+                          fte: values.fte
+                        }),
+                        { 
+                          label: 'Add Employee to Roster',
+                          onSuccess: () => {
+                            setAddingEmployee(false)
+                            invalidateWdc()
+                          }
+                        }
+                      )
                     }} 
+                    isPending={isPending}
                     onCancel={() => setAddingEmployee(false)} 
                   />
                 ) : (
@@ -238,12 +268,24 @@ function WdcPage() {
                 
                 {addingActivity ? (
                   <AddActivityForm 
-                    orgId={orgId!} 
-                    wdcId={pWdcId} 
-                    onSuccess={() => {
-                      setAddingActivity(false)
-                      invalidateWdc()
+                    onSubmit={async (values) => {
+                      if (!orgId) return
+                      await handleMutation(
+                        () => addActivityMutation.mutateAsync({
+                          organizationId: orgId,
+                          wdcId: pWdcId,
+                          name: values.name
+                        }),
+                        { 
+                          label: 'Add Activity Row',
+                          onSuccess: () => {
+                            setAddingActivity(false)
+                            invalidateWdc()
+                          }
+                        }
+                      )
                     }} 
+                    isPending={isPending}
                     onCancel={() => setAddingActivity(false)} 
                   />
                 ) : (
@@ -254,13 +296,27 @@ function WdcPage() {
 
                 {activeCell && (
                   <AddTaskForm 
-                    orgId={orgId!} 
-                    wdcId={pWdcId} 
-                    activeCell={activeCell} 
-                    onSuccess={() => {
-                      setActiveCell(null)
-                      invalidateWdc()
+                    onSubmit={async (values) => {
+                      if (!orgId || !activeCell) return
+                      await handleMutation(
+                        () => addTaskMutation.mutateAsync({
+                          organizationId: orgId,
+                          wdcId: pWdcId,
+                          employeeId: activeCell.empId,
+                          activityId: activeCell.actId,
+                          taskName: values.taskName.trim(),
+                          hoursPerWeek: Number(values.hours)
+                        }),
+                        { 
+                          label: 'Register Individual Task',
+                          onSuccess: () => {
+                            setActiveCell(null)
+                            invalidateWdc()
+                          }
+                        }
+                      )
                     }} 
+                    isPending={isPending}
                     onCancel={() => setActiveCell(null)} 
                   />
                 )}

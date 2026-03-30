@@ -4,6 +4,7 @@ import { useTRPC } from '@/integrations/trpc/react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useLiveQuery } from '@tanstack/react-db'
 import { useStepsCollection } from '@/db-collections'
+import { useMutationHandler } from '@/hooks/use-mutation-handler'
 import mermaid from 'mermaid'
 import { SymbolType, fmtMinutes } from '@/components/ws/SymbolMeta'
 import { z } from 'zod'
@@ -11,6 +12,7 @@ import { z } from 'zod'
 export function useProcessChart(orgId: number | undefined, pPcId: number) {
   const trpc = useTRPC()
   const queryClient = useQueryClient()
+  const { handleMutation, isPending: mutationPending, error: mutationError } = useMutationHandler()
 
   // -- Queries --
   const { data: pcData, isLoading: pcLoading } = useQuery({
@@ -56,14 +58,19 @@ export function useProcessChart(orgId: number | undefined, pPcId: number) {
     },
     onSubmit: async ({ value }) => {
       if (!orgId) return
-      stepsCollection.insert({
-        symbol: value.symbol,
-        description: value.description.trim(),
-        who: value.who.trim() || null,
-        minutes: value.minutes ? Number(value.minutes) : null,
-        feet: value.feet ? Number(value.feet) : null
-      } as any)
-      addStepForm.reset()
+      await handleMutation(
+        () => stepsCollection.insert({
+          symbol: value.symbol,
+          description: value.description.trim(),
+          who: value.who.trim() || null,
+          minutes: value.minutes ? Number(value.minutes) : null,
+          feet: value.feet ? Number(value.feet) : null
+        } as any),
+        { 
+          label: 'Create Process Step',
+          onSuccess: () => addStepForm.reset()
+        }
+      )
     },
   })
   const [editingId, setEditingId] = useState<number | null>(null)
@@ -84,14 +91,19 @@ export function useProcessChart(orgId: number | undefined, pPcId: number) {
       const step = steps.find(s => s.id === editingId)
       if (!step) return
 
-      stepsCollection.update(editingId, {
-        symbol: value.symbol,
-        description: value.description.trim() || step.description,
-        who: value.who.trim() || null,
-        minutes: value.minutes ? Number(value.minutes) : null,
-        feet: value.feet ? Number(value.feet) : null,
-      } as any)
-      setEditingId(null)
+      await handleMutation(
+        () => stepsCollection.update(editingId, {
+          symbol: value.symbol,
+          description: value.description.trim() || step.description,
+          who: value.who.trim() || null,
+          minutes: value.minutes ? Number(value.minutes) : null,
+          feet: value.feet ? Number(value.feet) : null,
+        } as any),
+        { 
+          label: 'Update Process Step',
+          onSuccess: () => setEditingId(null)
+        }
+      )
     },
   })
   const [copiedCsv, setCopiedCsv] = useState(false)
@@ -159,12 +171,17 @@ export function useProcessChart(orgId: number | undefined, pPcId: number) {
     const [removed] = nextSteps.splice(fromIdx, 1)
     nextSteps.splice(toIdx, 0, removed)
     
-    await reorderStepsMutation.mutateAsync({
-      organizationId: orgId,
-      processChartId: pPcId,
-      stepIds: nextSteps.map(s => s.id)
-    })
-    invalidatePc()
+    await handleMutation(
+      () => reorderStepsMutation.mutateAsync({
+        organizationId: orgId,
+        processChartId: pPcId,
+        stepIds: nextSteps.map(s => s.id)
+      }),
+      { 
+        label: 'Reorder Flow Sequence',
+        onSuccess: () => invalidatePc()
+      }
+    )
   }
 
   const handleAddStep = async (e?: React.FormEvent) => {
@@ -190,7 +207,10 @@ export function useProcessChart(orgId: number | undefined, pPcId: number) {
 
   const handleRemoveStep = async (stepId: number) => {
     if (!orgId) return
-    stepsCollection.delete(stepId)
+    await handleMutation(
+      () => stepsCollection.delete(stepId),
+      { label: 'Unregister Process Step' }
+    )
   }
 
   return {
@@ -205,6 +225,8 @@ export function useProcessChart(orgId: number | undefined, pPcId: number) {
     dragId, setDragId,
     dropIdx, setDropIdx,
     handleReorder, handleAddStep, startEdit, commitEdit, handleRemoveStep,
-    invalidatePc
+    invalidatePc,
+    mutationPending,
+    mutationError
   }
 }

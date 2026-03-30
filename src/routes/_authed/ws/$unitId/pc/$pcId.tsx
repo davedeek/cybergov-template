@@ -1,7 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useParams } from '@tanstack/react-router'
 import { useOrganization } from '@/hooks/useOrganization'
-import { FileBarChart, LayoutList, Share2, Hammer, Info } from 'lucide-react'
+import { FileBarChart, LayoutList, Share2, Hammer, Info, AlertCircle } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useProcessChart } from '@/hooks/useProcessChart'
@@ -33,6 +33,7 @@ function ProcessChartPageComponent() {
     dragId, setDragId,
     dropIdx, setDropIdx,
     handleReorder, startEdit, commitEdit, handleRemoveStep,
+    mutationError, mutationPending
   } = useProcessChart(orgId, pPcId)
 
   if (isLoading) return (
@@ -80,9 +81,16 @@ function ProcessChartPageComponent() {
       </header>
 
       <div className="p-8 max-w-[1600px] mx-auto">
+        {mutationError && (
+          <div className="mb-8 p-4 bg-nd-accent/10 border-2 border-nd-accent text-nd-accent font-mono text-xs uppercase tracking-widest flex items-center gap-3 animate-in fade-in slide-in-from-top-2">
+            <AlertCircle className="w-4 h-4 flex-shrink-0" />
+            <span>Process Error: {mutationError}</span>
+          </div>
+        )}
+
         <div className="flex flex-col lg:flex-row gap-12">
           <div className="flex-1 space-y-12">
-            <AddStepForm form={addStepForm} />
+            <AddStepForm form={addStepForm} isPending={mutationPending} />
 
             <Tabs value={activeTab} onValueChange={setActiveTab} className="p-0 border-none">
               <div className="flex items-center justify-between mb-8 border-b-2 border-nd-ink print:hidden">

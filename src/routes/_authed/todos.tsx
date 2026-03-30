@@ -1,9 +1,10 @@
 import { createFileRoute, useSearch } from '@tanstack/react-router'
-import { Trash2, CheckCircle, ListTodo } from 'lucide-react'
+import { Trash2, CheckCircle, ListTodo, AlertCircle } from 'lucide-react'
 import { useTRPC } from '@/integrations/trpc/react'
 import { useQuery } from '@tanstack/react-query'
 import { useLiveQuery } from '@tanstack/react-db'
 import { useTodosCollection } from '@/db-collections'
+import { useMutationHandler } from '@/hooks/use-mutation-handler'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -16,6 +17,7 @@ export const Route = createFileRoute('/_authed/todos')({
 function TodosPage() {
   const trpc = useTRPC()
   const search = useSearch({ strict: false }) as { orgId?: number }
+  const { handleMutation, isPending, error: mutationError } = useMutationHandler()
 
   const { data: currentOrg } = useQuery(
     trpc.organization.getOrCreateCurrent.queryOptions(),
@@ -38,6 +40,13 @@ function TodosPage() {
 
   return (
     <div className="p-6 lg:p-10 max-w-4xl mx-auto font-sans min-h-full bg-nd-bg overflow-x-hidden">
+      {mutationError && (
+        <div className="mb-6 p-4 bg-nd-accent/10 border-2 border-nd-accent text-nd-accent font-mono text-xs uppercase tracking-widest flex items-center gap-3 animate-in fade-in slide-in-from-top-2">
+          <AlertCircle className="w-4 h-4 flex-shrink-0" />
+          <span>Action Required: {mutationError}</span>
+        </div>
+      )}
+
       <header className="mb-10 border-b-2 border-nd-ink pb-6 flex items-center justify-between">
         <div>
           <div className="flex items-center gap-2 text-nd-accent mb-2">
@@ -58,7 +67,15 @@ function TodosPage() {
           </CardTitle>
         </CardHeader>
         <CardContent className="pt-6">
-          <AddTodoForm todosCollection={todosCollection} />
+          <AddTodoForm 
+            onSubmit={async (values) => {
+              await handleMutation(
+                () => todosCollection.insert({ name: values.name } as any),
+                { label: 'Create Todo' }
+              )
+            }} 
+            isPending={isPending}
+          />
         </CardContent>
       </Card>
 
@@ -93,9 +110,12 @@ function TodosPage() {
               >
                 <button
                   onClick={() =>
-                    todosCollection.update(todo.id, {
-                      completedAt: todo.completedAt ? null : new Date(),
-                    } as any)
+                    handleMutation(
+                      () => todosCollection.update(todo.id, {
+                        completedAt: todo.completedAt ? null : new Date(),
+                      } as any),
+                      { label: 'Toggle Todo' }
+                    )
                   }
                   className={`flex-shrink-0 w-6 h-6 border-2 flex items-center justify-center transition-colors ${todo.completedAt ? 'bg-nd-ink border-nd-ink text-nd-bg' : 'bg-nd-bg border-nd-ink hover:border-nd-accent'}`}
                 >
@@ -119,7 +139,10 @@ function TodosPage() {
                   <Button
                     variant="ghost"
                     size="icon"
-                    onClick={() => todosCollection.delete(todo.id)}
+                    onClick={() => handleMutation(
+                      () => todosCollection.delete(todo.id),
+                      { label: 'Delete Todo' }
+                    )}
                     className="h-9 w-9 text-nd-ink-muted hover:text-nd-accent hover:bg-nd-accent-light rounded-none transition-colors border border-transparent hover:border-nd-accent"
                   >
                     <Trash2 className="w-4 h-4" />

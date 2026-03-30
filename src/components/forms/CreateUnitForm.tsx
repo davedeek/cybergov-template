@@ -7,10 +7,9 @@ import { Label } from '@/components/ui/label'
 import { DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog'
 
 interface CreateUnitFormProps {
-  unitsCollection: any
-  onSuccess: () => void
+  onSubmit: (values: { name: string, description: string }) => Promise<void>
+  isPending?: boolean
   onCancel: () => void
-  orgId: number
 }
 
 const unitSchema = z.object({
@@ -18,33 +17,29 @@ const unitSchema = z.object({
   description: z.string(),
 })
 
-export function CreateUnitForm({ unitsCollection, onSuccess, onCancel, orgId }: CreateUnitFormProps) {
+export function CreateUnitForm({ onSubmit, isPending: externalPending, onCancel }: CreateUnitFormProps) {
   const form = useForm({
     defaultValues: {
       name: '',
       description: '',
     },
+    validators: {
+      onChange: unitSchema,
+    },
     onSubmit: async ({ value }) => {
-      if (!orgId) return
-
-      await unitsCollection.insert({
-        name: value.name.trim(),
-        description: value.description.trim() || null,
-      } as any)
-
+      await onSubmit(value)
       form.reset()
-      onSuccess()
     },
   })
 
+  const handleFormSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    form.handleSubmit()
+  }
+
   return (
-    <form 
-      onSubmit={(e) => {
-        e.preventDefault()
-        e.stopPropagation()
-        form.handleSubmit()
-      }}
-    >
+    <form onSubmit={handleFormSubmit}>
       <DialogHeader>
         <DialogTitle>Create New Unit</DialogTitle>
         <DialogDescription>
@@ -54,9 +49,6 @@ export function CreateUnitForm({ unitsCollection, onSuccess, onCancel, orgId }: 
       <div className="grid gap-4 py-4">
         <form.Field
           name="name"
-          validators={{
-            onChange: unitSchema.shape.name,
-          }}
           children={(field) => (
             <div className="flex flex-col gap-2">
               <Label htmlFor={field.name}>Unit Name</Label>
@@ -74,9 +66,6 @@ export function CreateUnitForm({ unitsCollection, onSuccess, onCancel, orgId }: 
         />
         <form.Field
           name="description"
-          validators={{
-            onChange: unitSchema.shape.description,
-          }}
           children={(field) => (
             <div className="flex flex-col gap-2">
               <Label htmlFor={field.name}>Description (optional)</Label>
@@ -108,10 +97,10 @@ export function CreateUnitForm({ unitsCollection, onSuccess, onCancel, orgId }: 
           children={([canSubmit, isSubmitting]) => (
             <Button
               type="submit"
-              disabled={!canSubmit || isSubmitting}
-              className="bg-nd-accent hover:bg-nd-accent-hover text-white"
+              disabled={!canSubmit || isSubmitting || externalPending}
+              className="bg-nd-accent hover:bg-nd-accent-hover text-white px-8"
             >
-              {isSubmitting ? 'Creating...' : 'Create Unit'}
+              {isSubmitting || externalPending ? 'Creating...' : 'Create Unit'}
             </Button>
           )}
         />

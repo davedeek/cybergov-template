@@ -4,14 +4,10 @@ import { FormError } from '@/components/ui/form-error'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { ArrowRight } from 'lucide-react'
-import { useMutation } from '@tanstack/react-query'
-import { useTRPC } from '@/integrations/trpc/react'
 
 interface AddTaskFormProps {
-  orgId: number
-  wdcId: number
-  activeCell: { actId: number, empId: number } | null
-  onSuccess: () => void
+  onSubmit: (values: z.infer<typeof taskSchema>) => Promise<void>
+  isPending?: boolean
   onCancel: () => void
 }
 
@@ -20,40 +16,30 @@ const taskSchema = z.object({
   hours: z.string().refine(v => !isNaN(Number(v)) && Number(v) > 0, 'Hours must be a positive number'),
 })
 
-export function AddTaskForm({ orgId, wdcId, activeCell, onSuccess, onCancel }: AddTaskFormProps) {
-  const trpc = useTRPC()
-  const addTaskMutation = useMutation(trpc.ws.wdc.addTask.mutationOptions())
-
+export function AddTaskForm({ onSubmit, isPending: externalPending, onCancel }: AddTaskFormProps) {
   const form = useForm({
     defaultValues: {
       taskName: '',
-      hours: '',
+      hours: '1',
     },
     validators: {
       onChange: taskSchema,
     },
     onSubmit: async ({ value }) => {
-      if (!activeCell || !orgId) return
-      await addTaskMutation.mutateAsync({
-        organizationId: orgId, 
-        wdcId: wdcId,
-        employeeId: activeCell.empId, 
-        activityId: activeCell.actId,
-        taskName: value.taskName.trim(), 
-        hoursPerWeek: Number(value.hours)
-      })
+      await onSubmit(value)
       form.reset()
-      onSuccess()
     },
   })
 
+  const handleFormSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    form.handleSubmit()
+  }
+
   return (
     <form 
-      onSubmit={(e) => {
-        e.preventDefault()
-        e.stopPropagation()
-        form.handleSubmit()
-      }}
+      onSubmit={handleFormSubmit}
       className="flex items-center gap-2 bg-nd-surface px-4 py-2 border-2 border-nd-accent shadow-sm ml-auto animate-in fade-in zoom-in-95 duration-200"
     >
       <span className="text-[10px] font-mono text-nd-accent tracking-widest uppercase flex items-center gap-1">
@@ -96,11 +82,11 @@ export function AddTaskForm({ orgId, wdcId, activeCell, onSuccess, onCancel }: A
         children={([canSubmit, isSubmitting]) => (
           <Button 
             type="submit"
-            disabled={!canSubmit || isSubmitting || addTaskMutation.isPending} 
+            disabled={!canSubmit || isSubmitting || externalPending} 
             size="sm" 
-            className="h-8 rounded-none bg-nd-accent hover:bg-nd-accent-hover text-white font-serif uppercase text-xs tracking-wider px-4 shadow-sm active:translate-y-[1px]"
+            className="h-8 rounded-none bg-nd-accent hover:bg-nd-accent-hover text-white font-serif tracking-wide px-4"
           >
-            {isSubmitting || addTaskMutation.isPending ? '...' : 'Add'}
+            {isSubmitting || externalPending ? '...' : 'Add'}
           </Button>
         )}
       />

@@ -1,9 +1,11 @@
 import { createFileRoute, useSearch } from '@tanstack/react-router'
-import { Settings, Shield } from 'lucide-react'
+import { Settings, Shield, AlertCircle } from 'lucide-react'
 import { useTRPC } from '@/integrations/trpc/react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useLiveQuery } from '@tanstack/react-db'
+import { trpcClient } from '@/integrations/tanstack-query/root-provider'
 import { useMembersCollection } from '@/db-collections'
+import { useMutationHandler } from '@/hooks/use-mutation-handler'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { InviteMemberForm } from '@/components/forms/InviteMemberForm'
 
@@ -15,6 +17,7 @@ function SettingsPage() {
   const trpc = useTRPC()
   const queryClient = useQueryClient()
   const search = useSearch({ strict: false }) as { orgId?: number }
+  const { handleMutation, isPending, error: mutationError } = useMutationHandler()
 
   const { data: currentOrg } = useQuery(
     trpc.organization.getOrCreateCurrent.queryOptions(),
@@ -30,6 +33,13 @@ function SettingsPage() {
 
   return (
     <div className="p-6 lg:p-8 max-w-3xl mx-auto font-sans">
+      {mutationError && (
+        <div className="mb-6 p-4 bg-nd-accent/10 border-2 border-nd-accent text-nd-accent font-mono text-xs uppercase tracking-widest flex items-center gap-3 animate-in fade-in slide-in-from-top-2">
+          <AlertCircle className="w-4 h-4 flex-shrink-0" />
+          <span>Registry Error: {mutationError}</span>
+        </div>
+      )}
+
       <div className="mb-8 border-b-2 border-nd-ink pb-6">
         <h1 className="text-3xl font-bold font-serif text-nd-ink uppercase tracking-tight flex items-center gap-3">
           <Settings className="w-6 h-6 text-nd-accent" />
@@ -71,8 +81,20 @@ function SettingsPage() {
         <CardContent className="p-8">
           {orgId && (
             <InviteMemberForm 
-              orgId={orgId} 
-              onSuccess={() => queryClient.invalidateQueries()} 
+              onSubmit={async (values) => {
+                await handleMutation(
+                  () => trpcClient.organization.invite.mutate({
+                    organizationId: orgId,
+                    email: values.email,
+                    role: values.role as any,
+                  }),
+                  { 
+                    label: 'Invite Team Member',
+                    onSuccess: () => queryClient.invalidateQueries()
+                  }
+                )
+              }} 
+              isPending={isPending}
             />
           )}
         </CardContent>

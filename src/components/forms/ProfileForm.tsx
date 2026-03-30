@@ -1,7 +1,6 @@
 import { useState } from 'react'
 import { useForm } from '@tanstack/react-form'
 import { Save } from 'lucide-react'
-import { authClient } from '@/lib/auth-client'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -11,44 +10,40 @@ import { FormError } from '@/components/ui/form-error'
 interface ProfileFormProps {
   initialName: string
   email: string
-  onSuccess?: () => void
+  onSubmit: (values: { name: string }) => Promise<void>
+  isPending?: boolean
 }
 
 const profileSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters'),
 })
 
-export function ProfileForm({ initialName, email, onSuccess }: ProfileFormProps) {
+export function ProfileForm({ initialName, email, onSubmit, isPending: externalPending }: ProfileFormProps) {
   const [saved, setSaved] = useState(false)
-  const [isLoading, setIsLoading] = useState(false)
 
   const form = useForm({
     defaultValues: {
       name: initialName,
     },
+    validators: {
+      onChange: profileSchema,
+    },
     onSubmit: async ({ value }) => {
-      setIsLoading(true)
       setSaved(false)
-
-      try {
-        await authClient.updateUser({ name: value.name })
-        setSaved(true)
-        onSuccess?.()
-      } catch {
-        // handle error
-      } finally {
-        setIsLoading(false)
-      }
+      await onSubmit(value)
+      setSaved(true)
     },
   })
 
+  const handleFormSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    form.handleSubmit()
+  }
+
   return (
     <form 
-      onSubmit={(e) => {
-        e.preventDefault()
-        e.stopPropagation()
-        form.handleSubmit()
-      }} 
+      onSubmit={handleFormSubmit} 
       className="space-y-6"
     >
       <div className="space-y-2">
@@ -66,9 +61,6 @@ export function ProfileForm({ initialName, email, onSuccess }: ProfileFormProps)
 
       <form.Field
         name="name"
-        validators={{
-          onChange: profileSchema.shape.name,
-        }}
         children={(field) => (
           <div className="space-y-2">
             <Label htmlFor={field.name} className="text-[10px] font-mono uppercase tracking-[0.2em] text-nd-ink-muted">
@@ -96,11 +88,11 @@ export function ProfileForm({ initialName, email, onSuccess }: ProfileFormProps)
           children={([canSubmit, isSubmitting]) => (
             <Button
               type="submit"
-              disabled={!canSubmit || isSubmitting || isLoading}
+              disabled={!canSubmit || isSubmitting || externalPending}
               className="px-8 h-12 bg-nd-ink hover:bg-nd-accent text-nd-bg font-serif font-bold tracking-widest uppercase rounded-none transition-all border-2 border-nd-ink flex items-center gap-3 shadow-[3px_3px_0px_#C94A1E]"
             >
               <Save className="w-4 h-4" />
-              {isLoading || isSubmitting ? 'Processing...' : 'Save Artifacts'}
+              {isSubmitting || externalPending ? 'Processing...' : 'Save Artifacts'}
             </Button>
           )}
         />

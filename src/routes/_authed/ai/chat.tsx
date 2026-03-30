@@ -1,12 +1,13 @@
 import { useEffect, useRef } from 'react'
 import { createFileRoute } from '@tanstack/react-router'
-import { Square } from 'lucide-react'
+import { Square, AlertCircle } from 'lucide-react'
 import { Streamdown } from 'streamdown'
 
 import { useAIChat } from '@/lib/ai-chat-hook'
 import type { ChatMessages } from '@/lib/ai-chat-hook'
 import { Button } from '@/components/ui/button'
 import { ChatForm } from '@/components/forms/ChatForm'
+import { useMutationHandler } from '@/hooks/use-mutation-handler'
 
 import './chat.css'
 
@@ -98,6 +99,7 @@ function Messages({ messages }: { messages: ChatMessages }) {
 
 function ChatPage() {
   const { messages, sendMessage, isLoading, stop } = useAIChat()
+  const { handleMutation, isPending, error: mutationError } = useMutationHandler()
   const scrollRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -115,7 +117,14 @@ function ChatPage() {
 
         <Layout>
           <div className="space-y-3">
-            {isLoading && (
+            {mutationError && (
+              <div className="mb-4 p-3 bg-nd-accent/10 border border-nd-accent text-nd-accent font-mono text-[10px] uppercase tracking-widest flex items-center gap-2">
+                <AlertCircle className="w-3 h-3" />
+                <span>Transmission Error: {mutationError}</span>
+              </div>
+            )}
+            
+            {(isLoading || isPending) && (
               <div className="flex items-center justify-center mb-4">
                 <Button
                   variant="outline"
@@ -128,8 +137,13 @@ function ChatPage() {
               </div>
             )}
             <ChatForm 
-              onSubmit={sendMessage} 
-              isLoading={isLoading} 
+              onSubmit={async (values) => {
+                await handleMutation(
+                  () => sendMessage(values),
+                  { label: 'AI Query' }
+                )
+              }} 
+              isPending={isLoading || isPending} 
             />
           </div>
         </Layout>

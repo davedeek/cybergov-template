@@ -1,7 +1,5 @@
 import { useState } from 'react'
 import { useForm } from '@tanstack/react-form'
-import { authClient } from '@/lib/auth-client'
-import { useQueryClient } from '@tanstack/react-query'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -10,7 +8,8 @@ import { z } from 'zod'
 import { FormError } from '@/components/ui/form-error'
 
 interface SignInFormProps {
-  onSuccess: () => void
+  onSubmit: (values: z.infer<typeof signinSchema>) => Promise<{ error?: { message: string } } | void>
+  isPending?: boolean
 }
 
 const signinSchema = z.object({
@@ -18,47 +17,35 @@ const signinSchema = z.object({
   password: z.string().min(1, 'Password is required'),
 })
 
-export function SignInForm({ onSuccess }: SignInFormProps) {
-  const queryClient = useQueryClient()
+export function SignInForm({ onSubmit, isPending: externalPending }: SignInFormProps) {
   const [error, setError] = useState<string | null>(null)
-  const [isLoading, setIsLoading] = useState(false)
 
   const form = useForm({
     defaultValues: {
       email: '',
       password: '',
     },
+    validators: {
+      onChange: signinSchema,
+    },
     onSubmit: async ({ value }) => {
       setError(null)
-      setIsLoading(true)
-
-      try {
-        const result = await authClient.signIn.email({
-          email: value.email,
-          password: value.password,
-        })
-
-        if (result.error) {
-          setError(result.error.message || 'Invalid credentials')
-        } else {
-          await queryClient.invalidateQueries()
-          onSuccess()
-        }
-      } catch {
-        setError('Something went wrong. Please try again.')
-      } finally {
-        setIsLoading(false)
+      const result = await onSubmit(value)
+      if (result && result.error) {
+        setError(result.error.message || 'Invalid credentials')
       }
     },
   })
 
+  const handleFormSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    form.handleSubmit()
+  }
+
   return (
     <form
-      onSubmit={(e) => {
-        e.preventDefault()
-        e.stopPropagation()
-        form.handleSubmit()
-      }}
+      onSubmit={handleFormSubmit}
       className="space-y-6"
     >
       {error && (
@@ -72,9 +59,6 @@ export function SignInForm({ onSuccess }: SignInFormProps) {
       <div className="space-y-4">
         <form.Field
           name="email"
-          validators={{
-            onChange: signinSchema.shape.email,
-          }}
           children={(field) => (
             <div className="space-y-2">
               <Label htmlFor={field.name} className="text-xs font-mono uppercase tracking-wider text-nd-ink-muted">
@@ -96,9 +80,6 @@ export function SignInForm({ onSuccess }: SignInFormProps) {
 
         <form.Field
           name="password"
-          validators={{
-            onChange: signinSchema.shape.password,
-          }}
           children={(field) => (
             <div className="space-y-2">
               <Label htmlFor={field.name} className="text-xs font-mono uppercase tracking-wider text-nd-ink-muted">
@@ -122,12 +103,12 @@ export function SignInForm({ onSuccess }: SignInFormProps) {
       <form.Subscribe
         selector={(state) => [state.canSubmit, state.isSubmitting]}
         children={([canSubmit, isSubmitting]) => (
-          <Button
-            type="submit"
-            disabled={!canSubmit || isSubmitting || isLoading}
-            className="w-full h-12 bg-nd-ink hover:bg-nd-ink/90 text-nd-bg font-serif font-bold tracking-wide transition-colors rounded-none"
+          <Button 
+            type="submit" 
+            className="w-full h-12 bg-nd-ink hover:bg-nd-accent text-nd-bg font-serif font-bold tracking-[0.1em] uppercase rounded-none transition-all border-2 border-nd-ink shadow-[4px_4px_0px_#C94A1E]"
+            disabled={!canSubmit || isSubmitting || externalPending}
           >
-            {isLoading || isSubmitting ? 'Signing in...' : 'Sign in'}
+            {isSubmitting || externalPending ? 'Authenticating...' : 'Sign In'}
           </Button>
         )}
       />

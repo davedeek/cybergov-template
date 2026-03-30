@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { createFileRoute } from '@tanstack/react-router'
-import { ImageIcon, Loader2, Download } from 'lucide-react'
+import { AlertCircle, ImageIcon, Loader2, Download } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import {
@@ -13,6 +13,7 @@ import {
 import { Label } from '@/components/ui/label'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { useMutationHandler } from '@/hooks/use-mutation-handler'
 
 const SIZES = ['1024x1024', '1536x1024', '1024x1536', 'auto']
 
@@ -29,33 +30,31 @@ function ImagePage() {
   const [size, setSize] = useState('1024x1024')
   const [numberOfImages, setNumberOfImages] = useState(1)
   const [images, setImages] = useState<Array<GeneratedImage>>([])
-  const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  
+  const { handleMutation, isPending: isLoading, error: mutationError } = useMutationHandler()
 
   const handleGenerate = async () => {
-    setIsLoading(true)
-    setError(null)
     setImages([])
 
-    try {
-      const response = await fetch('/api/ai/image', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ prompt, size, numberOfImages }),
-      })
+    await handleMutation(
+      async () => {
+        const response = await fetch('/api/ai/image', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ prompt, size, numberOfImages }),
+        })
 
-      const data = await response.json()
+        const data = await response.json()
 
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to generate image')
-      }
+        if (!response.ok) {
+          throw new Error(data.error || 'Failed to generate image')
+        }
 
-      setImages(data.images)
-    } catch (err: any) {
-      setError(err.message)
-    } finally {
-      setIsLoading(false)
-    }
+        setImages(data.images)
+        return data
+      },
+      { label: 'AI Image Synthesis' }
+    )
   }
 
   const getImageSrc = (image: GeneratedImage) => {
@@ -68,20 +67,21 @@ function ImagePage() {
     const src = getImageSrc(image)
     if (!src) return
 
-    try {
-      const response = await fetch(src)
-      const blob = await response.blob()
-      const url = URL.createObjectURL(blob)
-      const a = document.createElement('a')
-      a.href = url
-      a.download = `generated-image-${index + 1}.png`
-      document.body.appendChild(a)
-      a.click()
-      document.body.removeChild(a)
-      URL.revokeObjectURL(url)
-    } catch (err) {
-      // Failed to download image
-    }
+    await handleMutation(
+      async () => {
+        const response = await fetch(src)
+        const blob = await response.blob()
+        const url = URL.createObjectURL(blob)
+        const a = document.createElement('a')
+        a.href = url
+        a.download = `generated-image-${index + 1}.png`
+        document.body.appendChild(a)
+        a.click()
+        document.body.removeChild(a)
+        URL.revokeObjectURL(url)
+      },
+      { label: 'Artifact Download' }
+    )
   }
 
   return (
@@ -182,10 +182,11 @@ function ImagePage() {
               Generated Artifacts
             </h2>
 
-            {error && (
+            {mutationError && (
               <Alert variant="destructive" className="rounded-none border-2 border-nd-flag-red bg-nd-flag-red/5 mb-6">
+                <AlertCircle className="w-4 h-4 mr-2" />
                 <AlertDescription className="font-mono text-sm">
-                  <strong>Error:</strong> {error}
+                  <strong>Error:</strong> {mutationError}
                 </AlertDescription>
               </Alert>
             )}
@@ -219,7 +220,7 @@ function ImagePage() {
                   ))}
                 </div>
               </div>
-            ) : !error && !isLoading ? (
+            ) : !mutationError && !isLoading ? (
               <div className="flex flex-col items-center justify-center h-64 text-nd-ink-muted border-2 border-dashed border-nd-border bg-nd-surface-alt m-4">
                 <ImageIcon className="w-12 h-12 mb-4 opacity-50" />
                 <p className="font-mono text-xs uppercase tracking-widest text-center px-4">

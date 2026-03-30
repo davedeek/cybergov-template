@@ -7,41 +7,37 @@ import { Label } from '@/components/ui/label'
 import { DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog'
 
 interface CreateWdcFormProps {
-  wdcCollection: any
-  onSuccess: (newChart: any) => void
+  onSubmit: (values: { name: string }) => Promise<void>
+  isPending?: boolean
   onCancel: () => void
-  orgId: number
 }
 
 const wdcSchema = z.object({
   name: z.string().min(3, 'Chart name must be at least 3 characters'),
 })
 
-export function CreateWdcForm({ wdcCollection, onSuccess, onCancel, orgId }: CreateWdcFormProps) {
+export function CreateWdcForm({ onSubmit, isPending: externalPending, onCancel }: CreateWdcFormProps) {
   const form = useForm({
     defaultValues: {
       name: '',
     },
+    validators: {
+      onChange: wdcSchema,
+    },
     onSubmit: async ({ value }) => {
-      if (!orgId) return
-
-      const newChart = await wdcCollection.insert({
-        name: value.name,
-      } as any)
-
+      await onSubmit(value)
       form.reset()
-      onSuccess(newChart)
     },
   })
 
+  const handleFormSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    form.handleSubmit()
+  }
+
   return (
-    <form 
-      onSubmit={(e) => {
-        e.preventDefault()
-        e.stopPropagation()
-        form.handleSubmit()
-      }}
-    >
+    <form onSubmit={handleFormSubmit}>
       <DialogHeader>
         <DialogTitle>New Work Distribution Chart</DialogTitle>
         <DialogDescription>
@@ -51,9 +47,6 @@ export function CreateWdcForm({ wdcCollection, onSuccess, onCancel, orgId }: Cre
       <div className="flex flex-col gap-2 py-4">
         <form.Field
           name="name"
-          validators={{
-            onChange: wdcSchema.shape.name,
-          }}
           children={(field) => (
             <>
               <Label htmlFor={field.name}>Chart Name</Label>
@@ -78,8 +71,12 @@ export function CreateWdcForm({ wdcCollection, onSuccess, onCancel, orgId }: Cre
         <form.Subscribe
           selector={(state) => [state.canSubmit, state.isSubmitting]}
           children={([canSubmit, isSubmitting]) => (
-            <Button type="submit" disabled={!canSubmit || isSubmitting} className="bg-nd-accent hover:bg-nd-accent-hover text-white">
-              {isSubmitting ? 'Creating...' : 'Create Chart'}
+            <Button 
+              type="submit" 
+              disabled={!canSubmit || isSubmitting || externalPending} 
+              className="bg-nd-accent hover:bg-nd-accent-hover text-white px-8"
+            >
+              {isSubmitting || externalPending ? 'Creating...' : 'Create Chart'}
             </Button>
           )}
         />

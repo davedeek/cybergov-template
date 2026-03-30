@@ -1,12 +1,13 @@
 import { useState } from 'react'
 import { createFileRoute } from '@tanstack/react-router'
-import { ChefHat, Clock, Users, Gauge } from 'lucide-react'
+import { ChefHat, Clock, Users, Gauge, AlertCircle } from 'lucide-react'
 import { Streamdown } from 'streamdown'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Skeleton } from '@/components/ui/skeleton'
+import { useMutationHandler } from '@/hooks/use-mutation-handler'
 
 interface Recipe {
   name: string
@@ -185,38 +186,36 @@ function StructuredPage() {
     provider: string
     model: string
   } | null>(null)
-  const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  
+  const { handleMutation, isPending: isLoading, error: mutationError } = useMutationHandler()
 
   const handleGenerate = async (mode: Mode) => {
     if (!recipeName.trim()) return
 
-    setIsLoading(true)
-    setError(null)
     setResult(null)
 
-    try {
-      const response = await fetch('/api/ai/structured', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ recipeName, mode }),
-      })
+    await handleMutation(
+      async () => {
+        const response = await fetch('/api/ai/structured', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ recipeName, mode }),
+        })
 
-      const data = await response.json()
+        const data = await response.json()
 
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to generate recipe')
-      }
+        if (!response.ok) {
+          throw new Error(data.error || 'Failed to generate recipe')
+        }
 
-      setResult(data)
-    } catch (err: any) {
-      setError(err.message)
-    } finally {
-      setIsLoading(false)
-    }
+        setResult(data)
+        return data
+      },
+      { label: `AI Structured Synthesis (${mode})` }
+    )
   }
 
-  const canExecute = !!(!isLoading && recipeName.trim() && !error)
+  const canExecute = !!(!isLoading && recipeName.trim())
 
   return (
     <div className="min-h-[calc(100vh-80px)] bg-nd-bg p-6 lg:p-8 font-sans">
@@ -309,10 +308,11 @@ function StructuredPage() {
             )}
           </div>
 
-          {error && (
+          {mutationError && (
             <Alert variant="destructive" className="rounded-none border-2 border-nd-flag-red bg-nd-flag-red/5 mb-8">
+              <AlertCircle className="w-4 h-4 mr-2" />
               <AlertDescription className="font-mono text-sm uppercase">
-                <strong>Transmission Error:</strong> {error}
+                <strong>Transmission Error:</strong> {mutationError}
               </AlertDescription>
             </Alert>
           )}
@@ -341,7 +341,7 @@ function StructuredPage() {
                 </div>
               ) : null}
             </div>
-          ) : !error && !isLoading ? (
+          ) : !mutationError && !isLoading ? (
             <div className="flex flex-col items-center justify-center h-80 text-nd-ink-muted border-2 border-dashed border-nd-border bg-nd-surface-alt">
               <ChefHat className="w-16 h-16 mb-6 opacity-20" />
               <p className="font-mono text-xs uppercase tracking-[0.2em] text-center px-8">

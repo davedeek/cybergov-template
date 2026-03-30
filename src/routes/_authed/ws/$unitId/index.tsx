@@ -4,7 +4,8 @@ import { useTRPC } from '@/integrations/trpc/react'
 import { useQuery } from '@tanstack/react-query'
 import { useLiveQuery } from '@tanstack/react-db'
 import { useProcessChartsCollection, useWDCChartsCollection } from '@/db-collections'
-import { ArrowLeft, Plus, FileSpreadsheet, GitBranch, Calendar } from 'lucide-react'
+import { useMutationHandler } from '@/hooks/use-mutation-handler'
+import { ArrowLeft, Plus, FileSpreadsheet, GitBranch, Calendar, AlertCircle } from 'lucide-react'
 
 import { Card, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -21,6 +22,7 @@ function UnitDashboardPage() {
   const search = useSearch({ strict: false }) as { orgId?: number }
   const navigate = useNavigate()
   const trpc = useTRPC()
+  const { handleMutation, isPending, error: mutationError } = useMutationHandler()
 
   const { data: currentOrg } = useQuery(trpc.organization.getOrCreateCurrent.queryOptions())
   const orgId = search?.orgId ?? currentOrg?.organization.id
@@ -82,14 +84,32 @@ function UnitDashboardPage() {
               {orgId && (
                 <div className="p-6">
                   <CreateWdcForm 
-                    wdcCollection={wdcCollection} 
-                    orgId={orgId} 
-                    onSuccess={(newChart) => {
-                      setIsWdcOpen(false)
-                      navigate({ to: '/ws/$unitId/wdc/$wdcId', params: { unitId, wdcId: newChart.id.toString() }, search: { orgId } })
+                    onSubmit={async (values) => {
+                      await handleMutation(
+                        async () => {
+                          const newChart = await wdcCollection.insert({
+                            name: values.name,
+                          } as any)
+                          return newChart
+                        },
+                        { 
+                          label: 'Create WDC Register',
+                          onSuccess: (newChart: any) => {
+                            setIsWdcOpen(false)
+                            navigate({ to: '/ws/$unitId/wdc/$wdcId', params: { unitId, wdcId: newChart.id.toString() }, search: { orgId } })
+                          }
+                        }
+                      )
                     }} 
+                    isPending={isPending}
                     onCancel={() => setIsWdcOpen(false)} 
                   />
+                  {mutationError && (
+                    <div className="mt-4 p-3 bg-nd-accent/10 border border-nd-accent text-nd-accent font-mono text-[10px] uppercase tracking-widest flex items-center gap-2">
+                      <AlertCircle className="w-3 h-3 text-nd-accent" />
+                      {mutationError}
+                    </div>
+                  )}
                 </div>
               )}
             </DialogContent>
@@ -106,14 +126,33 @@ function UnitDashboardPage() {
               {orgId && (
                 <div className="p-6">
                   <CreateProcessChartForm 
-                    pcCollection={pcCollection} 
-                    orgId={orgId} 
-                    onSuccess={(newChart) => {
-                      setIsPcOpen(false)
-                      navigate({ to: '/ws/$unitId/pc/$pcId', params: { unitId, pcId: newChart.id.toString() }, search: { orgId } })
+                    onSubmit={async (values) => {
+                      await handleMutation(
+                        async () => {
+                          const newChart = await pcCollection.insert({
+                            name: values.name.trim(),
+                            description: values.description,
+                          } as any)
+                          return newChart
+                        },
+                        { 
+                          label: 'Create Process Definition',
+                          onSuccess: (newChart: any) => {
+                            setIsPcOpen(false)
+                            navigate({ to: '/ws/$unitId/pc/$pcId', params: { unitId, pcId: newChart.id.toString() }, search: { orgId } })
+                          }
+                        }
+                      )
                     }} 
+                    isPending={isPending}
                     onCancel={() => setIsPcOpen(false)} 
                   />
+                  {mutationError && (
+                    <div className="mt-4 p-3 bg-nd-accent/10 border border-nd-accent text-nd-accent font-mono text-[10px] uppercase tracking-widest flex items-center gap-2">
+                      <AlertCircle className="w-3 h-3 text-nd-accent" />
+                      {mutationError}
+                    </div>
+                  )}
                 </div>
               )}
             </DialogContent>

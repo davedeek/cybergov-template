@@ -1,7 +1,5 @@
 import { useForm } from '@tanstack/react-form'
-import { Shield } from 'lucide-react'
-import { useTRPC } from '@/integrations/trpc/react'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { UserPlus } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import {
@@ -16,8 +14,8 @@ import { z } from 'zod'
 import { FormError } from '@/components/ui/form-error'
 
 interface InviteMemberFormProps {
-  orgId: number
-  onSuccess?: () => void
+  onSubmit: (values: z.infer<typeof inviteSchema>) => Promise<void>
+  isPending?: boolean
 }
 
 const inviteSchema = z.object({
@@ -25,50 +23,35 @@ const inviteSchema = z.object({
   role: z.enum(['member', 'admin']),
 })
 
-export function InviteMemberForm({ orgId, onSuccess }: InviteMemberFormProps) {
-  const trpc = useTRPC()
-  const queryClient = useQueryClient()
-
-  const inviteMutation = useMutation(
-    trpc.organization.invite.mutationOptions({
-      onSuccess: () => {
-        queryClient.invalidateQueries()
-        onSuccess?.()
-      },
-    }),
-  )
-
+export function InviteMemberForm({ onSubmit, isPending: externalPending }: InviteMemberFormProps) {
   const form = useForm({
     defaultValues: {
       email: '',
-      role: 'member' as 'member' | 'admin',
+      role: 'member' as 'admin' | 'member',
+    },
+    validators: {
+      onChange: inviteSchema,
     },
     onSubmit: async ({ value }) => {
-      if (!value.email.trim() || !orgId) return
-      await inviteMutation.mutateAsync({
-        organizationId: orgId,
-        email: value.email,
-        role: value.role,
-      })
+      await onSubmit(value)
       form.reset()
     },
   })
 
+  const handleFormSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    form.handleSubmit()
+  }
+
   return (
     <div className="space-y-6">
       <form 
-        onSubmit={(e) => {
-          e.preventDefault()
-          e.stopPropagation()
-          form.handleSubmit()
-        }} 
+        onSubmit={handleFormSubmit} 
         className="flex flex-col md:flex-row gap-4 items-end"
       >
         <form.Field
           name="email"
-          validators={{
-            onChange: inviteSchema.shape.email,
-          }}
           children={(field) => (
             <div className="flex-1 w-full space-y-2">
               <Label htmlFor={field.name} className="text-[10px] font-mono uppercase tracking-[0.2em] text-nd-ink-muted">
@@ -89,9 +72,6 @@ export function InviteMemberForm({ orgId, onSuccess }: InviteMemberFormProps) {
         />
         <form.Field
           name="role"
-          validators={{
-            onChange: inviteSchema.shape.role,
-          }}
           children={(field) => (
             <div className="w-full md:w-[160px] space-y-2">
               <Label className="text-[10px] font-mono uppercase tracking-[0.2em] text-nd-ink-muted">
@@ -116,22 +96,17 @@ export function InviteMemberForm({ orgId, onSuccess }: InviteMemberFormProps) {
         <form.Subscribe
           selector={(state) => [state.canSubmit, state.isSubmitting]}
           children={([canSubmit, isSubmitting]) => (
-            <Button
-              type="submit"
-              disabled={!canSubmit || isSubmitting || inviteMutation.isPending}
-              className="h-12 bg-nd-ink hover:bg-nd-accent text-nd-bg font-serif font-bold tracking-widest rounded-none transition-all border-2 border-nd-ink whitespace-nowrap px-8 uppercase shadow-[3px_3px_0px_#C94A1E]"
+            <Button 
+              type="submit" 
+              disabled={!canSubmit || isSubmitting || externalPending}
+              className="px-8 h-12 bg-nd-ink hover:bg-nd-accent text-nd-bg font-serif font-bold tracking-widest uppercase rounded-none transition-all border-2 border-nd-ink flex items-center gap-3 shadow-[3px_3px_0px_#C94A1E]"
             >
-              {inviteMutation.isPending || isSubmitting ? 'Invoking...' : 'Induct User'}
+              <UserPlus className="w-4 h-4" />
+              {isSubmitting || externalPending ? 'Issuing...' : 'Issue Invitation'}
             </Button>
           )}
         />
       </form>
-      {inviteMutation.isSuccess && (
-        <div className="mt-6 p-3 bg-nd-flag-blue/5 border border-nd-flag-blue border-dashed text-nd-flag-blue font-mono text-[10px] uppercase tracking-widest font-bold flex items-center gap-2">
-          <Shield className="w-3 h-3" />
-          Manifest Dispatched Successfully.
-        </div>
-      )}
     </div>
   )
 }

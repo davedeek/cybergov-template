@@ -6,15 +6,15 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 
 interface AddTodoFormProps {
-  todosCollection: any
-  onSuccess?: () => void
+  onSubmit: (values: { name: string }) => Promise<void>
+  isPending?: boolean
 }
 
 const todoSchema = z.object({
   name: z.string().trim().min(3, 'Task description must be at least 3 characters'),
 })
 
-export function AddTodoForm({ todosCollection, onSuccess }: AddTodoFormProps) {
+export function AddTodoForm({ onSubmit, isPending }: AddTodoFormProps) {
   const form = useForm({
     defaultValues: {
       name: '',
@@ -23,20 +23,19 @@ export function AddTodoForm({ todosCollection, onSuccess }: AddTodoFormProps) {
       onChange: todoSchema,
     },
     onSubmit: async ({ value }) => {
-      await todosCollection.insert({ name: value.name } as any)
+      await onSubmit(value)
       form.reset()
-      onSuccess?.()
     },
   })
 
-  const handleAdd = (e: React.FormEvent) => {
+  const handleFormSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     e.stopPropagation()
     form.handleSubmit()
   }
 
   return (
-    <form onSubmit={handleAdd} className="flex gap-3">
+    <form onSubmit={handleFormSubmit} className="flex gap-3">
       <form.Field
         name="name"
         children={(field) => (
@@ -58,11 +57,11 @@ export function AddTodoForm({ todosCollection, onSuccess }: AddTodoFormProps) {
           <Button 
             type="submit" 
             className="bg-nd-ink hover:bg-nd-accent text-nd-bg px-8 h-12 rounded-none transition-all shadow-[2px_2px_0px_#C94A1E]"
-            disabled={!canSubmit || isSubmitting}
+            disabled={!canSubmit || isSubmitting || !!isPending}
           >
             <Plus className="w-5 h-5 mr-2" />
             <span className="font-bold uppercase tracking-widest text-xs">
-              {isSubmitting ? 'Appending...' : 'Append'}
+              {isSubmitting || isPending ? 'Appending...' : 'Append'}
             </span>
           </Button>
         )}

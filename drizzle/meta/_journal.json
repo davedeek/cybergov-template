@@ -15,6 +15,20 @@
       "when": 1774545583991,
       "tag": "0001_tired_shockwave",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1774889782526,
+      "tag": "0002_first_spacker_dave",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "6",
+      "when": 1774896439829,
+      "tag": "0003_gorgeous_power_pack",
+      "breakpoints": true
     }
   ]
 }

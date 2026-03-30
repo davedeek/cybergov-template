@@ -1,9 +1,23 @@
 import { createFileRoute, useSearch } from '@tanstack/react-router'
-import { LayoutDashboard, Users, CheckSquare, MessageSquare } from 'lucide-react'
+import {
+  LayoutDashboard,
+  Users,
+  CheckSquare,
+  MessageSquare,
+  FileSpreadsheet,
+  GitBranch,
+  Building2,
+} from 'lucide-react'
 import { useTRPC } from '@/integrations/trpc/react'
 import { useQuery } from '@tanstack/react-query'
 import { useLiveQuery } from '@tanstack/react-db'
-import { useTodosCollection, useMembersCollection } from '@/db-collections'
+import {
+  useTodosCollection,
+  useMembersCollection,
+  useUnitsCollection,
+  useAllProcessChartsCollection,
+  useAllWDCChartsCollection,
+} from '@/db-collections'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 
@@ -13,25 +27,40 @@ export const Route = createFileRoute('/_authed/dashboard')({
 
 function DashboardPage() {
   const trpc = useTRPC()
-  const { data: currentOrg } = useQuery(
-    trpc.organization.getOrCreateCurrent.queryOptions(),
-  )
+  const { data: currentOrg } = useQuery(trpc.organization.getOrCreateCurrent.queryOptions())
   const search = useSearch({ strict: false }) as { orgId?: number }
   const orgId = search?.orgId ?? currentOrg?.organization.id
 
   const todosCollection = useTodosCollection(orgId)
   const membersCollection = useMembersCollection(orgId)
+  const unitsCollection = useUnitsCollection(orgId)
+  const allPcCollection = useAllProcessChartsCollection(orgId)
+  const allWdcCollection = useAllWDCChartsCollection(orgId)
 
   const { data: liveTodos = [] } = useLiveQuery(
     (q) => q.from({ t: todosCollection }).select(({ t }) => t),
-    [todosCollection]
+    [todosCollection],
   )
   const { data: liveMembers = [] } = useLiveQuery(
     (q) => q.from({ m: membersCollection }).select(({ m }) => m),
-    [membersCollection]
+    [membersCollection],
+  )
+  const { data: liveUnits = [] } = useLiveQuery(
+    (q) => q.from({ u: unitsCollection }).select(({ u }) => u),
+    [unitsCollection],
+  )
+  const { data: livePcCharts = [] } = useLiveQuery(
+    (q) => q.from({ pc: allPcCollection }).select(({ pc }) => pc),
+    [allPcCollection],
+  )
+  const { data: liveWdcCharts = [] } = useLiveQuery(
+    (q) => q.from({ wdc: allWdcCollection }).select(({ wdc }) => wdc),
+    [allWdcCollection],
   )
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const todos = liveTodos as any[]
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const members = liveMembers as any[]
 
   const completedCount = todos?.filter((t) => t.completedAt).length ?? 0
@@ -64,6 +93,24 @@ function DashboardPage() {
     },
   ]
 
+  const wsStats = [
+    {
+      label: 'Units',
+      value: liveUnits.length,
+      icon: Building2,
+    },
+    {
+      label: 'WDC Charts',
+      value: liveWdcCharts.length,
+      icon: FileSpreadsheet,
+    },
+    {
+      label: 'Process Charts',
+      value: livePcCharts.length,
+      icon: GitBranch,
+    },
+  ]
+
   return (
     <div className="p-6 lg:p-8 max-w-6xl mx-auto font-sans">
       <div className="mb-8 border-b-2 border-nd-ink pb-6">
@@ -78,7 +125,10 @@ function DashboardPage() {
       {/* Stats grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         {stats.map((stat) => (
-          <Card key={stat.label} className="bg-nd-surface border-2 border-nd-ink rounded-none shadow-[4px_4px_0px_#1A1A18] hover:-translate-y-1 hover:shadow-[6px_6px_0px_#1A1A18] transition-all">
+          <Card
+            key={stat.label}
+            className="bg-nd-surface border-2 border-nd-ink rounded-none shadow-[4px_4px_0px_#1A1A18] hover:-translate-y-1 hover:shadow-[6px_6px_0px_#1A1A18] transition-all"
+          >
             <CardHeader className="flex flex-row items-center justify-between pb-2 bg-nd-surface-alt border-b border-nd-border">
               <CardTitle className="text-[10px] font-bold font-mono uppercase tracking-[0.2em] text-nd-ink-muted">
                 {stat.label}
@@ -94,10 +144,51 @@ function DashboardPage() {
         ))}
       </div>
 
+      {/* Work Simplification Section */}
+      <Card className="bg-nd-surface border-2 border-nd-ink rounded-none shadow-sm mb-8">
+        <CardHeader className="border-b border-nd-border bg-[#FAF9F5]">
+          <CardTitle className="text-sm font-mono tracking-widest uppercase text-nd-ink">
+            Work Simplification
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="p-6">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-6">
+            {wsStats.map((stat) => (
+              <div
+                key={stat.label}
+                className="flex items-center gap-4 p-4 bg-nd-bg border border-nd-border"
+              >
+                <div className="w-10 h-10 bg-nd-ink flex items-center justify-center shrink-0">
+                  <stat.icon className="w-5 h-5 text-nd-bg" />
+                </div>
+                <div>
+                  <div className="text-2xl font-serif font-black text-nd-ink">{stat.value}</div>
+                  <div className="text-[10px] font-mono text-nd-ink-muted uppercase tracking-widest">
+                    {stat.label}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+          <Button
+            variant="outline"
+            className="h-12 justify-start gap-3 bg-nd-bg border-2 border-nd-border hover:border-nd-ink hover:bg-nd-surface-alt text-nd-ink rounded-none transition-colors w-full sm:w-auto"
+            asChild
+          >
+            <a href={orgId ? `/ws?orgId=${orgId}` : '/ws'}>
+              <Building2 className="w-5 h-5 text-nd-accent" />
+              <span className="font-serif font-bold tracking-wide">View Units</span>
+            </a>
+          </Button>
+        </CardContent>
+      </Card>
+
       {/* Quick actions */}
       <Card className="bg-nd-surface border-2 border-nd-ink rounded-none shadow-sm">
         <CardHeader className="border-b border-nd-border bg-[#FAF9F5]">
-          <CardTitle className="text-sm font-mono tracking-widest uppercase text-nd-ink">Quick Actions</CardTitle>
+          <CardTitle className="text-sm font-mono tracking-widest uppercase text-nd-ink">
+            Quick Actions
+          </CardTitle>
         </CardHeader>
         <CardContent className="p-6">
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">

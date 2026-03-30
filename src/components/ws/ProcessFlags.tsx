@@ -1,12 +1,12 @@
 import { FLAG_SEVERITY_COLORS } from './table-styles'
-import type { WdcFlag } from '@/hooks/useWdcFlags'
+import type { ProcessFlag } from '@/hooks/useProcessFlags'
 
-interface WdcFlagsProps {
-  flags: WdcFlag[]
-  onNavigateToReference?: () => void
+interface ProcessFlagsProps {
+  flags: ProcessFlag[]
+  onStartAnalysis?: (targetQuestion?: string) => void
 }
 
-export function WdcFlags({ flags, onNavigateToReference }: WdcFlagsProps) {
+export function ProcessFlags({ flags, onStartAnalysis }: ProcessFlagsProps) {
   return (
     <div className="max-w-2xl bg-nd-surface p-8 border border-nd-border shadow-sm">
       <h2 className="text-2xl font-bold font-serif m-0 mb-1 text-nd-ink">Analysis Flags</h2>
@@ -16,7 +16,7 @@ export function WdcFlags({ flags, onNavigateToReference }: WdcFlagsProps) {
 
       {flags.length === 0 ? (
         <div className="p-8 text-center border border-dashed border-nd-border bg-nd-surface-alt font-mono text-sm text-nd-ink-muted">
-          No active flags. Add data to the chart or adjust capacities to see pattern analysis.
+          No active flags. Add steps to your process chart to see pattern analysis.
         </div>
       ) : (
         <div className="space-y-4">
@@ -38,12 +38,12 @@ export function WdcFlags({ flags, onNavigateToReference }: WdcFlagsProps) {
                     <span className="text-nd-accent mr-2 font-bold opacity-50">&rarr;</span>
                     {f.guide}
                   </div>
-                  {onNavigateToReference && (
+                  {onStartAnalysis && (
                     <button
-                      onClick={onNavigateToReference}
+                      onClick={() => onStartAnalysis(f.targetQuestion)}
                       className="text-nd-accent hover:underline text-[10px] uppercase tracking-widest whitespace-nowrap shrink-0"
                     >
-                      Reference &rarr;
+                      Start Analysis &rarr;
                     </button>
                   )}
                 </div>

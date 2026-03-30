@@ -1,13 +1,14 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState, useMemo, useEffect } from 'react'
 import { useForm } from '@tanstack/react-form'
 import { useTRPC } from '@/integrations/trpc/react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useLiveQuery } from '@tanstack/react-db'
-import { useStepsCollection } from '@/db-collections'
+import { useStepsCollection, useAnnotationsCollection } from '@/db-collections'
 import { useMutationHandler } from '@/hooks/use-mutation-handler'
 import { SymbolType, fmtMinutes } from '@/components/ws/SymbolMeta'
 import { stepFormSchema, STEP_FORM_DEFAULTS } from '@/lib/validators'
-import type { ProcessStep } from '@/types/entities'
+import type { ProcessStep, StepAnnotation } from '@/types/entities'
 
 export function useProcessChart(orgId: number | undefined, pPcId: number) {
   const trpc = useTRPC()
@@ -16,7 +17,10 @@ export function useProcessChart(orgId: number | undefined, pPcId: number) {
 
   // -- Queries --
   const { data: pcData, isLoading: pcLoading } = useQuery({
-    ...trpc.ws.processChart.get.queryOptions({ organizationId: orgId as number, processChartId: pPcId }),
+    ...trpc.ws.processChart.get.queryOptions({
+      organizationId: orgId as number,
+      processChartId: pPcId,
+    }),
     enabled: !!orgId && !isNaN(pPcId),
   })
 
@@ -27,8 +31,16 @@ export function useProcessChart(orgId: number | undefined, pPcId: number) {
     [stepsCollection],
   )
 
+  // TanStack DB Collection for annotations
+  const annotationsCollection = useAnnotationsCollection(orgId, pPcId)
+  const { data: liveAnnotations = [] } = useLiveQuery(
+    (q) => q.from({ annotation: annotationsCollection }).select(({ annotation }) => annotation),
+    [annotationsCollection],
+  )
+
   const chart = pcData?.chart
   const steps = (liveSteps as unknown as ProcessStep[]) || []
+  const annotations = (liveAnnotations as unknown as StepAnnotation[]) || []
   const isLoading = pcLoading || stepsLoading
 
   // -- Mutations --
@@ -36,7 +48,7 @@ export function useProcessChart(orgId: number | undefined, pPcId: number) {
 
   // -- Local State --
   const [activeTab, setActiveTab] = useState('ledger')
-  
+
   const addStepForm = useForm({
     defaultValues: STEP_FORM_DEFAULTS,
     validators: {
@@ -45,22 +57,23 @@ export function useProcessChart(orgId: number | undefined, pPcId: number) {
     onSubmit: async ({ value }) => {
       if (!orgId) return
       await handleMutation(
-        () => stepsCollection.insert({
-          symbol: value.symbol,
-          description: value.description.trim(),
-          who: value.who.trim() || null,
-          minutes: value.minutes ? Number(value.minutes) : null,
-          feet: value.feet ? Number(value.feet) : null
-        } as any),
-        { 
+        () =>
+          stepsCollection.insert({
+            symbol: value.symbol,
+            description: value.description.trim(),
+            who: value.who.trim() || null,
+            minutes: value.minutes ? Number(value.minutes) : null,
+            feet: value.feet ? Number(value.feet) : null,
+          } as any),
+        {
           label: 'Create Process Step',
-          onSuccess: () => addStepForm.reset()
-        }
+          onSuccess: () => addStepForm.reset(),
+        },
       )
     },
   })
   const [editingId, setEditingId] = useState<number | null>(null)
-  
+
   const editStepForm = useForm({
     defaultValues: STEP_FORM_DEFAULTS,
     validators: {
@@ -68,21 +81,23 @@ export function useProcessChart(orgId: number | undefined, pPcId: number) {
     },
     onSubmit: async ({ value }) => {
       if (!editingId || !orgId) return
-      const step = steps.find(s => s.id === editingId)
+      const step = steps.find((s) => s.id === editingId)
       if (!step) return
 
       await handleMutation(
-        () => stepsCollection.update(editingId, {
-          symbol: value.symbol,
-          description: value.description.trim() || step.description,
-          who: value.who.trim() || null,
-          minutes: value.minutes ? Number(value.minutes) : null,
-          feet: value.feet ? Number(value.feet) : null,
-        } as any),
-        { 
+        () =>
+          stepsCollection.update(editingId, {
+            symbol: value.symbol,
+            description: value.description.trim() || step.description,
+            who: value.who.trim() || null,
+            minutes: value.minutes ? Number(value.minutes) : null,
+            feet: value.feet ? Number(value.feet) : null,
+            notes: value.notes?.trim() || null,
+          } as any),
+        {
           label: 'Update Process Step',
-          onSuccess: () => setEditingId(null)
-        }
+          onSuccess: () => setEditingId(null),
+        },
       )
     },
   })
@@ -100,10 +115,30 @@ export function useProcessChart(orgId: number | undefined, pPcId: number) {
 
   // Mermaid Generation
   const mermaidSrc = useMemo(() => {
-    const safe = (s: string) => s.replace(/["]/g, "'").replace(/[#{}|]/g, ' ').trim().slice(0, 60)
-    const nodeFill = { operation: '#1A1A18', transportation: '#EDEAE2', storage: '#FDFAED', inspection: '#EDF1FB' }
-    const nodeStroke = { operation: '#1A1A18', transportation: '#888684', storage: '#D4A017', inspection: '#2B5EA7' }
-    const nodeText = { operation: '#F5F0E8', transportation: '#1A1A18', storage: '#6A5000', inspection: '#1A3A7A' }
+    const safe = (s: string) =>
+      s
+        .replace(/["]/g, "'")
+        .replace(/[#{}|]/g, ' ')
+        .trim()
+        .slice(0, 60)
+    const nodeFill = {
+      operation: '#1A1A18',
+      transportation: '#EDEAE2',
+      storage: '#FDFAED',
+      inspection: '#EDF1FB',
+    }
+    const nodeStroke = {
+      operation: '#1A1A18',
+      transportation: '#888684',
+      storage: '#D4A017',
+      inspection: '#2B5EA7',
+    }
+    const nodeText = {
+      operation: '#F5F0E8',
+      transportation: '#1A1A18',
+      storage: '#6A5000',
+      inspection: '#1A3A7A',
+    }
 
     const lines = ['flowchart TD']
     steps.forEach((s, idx) => {
@@ -117,7 +152,9 @@ export function useProcessChart(orgId: number | undefined, pPcId: number) {
       else if (s.symbol === 'storage') lines.push(`  ${id}[/"${full}"/]`)
       else lines.push(`  ${id}{"${full}"}`)
 
-      lines.push(`  style ${id} fill:${nodeFill[s.symbol as SymbolType]},stroke:${nodeStroke[s.symbol as SymbolType]},color:${nodeText[s.symbol as SymbolType]}`)
+      lines.push(
+        `  style ${id} fill:${nodeFill[s.symbol as SymbolType]},stroke:${nodeStroke[s.symbol as SymbolType]},color:${nodeText[s.symbol as SymbolType]}`,
+      )
 
       if (idx < steps.length - 1) {
         lines.push(`  ${id} --> S${steps[idx + 1].id}`)
@@ -141,7 +178,9 @@ export function useProcessChart(orgId: number | undefined, pPcId: number) {
         }
       }
       renderDiagram()
-      return () => { isMounted = false }
+      return () => {
+        isMounted = false
+      }
     }
   }, [activeTab, mermaidSrc])
 
@@ -151,17 +190,18 @@ export function useProcessChart(orgId: number | undefined, pPcId: number) {
     const nextSteps = [...steps]
     const [removed] = nextSteps.splice(fromIdx, 1)
     nextSteps.splice(toIdx, 0, removed)
-    
+
     await handleMutation(
-      () => reorderStepsMutation.mutateAsync({
-        organizationId: orgId,
-        processChartId: pPcId,
-        stepIds: nextSteps.map(s => s.id)
-      }),
-      { 
+      () =>
+        reorderStepsMutation.mutateAsync({
+          organizationId: orgId,
+          processChartId: pPcId,
+          stepIds: nextSteps.map((s) => s.id),
+        }),
+      {
         label: 'Reorder Flow Sequence',
-        onSuccess: () => invalidatePc()
-      }
+        onSuccess: () => invalidatePc(),
+      },
     )
   }
 
@@ -173,12 +213,13 @@ export function useProcessChart(orgId: number | undefined, pPcId: number) {
 
   const startEdit = (step: ProcessStep) => {
     setEditingId(step.id)
-    editStepForm.reset({ 
-      description: step.description, 
-      who: step.who || '', 
-      minutes: step.minutes?.toString() || '', 
+    editStepForm.reset({
+      description: step.description,
+      who: step.who || '',
+      minutes: step.minutes?.toString() || '',
       feet: step.feet?.toString() || '',
-      symbol: step.symbol as SymbolType
+      symbol: step.symbol as SymbolType,
+      notes: step.notes || '',
     })
   }
 
@@ -188,26 +229,38 @@ export function useProcessChart(orgId: number | undefined, pPcId: number) {
 
   const handleRemoveStep = async (stepId: number) => {
     if (!orgId) return
-    await handleMutation(
-      () => stepsCollection.delete(stepId),
-      { label: 'Unregister Process Step' }
-    )
+    await handleMutation(() => stepsCollection.delete(stepId), { label: 'Unregister Process Step' })
   }
 
   return {
-    chart, steps, isLoading,
-    activeTab, setActiveTab,
+    chart,
+    steps,
+    annotations,
+    annotationsCollection,
+    isLoading,
+    activeTab,
+    setActiveTab,
     addStepForm,
     editStepForm,
-    editingId, setEditingId,
-    copiedCsv, setCopiedCsv,
-    copiedMermaid, setCopiedMermaid,
-    mermaidSvg, mermaidSrc,
-    dragId, setDragId,
-    dropIdx, setDropIdx,
-    handleReorder, handleAddStep, startEdit, commitEdit, handleRemoveStep,
+    editingId,
+    setEditingId,
+    copiedCsv,
+    setCopiedCsv,
+    copiedMermaid,
+    setCopiedMermaid,
+    mermaidSvg,
+    mermaidSrc,
+    dragId,
+    setDragId,
+    dropIdx,
+    setDropIdx,
+    handleReorder,
+    handleAddStep,
+    startEdit,
+    commitEdit,
+    handleRemoveStep,
     invalidatePc,
     mutationPending,
-    mutationError
+    mutationError,
   }
 }

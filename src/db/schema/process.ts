@@ -13,6 +13,10 @@ export const processCharts = sqliteTable('process_charts', {
   storageWarnMinutes: integer('storage_warn_minutes').notNull().default(480),
   distanceWarnFeet: integer('distance_warn_feet').notNull().default(200),
   shareToken: text('share_token'),
+  chartState: text('chart_state', { enum: ['current', 'proposed'] })
+    .notNull()
+    .default('current'),
+  linkedChartId: integer('linked_chart_id'),
   createdAt: integer('created_at', { mode: 'timestamp' })
     .notNull()
     .default(sql`(unixepoch())`),
@@ -32,6 +36,7 @@ export const processSteps = sqliteTable('process_steps', {
   who: text(),
   minutes: integer(),
   feet: integer(),
+  notes: text(),
 })
 
 export const stepAnnotations = sqliteTable('step_annotations', {
@@ -41,6 +46,11 @@ export const stepAnnotations = sqliteTable('step_annotations', {
     .references(() => processSteps.id, { onDelete: 'cascade' }),
   question: text({ enum: ['what', 'why', 'where', 'when', 'who', 'how'] }).notNull(),
   note: text().notNull(),
+  proposedAction: text('proposed_action', {
+    enum: ['eliminate', 'combine', 'reorder', 'delegate', 'simplify', 'none'],
+  })
+    .notNull()
+    .default('none'),
   createdAt: integer('created_at', { mode: 'timestamp' })
     .notNull()
     .default(sql`(unixepoch())`),

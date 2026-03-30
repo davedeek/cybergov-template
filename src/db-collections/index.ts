@@ -5,7 +5,19 @@ import { useTRPC } from '@/integrations/trpc/react'
 import { useQueryClient } from '@tanstack/react-query'
 import { trpcClient } from '@/integrations/tanstack-query/root-provider'
 import { useMemo } from 'react'
-import type { Todo, OrganizationMembership, Unit, ProcessChart, ProcessStep, WdcChart, WdcEmployee, WdcActivity, WdcTask } from '@/types/entities'
+import type {
+  Todo,
+  OrganizationMembership,
+  Unit,
+  ProcessChart,
+  ProcessStep,
+  StepAnnotation,
+  ProposedChange,
+  WdcChart,
+  WdcEmployee,
+  WdcActivity,
+  WdcTask,
+} from '@/types/entities'
 
 export function useTodosCollection(orgId?: number) {
   const trpc = useTRPC()
@@ -13,13 +25,19 @@ export function useTodosCollection(orgId?: number) {
   return useMemo(() => {
     const qo = trpc.todos.list.queryOptions({ organizationId: orgId ?? -1 })
     return buildCollection<Todo>(`todos-${orgId}`, {
-      queryClient, queryKey: qo.queryKey, queryFn: qo.queryFn,
-      enabled: !!orgId, getKey: (t) => t.id,
+      queryClient,
+      queryKey: qo.queryKey,
+      queryFn: qo.queryFn,
+      enabled: !!orgId,
+      getKey: (t) => t.id,
       onInsert: async (tx) => {
         if (!orgId) return
         const results = []
         for (const m of tx.mutations) {
-          const res = await trpcClient.todos.add.mutate({ organizationId: orgId, name: m.modified.name })
+          const res = await trpcClient.todos.add.mutate({
+            organizationId: orgId,
+            name: m.modified.name,
+          })
           results.push(res)
         }
         return results[0]
@@ -27,8 +45,12 @@ export function useTodosCollection(orgId?: number) {
       onUpdate: async (tx) => {
         if (!orgId) return
         for (const m of tx.mutations) {
-          const { id, organizationId, ...rest } = m.modified
-          await trpcClient.todos.update.mutate({ organizationId: orgId, id: m.key as number, ...rest })
+          const { id: _id, organizationId: _orgId, ...rest } = m.modified
+          await trpcClient.todos.update.mutate({
+            organizationId: orgId,
+            id: m.key as number,
+            ...rest,
+          })
         }
       },
       onDelete: async (tx) => {
@@ -47,8 +69,11 @@ export function useMembersCollection(orgId?: number) {
   return useMemo(() => {
     const qo = trpc.organization.listMembers.queryOptions({ organizationId: orgId ?? -1 })
     return buildCollection<OrganizationMembership>(`members-${orgId}`, {
-      queryClient, queryKey: qo.queryKey, queryFn: qo.queryFn,
-      enabled: !!orgId, getKey: (m) => m.id,
+      queryClient,
+      queryKey: qo.queryKey,
+      queryFn: qo.queryFn,
+      enabled: !!orgId,
+      getKey: (m) => m.id,
     })
   }, [orgId])
 }
@@ -59,11 +84,17 @@ export function useOrganizationsCollection() {
   return useMemo(() => {
     const qo = trpc.organization.listMine.queryOptions()
     return getCachedCollection(`organizations`, () =>
-      createCollection(queryCollectionOptions({
-        queryClient, queryKey: qo.queryKey,
-        queryFn: async (ctx) => { if (!qo.queryFn) return []; return qo.queryFn(ctx) },
-        getKey: (org) => (org as { organization: { id: number } }).organization.id,
-      }))
+      createCollection(
+        queryCollectionOptions({
+          queryClient,
+          queryKey: qo.queryKey,
+          queryFn: async (ctx) => {
+            if (!qo.queryFn) return []
+            return qo.queryFn(ctx)
+          },
+          getKey: (org) => (org as { organization: { id: number } }).organization.id,
+        }),
+      ),
     )
   }, [])
 }
@@ -74,8 +105,11 @@ export function useUnitsCollection(orgId?: number) {
   return useMemo(() => {
     const qo = trpc.ws.units.list.queryOptions({ organizationId: orgId ?? -1 })
     return buildCollection<Unit>(`units-${orgId}`, {
-      queryClient, queryKey: qo.queryKey, queryFn: qo.queryFn,
-      enabled: !!orgId, getKey: (u) => u.id,
+      queryClient,
+      queryKey: qo.queryKey,
+      queryFn: qo.queryFn,
+      enabled: !!orgId,
+      getKey: (u) => u.id,
       onInsert: async (tx) => {
         if (!orgId) return
         const results = []
@@ -102,8 +136,11 @@ export function useProcessChartsCollection(orgId?: number, unitId?: number) {
       unitId: unitId ?? -1,
     })
     return buildCollection<ProcessChart>(`pc-${orgId}-${unitId}`, {
-      queryClient, queryKey: qo.queryKey, queryFn: qo.queryFn,
-      enabled: !!orgId && !!unitId, getKey: (c) => c.id,
+      queryClient,
+      queryKey: qo.queryKey,
+      queryFn: qo.queryFn,
+      enabled: !!orgId && !!unitId,
+      getKey: (c) => c.id,
       onInsert: async (tx) => {
         if (!orgId || !unitId) return
         const results = []
@@ -127,8 +164,11 @@ export function useAllProcessChartsCollection(orgId?: number) {
   return useMemo(() => {
     const qo = trpc.ws.processChart.listAll.queryOptions({ organizationId: orgId ?? -1 })
     return buildCollection<ProcessChart>(`pc-all-${orgId}`, {
-      queryClient, queryKey: qo.queryKey, queryFn: qo.queryFn,
-      enabled: !!orgId, getKey: (c) => c.id,
+      queryClient,
+      queryKey: qo.queryKey,
+      queryFn: qo.queryFn,
+      enabled: !!orgId,
+      getKey: (c) => c.id,
     })
   }, [orgId])
 }
@@ -142,8 +182,11 @@ export function useWDCChartsCollection(orgId?: number, unitId?: number) {
       unitId: unitId ?? -1,
     })
     return buildCollection<WdcChart>(`wdc-${orgId}-${unitId}`, {
-      queryClient, queryKey: qo.queryKey, queryFn: qo.queryFn,
-      enabled: !!orgId && !!unitId, getKey: (c) => c.id,
+      queryClient,
+      queryKey: qo.queryKey,
+      queryFn: qo.queryFn,
+      enabled: !!orgId && !!unitId,
+      getKey: (c) => c.id,
       onInsert: async (tx) => {
         if (!orgId || !unitId) return
         const results = []
@@ -167,8 +210,11 @@ export function useAllWDCChartsCollection(orgId?: number) {
   return useMemo(() => {
     const qo = trpc.ws.wdc.listAll.queryOptions({ organizationId: orgId ?? -1 })
     return buildCollection<WdcChart>(`wdc-all-${orgId}`, {
-      queryClient, queryKey: qo.queryKey, queryFn: qo.queryFn,
-      enabled: !!orgId, getKey: (c) => c.id,
+      queryClient,
+      queryKey: qo.queryKey,
+      queryFn: qo.queryFn,
+      enabled: !!orgId,
+      getKey: (c) => c.id,
     })
   }, [orgId])
 }
@@ -182,8 +228,11 @@ export function useStepsCollection(orgId?: number, pcId?: number) {
       processChartId: pcId ?? -1,
     })
     return buildCollection<ProcessStep>(`steps-${orgId}-${pcId}`, {
-      queryClient, queryKey: qo.queryKey, queryFn: qo.queryFn,
-      enabled: !!orgId && !!pcId, getKey: (s) => s.id,
+      queryClient,
+      queryKey: qo.queryKey,
+      queryFn: qo.queryFn,
+      enabled: !!orgId && !!pcId,
+      getKey: (s) => s.id,
       onInsert: async (tx) => {
         if (!orgId || !pcId) return
         const results = []
@@ -204,7 +253,7 @@ export function useStepsCollection(orgId?: number, pcId?: number) {
       onUpdate: async (tx) => {
         if (!orgId) return
         for (const m of tx.mutations) {
-          const { id, processChartId, sequenceNumber, ...rest } = m.modified
+          const { id: _id, processChartId: _pcId, sequenceNumber: _seq, ...rest } = m.modified
           await trpcClient.ws.processChart.updateStep.mutate({
             organizationId: orgId,
             stepId: m.key as number,
@@ -212,6 +261,7 @@ export function useStepsCollection(orgId?: number, pcId?: number) {
             who: rest.who ?? undefined,
             minutes: rest.minutes ?? undefined,
             feet: rest.feet ?? undefined,
+            notes: rest.notes ?? undefined,
           })
         }
       },
@@ -228,6 +278,60 @@ export function useStepsCollection(orgId?: number, pcId?: number) {
   }, [orgId, pcId])
 }
 
+export function useAnnotationsCollection(orgId?: number, pcId?: number) {
+  const trpc = useTRPC()
+  const queryClient = useQueryClient()
+  return useMemo(() => {
+    const qo = trpc.ws.processChart.listAnnotations.queryOptions({
+      organizationId: orgId ?? -1,
+      processChartId: pcId ?? -1,
+    })
+    return buildCollection<StepAnnotation>(`annotations-${orgId}-${pcId}`, {
+      queryClient,
+      queryKey: qo.queryKey,
+      queryFn: qo.queryFn,
+      enabled: !!orgId && !!pcId,
+      getKey: (a) => a.id,
+      onInsert: async (tx) => {
+        if (!orgId) return
+        const results = []
+        for (const m of tx.mutations) {
+          const res = await trpcClient.ws.processChart.upsertAnnotation.mutate({
+            organizationId: orgId,
+            stepId: m.modified.stepId,
+            question: m.modified.question,
+            note: m.modified.note,
+            proposedAction: m.modified.proposedAction,
+          })
+          results.push(res)
+        }
+        return results[0]
+      },
+      onUpdate: async (tx) => {
+        if (!orgId) return
+        for (const m of tx.mutations) {
+          await trpcClient.ws.processChart.upsertAnnotation.mutate({
+            organizationId: orgId,
+            stepId: m.modified.stepId,
+            question: m.modified.question,
+            note: m.modified.note,
+            proposedAction: m.modified.proposedAction,
+          })
+        }
+      },
+      onDelete: async (tx) => {
+        if (!orgId) return
+        for (const m of tx.mutations) {
+          await trpcClient.ws.processChart.removeAnnotation.mutate({
+            organizationId: orgId,
+            annotationId: m.key as number,
+          })
+        }
+      },
+    })
+  }, [orgId, pcId])
+}
+
 export function useWDCEmployeesCollection(orgId?: number, wdcId?: number) {
   const trpc = useTRPC()
   const queryClient = useQueryClient()
@@ -237,8 +341,11 @@ export function useWDCEmployeesCollection(orgId?: number, wdcId?: number) {
       wdcId: wdcId ?? -1,
     })
     return buildCollection<WdcEmployee>(`wdc-employees-${orgId}-${wdcId}`, {
-      queryClient, queryKey: qo.queryKey, queryFn: qo.queryFn,
-      enabled: !!orgId && !!wdcId, getKey: (e) => e.id,
+      queryClient,
+      queryKey: qo.queryKey,
+      queryFn: qo.queryFn,
+      enabled: !!orgId && !!wdcId,
+      getKey: (e) => e.id,
     })
   }, [orgId, wdcId])
 }
@@ -252,8 +359,11 @@ export function useWDCActivitiesCollection(orgId?: number, wdcId?: number) {
       wdcId: wdcId ?? -1,
     })
     return buildCollection<WdcActivity>(`wdc-activities-${orgId}-${wdcId}`, {
-      queryClient, queryKey: qo.queryKey, queryFn: qo.queryFn,
-      enabled: !!orgId && !!wdcId, getKey: (a) => a.id,
+      queryClient,
+      queryKey: qo.queryKey,
+      queryFn: qo.queryFn,
+      enabled: !!orgId && !!wdcId,
+      getKey: (a) => a.id,
     })
   }, [orgId, wdcId])
 }
@@ -267,8 +377,56 @@ export function useWDCTasksCollection(orgId?: number, wdcId?: number) {
       wdcId: wdcId ?? -1,
     })
     return buildCollection<WdcTask>(`wdc-tasks-${orgId}-${wdcId}`, {
-      queryClient, queryKey: qo.queryKey, queryFn: qo.queryFn,
-      enabled: !!orgId && !!wdcId, getKey: (t) => t.id,
+      queryClient,
+      queryKey: qo.queryKey,
+      queryFn: qo.queryFn,
+      enabled: !!orgId && !!wdcId,
+      getKey: (t) => t.id,
     })
   }, [orgId, wdcId])
+}
+
+export function useChangesCollection(orgId?: number, unitId?: number) {
+  const trpc = useTRPC()
+  const queryClient = useQueryClient()
+  return useMemo(() => {
+    const qo = trpc.ws.changes.listByUnit.queryOptions({
+      organizationId: orgId ?? -1,
+      unitId: unitId ?? -1,
+    })
+    return buildCollection<ProposedChange>(`changes-${orgId}-${unitId}`, {
+      queryClient,
+      queryKey: qo.queryKey,
+      queryFn: qo.queryFn,
+      enabled: !!orgId && !!unitId,
+      getKey: (c) => c.id,
+      onInsert: async (tx) => {
+        if (!orgId || !unitId) return
+        const results = []
+        for (const m of tx.mutations) {
+          const res = await trpcClient.ws.changes.createChange.mutate({
+            organizationId: orgId,
+            unitId,
+            chartType: m.modified.chartType,
+            chartId: m.modified.chartId,
+            description: m.modified.description,
+            beforeState: m.modified.beforeState ?? undefined,
+            afterState: m.modified.afterState ?? undefined,
+          })
+          results.push(res)
+        }
+        return results[0]
+      },
+      onUpdate: async (tx) => {
+        if (!orgId) return
+        for (const m of tx.mutations) {
+          await trpcClient.ws.changes.updateStatus.mutate({
+            organizationId: orgId,
+            changeId: m.key as number,
+            status: m.modified.status,
+          })
+        }
+      },
+    })
+  }, [orgId, unitId])
 }

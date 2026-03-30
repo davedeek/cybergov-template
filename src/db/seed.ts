@@ -7,6 +7,11 @@ import {
 } from './schema'
 
 async function main() {
+  if (process.env.NODE_ENV === 'production') {
+    console.error('Seed script must not run in production')
+    process.exit(1)
+  }
+
   const [user] = await db
     .insert(users)
     .values({

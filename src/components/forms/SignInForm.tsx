@@ -6,6 +6,7 @@ import { Label } from '@/components/ui/label'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { z } from 'zod'
 import { FormError } from '@/components/ui/form-error'
+import { emailField } from '@/lib/validators'
 
 interface SignInFormProps {
   onSubmit: (values: z.infer<typeof signinSchema>) => Promise<{ error?: { message: string } } | void>
@@ -13,8 +14,8 @@ interface SignInFormProps {
 }
 
 const signinSchema = z.object({
-  email: z.string().email('Valid email is required'),
-  password: z.string().min(1, 'Password is required'),
+  email: emailField,
+  password: z.string().min(1, 'Password is required').max(128),
 })
 
 export function SignInForm({ onSubmit, isPending: externalPending }: SignInFormProps) {

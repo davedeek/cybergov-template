@@ -13,7 +13,8 @@ import {
   Activity,
   LogOutIcon,
   GitBranch,
-  FileSpreadsheet
+  FileSpreadsheet,
+  ClipboardList
 } from 'lucide-react'
 import { authClient } from '@/lib/auth-client'
 import { useLiveQuery } from '@tanstack/react-db'
@@ -54,6 +55,7 @@ const wsNavItems = [
 
 const settingsItems = [
   { to: '/settings', icon: Settings, label: 'Settings' },
+  { to: '/audit-log', icon: ClipboardList, label: 'Audit Log' },
 ] as const
 
 export default function AppShell({ children }: AppShellProps) {
@@ -70,7 +72,7 @@ export default function AppShell({ children }: AppShellProps) {
     (q) => q.from({ o: orgsCollection }).select(({ o }) => o),
     [orgsCollection]
   )
-  const orgs = liveOrgs as any[]
+  const orgs = liveOrgs as { organization: { id: number; name: string } }[]
   const search = useSearch({ strict: false }) as { orgId?: number }
   const currentOrgId = search?.orgId
 
@@ -85,7 +87,7 @@ export default function AppShell({ children }: AppShellProps) {
 
   const switchOrg = (orgId: number) => {
     setOrgDropdownOpen(false)
-    navigate({ search: { orgId } } as any)
+    navigate({ search: { orgId } } as Parameters<typeof navigate>[0])
   }
 
   // Helper to determine if a route is active (including nested WS routes)
@@ -113,6 +115,9 @@ export default function AppShell({ children }: AppShellProps) {
           <div className="relative mt-6 px-2">
             <button
               onClick={() => setOrgDropdownOpen(!orgDropdownOpen)}
+              aria-haspopup="listbox"
+              aria-expanded={orgDropdownOpen}
+              aria-label="Switch workspace"
               className="w-full flex items-center justify-between gap-2 px-3 py-2 bg-nd-surface-dark hover:bg-nd-surface-dark/90 transition-colors text-sm text-white border border-nd-ink-muted rounded-none shadow-inner"
             >
               <div className="flex items-center gap-2 overflow-hidden">
@@ -125,10 +130,12 @@ export default function AppShell({ children }: AppShellProps) {
             </button>
 
             {orgDropdownOpen && orgs && (
-              <div className="absolute left-2 right-2 mt-1 bg-nd-surface-dark border border-nd-ink-muted shadow-xl z-50 py-1 max-h-60 overflow-auto rounded-none">
+              <div role="listbox" aria-label="Select workspace" className="absolute left-2 right-2 mt-1 bg-nd-surface-dark border border-nd-ink-muted shadow-xl z-50 py-1 max-h-60 overflow-auto rounded-none">
                 {orgs.map((o) => (
                   <button
                     key={o.organization.id}
+                    role="option"
+                    aria-selected={o.organization.id === currentOrg?.organization.id}
                     onClick={() => switchOrg(o.organization.id)}
                     className={`w-full text-left px-3 py-2.5 text-xs font-mono uppercase tracking-widest hover:bg-white/5 transition-colors ${
                       o.organization.id === currentOrg?.organization.id

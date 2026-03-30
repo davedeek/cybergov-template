@@ -3,7 +3,9 @@ import { z } from 'zod'
 import { FormError } from '@/components/ui/form-error'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
 import { ArrowRight } from 'lucide-react'
+import { shortTextField } from '@/lib/validators'
 
 interface AddTaskFormProps {
   onSubmit: (values: z.infer<typeof taskSchema>) => Promise<void>
@@ -12,8 +14,10 @@ interface AddTaskFormProps {
 }
 
 const taskSchema = z.object({
-  taskName: z.string().trim().min(3, 'Task name must be at least 3 characters'),
-  hours: z.string().refine(v => !isNaN(Number(v)) && Number(v) > 0, 'Hours must be a positive number'),
+  taskName: shortTextField.min(3, 'Task name must be at least 3 characters'),
+  hours: z.string()
+    .refine(v => !isNaN(Number(v)) && Number(v) > 0, 'Hours must be a positive number')
+    .refine(v => Number(v) <= 168, 'Cannot exceed 168 hours per week'),
 })
 
 export function AddTaskForm({ onSubmit, isPending: externalPending, onCancel }: AddTaskFormProps) {
@@ -49,13 +53,15 @@ export function AddTaskForm({ onSubmit, isPending: externalPending, onCancel }: 
         name="taskName"
         children={(field) => (
           <div className="flex flex-col gap-1">
-            <Input 
-              placeholder="Task description..." 
-              className="w-[240px] font-mono text-xs h-8 border-nd-border rounded-none focus-visible:ring-1 focus-visible:ring-nd-accent shadow-inner outline-none" 
-              value={field.state.value} 
+            <Label htmlFor={field.name} className="sr-only">Task description</Label>
+            <Input
+              id={field.name}
+              placeholder="Task description..."
+              className="w-[240px] font-mono text-xs h-8 border-nd-border rounded-none focus-visible:ring-1 focus-visible:ring-nd-accent shadow-inner outline-none"
+              value={field.state.value}
               onBlur={field.handleBlur}
-              onChange={e => field.handleChange(e.target.value)} 
-              autoFocus 
+              onChange={e => field.handleChange(e.target.value)}
+              autoFocus
             />
             <FormError errors={field.state.meta.errors} />
           </div>
@@ -65,13 +71,15 @@ export function AddTaskForm({ onSubmit, isPending: externalPending, onCancel }: 
         name="hours"
         children={(field) => (
           <div className="flex flex-col gap-1">
-            <Input 
-              type="number" 
-              placeholder="hrs/wk" 
-              className="w-[80px] font-mono text-xs h-8 border-nd-border rounded-none text-right focus-visible:ring-1 focus-visible:ring-nd-accent shadow-inner outline-none" 
-              value={field.state.value} 
+            <Label htmlFor={field.name} className="sr-only">Hours per week</Label>
+            <Input
+              id={field.name}
+              type="number"
+              placeholder="hrs/wk"
+              className="w-[80px] font-mono text-xs h-8 border-nd-border rounded-none text-right focus-visible:ring-1 focus-visible:ring-nd-accent shadow-inner outline-none"
+              value={field.state.value}
               onBlur={field.handleBlur}
-              onChange={e => field.handleChange(e.target.value)} 
+              onChange={e => field.handleChange(e.target.value)}
             />
             <FormError errors={field.state.meta.errors} />
           </div>

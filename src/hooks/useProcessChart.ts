@@ -5,7 +5,6 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useLiveQuery } from '@tanstack/react-db'
 import { useStepsCollection } from '@/db-collections'
 import { useMutationHandler } from '@/hooks/use-mutation-handler'
-import mermaid from 'mermaid'
 import { SymbolType, fmtMinutes } from '@/components/ws/SymbolMeta'
 import { z } from 'zod'
 
@@ -146,12 +145,13 @@ export function useProcessChart(orgId: number | undefined, pPcId: number) {
     return lines.join('\n')
   }, [steps])
 
-  // Mermaid Rendering
+  // Mermaid Rendering (lazy-loaded to keep mermaid out of the main bundle)
   useEffect(() => {
     if (activeTab === 'mermaid' && mermaidSrc && typeof window !== 'undefined') {
       let isMounted = true
       const renderDiagram = async () => {
         try {
+          const { default: mermaid } = await import('mermaid')
           const randomId = 'mermaid-svg-' + Math.floor(Math.random() * 100000)
           const { svg } = await mermaid.render(randomId, mermaidSrc)
           if (isMounted) setMermaidSvg(svg)

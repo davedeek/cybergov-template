@@ -6,6 +6,7 @@ import { Label } from '@/components/ui/label'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { z } from 'zod'
 import { FormError } from '@/components/ui/form-error'
+import { nameField, emailField, passwordField } from '@/lib/validators'
 
 interface SignUpFormProps {
   onSubmit: (values: z.infer<typeof signupSchema>) => Promise<{ error?: { message: string } } | void>
@@ -13,9 +14,9 @@ interface SignUpFormProps {
 }
 
 const signupSchema = z.object({
-  name: z.string().min(2, 'Name must be at least 2 characters'),
-  email: z.string().email('Valid email is required'),
-  password: z.string().min(8, 'Password must be at least 8 characters'),
+  name: nameField,
+  email: emailField,
+  password: passwordField,
 })
 
 export function SignUpForm({ onSubmit, isPending: externalPending }: SignUpFormProps) {
@@ -118,7 +119,7 @@ export function SignUpForm({ onSubmit, isPending: externalPending }: SignUpFormP
                 placeholder="••••••••"
               />
               <FormError errors={field.state.meta.errors} />
-              <p className="text-[10px] font-mono tracking-wider text-nd-ink-muted mt-2 uppercase">At least 8 characters</p>
+              <p className="text-[10px] font-mono tracking-wider text-nd-ink-muted mt-2 uppercase">At least 12 characters</p>
             </div>
           )}
         />

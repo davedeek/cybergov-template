@@ -3,6 +3,7 @@ import { z } from 'zod'
 import { FormError } from '@/components/ui/form-error'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { shortTextField } from '@/lib/validators'
 
 interface AddActivityFormProps {
   onSubmit: (values: z.infer<typeof actSchema>) => Promise<void>
@@ -11,7 +12,7 @@ interface AddActivityFormProps {
 }
 
 const actSchema = z.object({
-  name: z.string().trim().min(3, 'Activity name must be at least 3 characters'),
+  name: shortTextField.min(3, 'Activity name must be at least 3 characters'),
 })
 
 export function AddActivityForm({ onSubmit, isPending: externalPending, onCancel }: AddActivityFormProps) {

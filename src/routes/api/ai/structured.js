@@ -1,6 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router';
 import { chat } from '@tanstack/ai';
-import { openaiText } from '@tanstack/ai-openai';
 import { z } from 'zod';
 // Schema for structured recipe output
 const RecipeSchema = z.object({
@@ -31,12 +30,24 @@ const RecipeSchema = z.object({
         .optional()
         .describe('Nutritional information per serving'),
 });
+const structuredBodySchema = z.object({
+    recipeName: z.string().min(1, 'Recipe name is required').max(255),
+    mode: z.enum(['structured', 'oneshot']).optional().default('structured'),
+});
+
 export const Route = createFileRoute('/api/ai/structured')({
     server: {
         handlers: {
             POST: async ({ request }) => {
-                const body = await request.json();
-                const { recipeName, mode = 'structured' } = body;
+                const rawBody = await request.json();
+                const parseResult = structuredBodySchema.safeParse(rawBody);
+                if (!parseResult.success) {
+                    return new Response(JSON.stringify({ error: 'Invalid request body', details: parseResult.error.flatten() }), {
+                        status: 400,
+                        headers: { 'Content-Type': 'application/json' },
+                    });
+                }
+                const { recipeName, mode } = parseResult.data;
                 if (!recipeName || recipeName.trim().length === 0) {
                     return new Response(JSON.stringify({
                         error: 'Recipe name is required',
@@ -46,6 +57,7 @@ export const Route = createFileRoute('/api/ai/structured')({
                     });
                 }
                 try {
+                    const { openaiText } = await import('@tanstack/ai-openai');
                     if (mode === 'structured') {
                         // Structured output mode - returns validated object
                         const result = await chat({

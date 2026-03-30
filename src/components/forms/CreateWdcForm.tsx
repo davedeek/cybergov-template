@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog'
+import { shortTextField } from '@/lib/validators'
 
 interface CreateWdcFormProps {
   onSubmit: (values: { name: string }) => Promise<void>
@@ -13,7 +14,7 @@ interface CreateWdcFormProps {
 }
 
 const wdcSchema = z.object({
-  name: z.string().min(3, 'Chart name must be at least 3 characters'),
+  name: shortTextField.min(3, 'Chart name must be at least 3 characters'),
 })
 
 export function CreateWdcForm({ onSubmit, isPending: externalPending, onCancel }: CreateWdcFormProps) {

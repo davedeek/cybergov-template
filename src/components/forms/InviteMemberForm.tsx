@@ -12,6 +12,7 @@ import {
 import { Label } from '@/components/ui/label'
 import { z } from 'zod'
 import { FormError } from '@/components/ui/form-error'
+import { emailField } from '@/lib/validators'
 
 interface InviteMemberFormProps {
   onSubmit: (values: z.infer<typeof inviteSchema>) => Promise<void>
@@ -19,7 +20,7 @@ interface InviteMemberFormProps {
 }
 
 const inviteSchema = z.object({
-  email: z.string().email('Valid email is required'),
+  email: emailField,
   role: z.enum(['member', 'admin']),
 })
 

@@ -4,6 +4,7 @@ import { FormError } from '@/components/ui/form-error'
 import { Plus } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { shortTextField } from '@/lib/validators'
 
 interface AddTodoFormProps {
   onSubmit: (values: { name: string }) => Promise<void>
@@ -11,7 +12,7 @@ interface AddTodoFormProps {
 }
 
 const todoSchema = z.object({
-  name: z.string().trim().min(3, 'Task description must be at least 3 characters'),
+  name: shortTextField.min(3, 'Task description must be at least 3 characters'),
 })
 
 export function AddTodoForm({ onSubmit, isPending }: AddTodoFormProps) {

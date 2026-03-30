@@ -6,7 +6,8 @@ import { useLiveQuery } from '@tanstack/react-db'
 import { useStepsCollection } from '@/db-collections'
 import { useMutationHandler } from '@/hooks/use-mutation-handler'
 import { SymbolType, fmtMinutes } from '@/components/ws/SymbolMeta'
-import { z } from 'zod'
+import { stepFormSchema, STEP_FORM_DEFAULTS } from '@/lib/validators'
+import type { ProcessStep } from '@/types/entities'
 
 export function useProcessChart(orgId: number | undefined, pPcId: number) {
   const trpc = useTRPC()
@@ -27,7 +28,7 @@ export function useProcessChart(orgId: number | undefined, pPcId: number) {
   )
 
   const chart = pcData?.chart
-  const steps = (liveSteps as any[]) || []
+  const steps = (liveSteps as unknown as ProcessStep[]) || []
   const isLoading = pcLoading || stepsLoading
 
   // -- Mutations --
@@ -36,24 +37,10 @@ export function useProcessChart(orgId: number | undefined, pPcId: number) {
   // -- Local State --
   const [activeTab, setActiveTab] = useState('ledger')
   
-  const stepSchema = z.object({
-    symbol: z.enum(['operation', 'transportation', 'storage', 'inspection']),
-    description: z.string().trim().min(3, 'Description must be at least 3 characters'),
-    who: z.string().trim(),
-    minutes: z.string().refine(v => v === '' || !isNaN(Number(v)), 'Must be a number'),
-    feet: z.string().refine(v => v === '' || !isNaN(Number(v)), 'Must be a number'),
-  })
-
   const addStepForm = useForm({
-    defaultValues: {
-      symbol: 'operation' as SymbolType,
-      description: '',
-      who: '',
-      minutes: '',
-      feet: '',
-    },
+    defaultValues: STEP_FORM_DEFAULTS,
     validators: {
-      onChange: stepSchema,
+      onChange: stepFormSchema,
     },
     onSubmit: async ({ value }) => {
       if (!orgId) return
@@ -75,15 +62,9 @@ export function useProcessChart(orgId: number | undefined, pPcId: number) {
   const [editingId, setEditingId] = useState<number | null>(null)
   
   const editStepForm = useForm({
-    defaultValues: {
-      symbol: 'operation' as SymbolType,
-      description: '',
-      who: '',
-      minutes: '',
-      feet: '',
-    },
+    defaultValues: STEP_FORM_DEFAULTS,
     validators: {
-      onChange: stepSchema,
+      onChange: stepFormSchema,
     },
     onSubmit: async ({ value }) => {
       if (!editingId || !orgId) return
@@ -190,7 +171,7 @@ export function useProcessChart(orgId: number | undefined, pPcId: number) {
     addStepForm.handleSubmit()
   }
 
-  const startEdit = (step: any) => {
+  const startEdit = (step: ProcessStep) => {
     setEditingId(step.id)
     editStepForm.reset({ 
       description: step.description, 

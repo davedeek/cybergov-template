@@ -18,6 +18,7 @@ import { Route as AuthedTodosRouteImport } from './routes/_authed/todos'
 import { Route as AuthedSettingsRouteImport } from './routes/_authed/settings'
 import { Route as AuthedProfileRouteImport } from './routes/_authed/profile'
 import { Route as AuthedDashboardRouteImport } from './routes/_authed/dashboard'
+import { Route as AuthedAuditLogRouteImport } from './routes/_authed/audit-log'
 import { Route as AuthedWsIndexRouteImport } from './routes/_authed/ws/index'
 import { Route as ApiTrpcSplatRouteImport } from './routes/api.trpc.$'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
@@ -77,6 +78,11 @@ const AuthedProfileRoute = AuthedProfileRouteImport.update({
 const AuthedDashboardRoute = AuthedDashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
+  getParentRoute: () => AuthedRoute,
+} as any)
+const AuthedAuditLogRoute = AuthedAuditLogRouteImport.update({
+  id: '/audit-log',
+  path: '/audit-log',
   getParentRoute: () => AuthedRoute,
 } as any)
 const AuthedWsIndexRoute = AuthedWsIndexRouteImport.update({
@@ -164,6 +170,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/signin': typeof SigninRoute
   '/signup': typeof SignupRoute
+  '/audit-log': typeof AuthedAuditLogRoute
   '/dashboard': typeof AuthedDashboardRoute
   '/profile': typeof AuthedProfileRoute
   '/settings': typeof AuthedSettingsRoute
@@ -190,6 +197,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/signin': typeof SigninRoute
   '/signup': typeof SignupRoute
+  '/audit-log': typeof AuthedAuditLogRoute
   '/dashboard': typeof AuthedDashboardRoute
   '/profile': typeof AuthedProfileRoute
   '/settings': typeof AuthedSettingsRoute
@@ -218,6 +226,7 @@ export interface FileRoutesById {
   '/_authed': typeof AuthedRouteWithChildren
   '/signin': typeof SigninRoute
   '/signup': typeof SignupRoute
+  '/_authed/audit-log': typeof AuthedAuditLogRoute
   '/_authed/dashboard': typeof AuthedDashboardRoute
   '/_authed/profile': typeof AuthedProfileRoute
   '/_authed/settings': typeof AuthedSettingsRoute
@@ -246,6 +255,7 @@ export interface FileRouteTypes {
     | '/'
     | '/signin'
     | '/signup'
+    | '/audit-log'
     | '/dashboard'
     | '/profile'
     | '/settings'
@@ -272,6 +282,7 @@ export interface FileRouteTypes {
     | '/'
     | '/signin'
     | '/signup'
+    | '/audit-log'
     | '/dashboard'
     | '/profile'
     | '/settings'
@@ -299,6 +310,7 @@ export interface FileRouteTypes {
     | '/_authed'
     | '/signin'
     | '/signup'
+    | '/_authed/audit-log'
     | '/_authed/dashboard'
     | '/_authed/profile'
     | '/_authed/settings'
@@ -400,6 +412,13 @@ declare module '@tanstack/react-router' {
       path: '/dashboard'
       fullPath: '/dashboard'
       preLoaderRoute: typeof AuthedDashboardRouteImport
+      parentRoute: typeof AuthedRoute
+    }
+    '/_authed/audit-log': {
+      id: '/_authed/audit-log'
+      path: '/audit-log'
+      fullPath: '/audit-log'
+      preLoaderRoute: typeof AuthedAuditLogRouteImport
       parentRoute: typeof AuthedRoute
     }
     '/_authed/ws/': {
@@ -518,6 +537,7 @@ declare module '@tanstack/react-router' {
 }
 
 interface AuthedRouteChildren {
+  AuthedAuditLogRoute: typeof AuthedAuditLogRoute
   AuthedDashboardRoute: typeof AuthedDashboardRoute
   AuthedProfileRoute: typeof AuthedProfileRoute
   AuthedSettingsRoute: typeof AuthedSettingsRoute
@@ -534,6 +554,7 @@ interface AuthedRouteChildren {
 }
 
 const AuthedRouteChildren: AuthedRouteChildren = {
+  AuthedAuditLogRoute: AuthedAuditLogRoute,
   AuthedDashboardRoute: AuthedDashboardRoute,
   AuthedProfileRoute: AuthedProfileRoute,
   AuthedSettingsRoute: AuthedSettingsRoute,

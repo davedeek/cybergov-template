@@ -22,7 +22,7 @@ export function AddStepForm({ form, isPending: externalPending }: AddStepFormPro
     >
       <form.Field
         name="symbol"
-        children={(field) => (
+        children={(field: any) => (
           <div className="md:col-span-2">
             <label className="block text-[9px] font-mono uppercase tracking-[0.1em] text-nd-bg/60 mb-1 ml-2 mt-1">Symbol</label>
             <Select value={field.state.value} onValueChange={(v: string) => field.handleChange(v as SymbolType)}>
@@ -49,7 +49,7 @@ export function AddStepForm({ form, isPending: externalPending }: AddStepFormPro
 
       <form.Field
         name="description"
-        children={(field) => (
+        children={(field: any) => (
           <div className="md:col-span-4">
             <label className="block text-[9px] font-mono uppercase tracking-[0.1em] text-nd-bg/60 mb-1 ml-2 mt-1">Step Description</label>
             <Input
@@ -68,7 +68,7 @@ export function AddStepForm({ form, isPending: externalPending }: AddStepFormPro
 
       <form.Field
         name="who"
-        children={(field) => (
+        children={(field: any) => (
           <div className="md:col-span-2">
             <label className="block text-[9px] font-mono uppercase tracking-[0.1em] text-nd-bg/60 mb-1 ml-2 mt-1">Person/Machine</label>
             <Input
@@ -87,11 +87,11 @@ export function AddStepForm({ form, isPending: externalPending }: AddStepFormPro
 
       <form.Field
         name="minutes"
-        children={(field) => (
+        children={(field: any) => (
           <div className="md:col-span-1">
             <form.Subscribe
-              selector={(state) => (state as { values: { symbol: string } }).values.symbol}
-              children={(symbol) => (
+              selector={(state: any) => (state as { values: { symbol: string } }).values.symbol}
+              children={(symbol: any) => (
                 <>
                   <label className="block text-[9px] font-mono uppercase tracking-[0.1em] text-nd-bg/60 mb-1 ml-2 mt-1">{symbol === 'storage' ? 'Wait(m)' : 'Min'}</label>
                   <Input
@@ -111,11 +111,11 @@ export function AddStepForm({ form, isPending: externalPending }: AddStepFormPro
 
       <form.Field
         name="feet"
-        children={(field) => (
+        children={(field: any) => (
           <div className="md:col-span-1">
             <form.Subscribe
-              selector={(state) => (state as { values: { symbol: string } }).values.symbol}
-              children={(symbol) => (
+              selector={(state: any) => (state as { values: { symbol: string } }).values.symbol}
+              children={(symbol: any) => (
                 <>
                   <label className="block text-[9px] font-mono uppercase tracking-[0.1em] text-nd-bg/60 mb-1 ml-2 mt-1">{symbol === 'transportation' ? 'Dist(ft)' : 'Feet'}</label>
                   <Input
@@ -135,8 +135,8 @@ export function AddStepForm({ form, isPending: externalPending }: AddStepFormPro
 
       <div className="md:col-span-2">
         <form.Subscribe
-          selector={(state) => [state.canSubmit, state.isSubmitting, (state as { values: { description: string } }).values.description] as const}
-          children={([canSubmit, isSubmitting, description]) => (
+          selector={(state: any) => [state.canSubmit, state.isSubmitting, (state as { values: { description: string } }).values.description] as const}
+          children={([canSubmit, isSubmitting, description]: any) => (
             <Button
               type="submit"
               disabled={!canSubmit || isSubmitting || externalPending || !(description as string).trim()}

@@ -5,6 +5,7 @@ import { useQuery } from '@tanstack/react-query'
 import { useLiveQuery } from '@tanstack/react-db'
 import { useProcessChartsCollection, useWDCChartsCollection } from '@/db-collections'
 import { useMutationHandler } from '@/hooks/use-mutation-handler'
+import type { ProcessChart, WdcChart } from '@/types/entities'
 import { ArrowLeft, Plus, FileSpreadsheet, GitBranch, Calendar, AlertCircle } from 'lucide-react'
 
 import { Card, CardHeader, CardTitle } from '@/components/ui/card'
@@ -32,16 +33,18 @@ function UnitDashboardPage() {
   )
 
   const wdcCollection = useWDCChartsCollection(orgId, parseInt(unitId))
-  const { data: wdcCharts = [], isLoading: wdcLoading } = useLiveQuery(
+  const { data: rawWdcCharts = [], isLoading: wdcLoading } = useLiveQuery(
     (q) => q.from({ wdc: wdcCollection }).select(({ wdc }) => wdc),
     [wdcCollection],
   )
+  const wdcCharts = rawWdcCharts as unknown as WdcChart[]
 
   const pcCollection = useProcessChartsCollection(orgId, parseInt(unitId))
-  const { data: pcCharts = [], isLoading: pcLoading } = useLiveQuery(
+  const { data: rawPcCharts = [], isLoading: pcLoading } = useLiveQuery(
     (q) => q.from({ pc: pcCollection }).select(({ pc }) => pc),
     [pcCollection],
   )
+  const pcCharts = rawPcCharts as unknown as ProcessChart[]
 
   const [isWdcOpen, setIsWdcOpen] = useState(false)
   const [isPcOpen, setIsPcOpen] = useState(false)

@@ -7,3 +7,23 @@ export const shortTextField = z.string().trim().min(1, 'Required').max(255, 'Mus
 export const longTextField = z.string().trim().min(1, 'Required').max(2000, 'Must be 2000 characters or fewer')
 export const positiveInt = z.number().int().positive('Must be a positive integer')
 export const positiveFloat = z.number().positive('Must be a positive number')
+
+// -- Process Step Form Schema --
+// Used by both AddStepForm and inline editing in ProcessChartLedger
+export const stepFormSchema = z.object({
+  symbol: z.enum(['operation', 'transportation', 'storage', 'inspection']),
+  description: z.string().trim().min(3, 'Description must be at least 3 characters'),
+  who: z.string().trim(),
+  minutes: z.string().refine(v => v === '' || !isNaN(Number(v)), 'Must be a number'),
+  feet: z.string().refine(v => v === '' || !isNaN(Number(v)), 'Must be a number'),
+})
+
+export type StepFormValues = z.infer<typeof stepFormSchema>
+
+export const STEP_FORM_DEFAULTS: StepFormValues = {
+  symbol: 'operation',
+  description: '',
+  who: '',
+  minutes: '',
+  feet: '',
+}

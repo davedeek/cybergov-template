@@ -5,6 +5,7 @@ import { useQuery } from '@tanstack/react-query'
 import { useLiveQuery } from '@tanstack/react-db'
 import { useUnitsCollection } from '@/db-collections'
 import { useMutationHandler } from '@/hooks/use-mutation-handler'
+import type { Unit } from '@/types/entities'
 import { Plus, FolderTree, Activity, ArrowRight, AlertCircle } from 'lucide-react'
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card'
@@ -24,10 +25,11 @@ function UnitsLandingPage() {
   const orgId = search?.orgId ?? currentOrg?.organization.id
 
   const unitsCollection = useUnitsCollection(orgId)
-  const { data: units = [], isLoading } = useLiveQuery(
+  const { data: rawUnits = [], isLoading } = useLiveQuery(
     (q) => q.from({ units: unitsCollection }).select(({ units }) => units),
     [unitsCollection],
   )
+  const units = rawUnits as unknown as Unit[]
 
   const [isCreateOpen, setIsCreateOpen] = useState(false)
 

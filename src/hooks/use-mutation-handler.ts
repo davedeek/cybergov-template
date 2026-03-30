@@ -1,6 +1,19 @@
 import { useState, useCallback } from 'react'
 import { logger } from '@/lib/logger'
 
+export interface MutationError {
+  message: string
+}
+
+export function isMutationError(value: unknown): value is { error: MutationError } {
+  return (
+    typeof value === 'object' &&
+    value !== null &&
+    'error' in value &&
+    typeof (value as { error: { message?: unknown } }).error?.message === 'string'
+  )
+}
+
 export function useMutationHandler() {
   const [isPending, setIsPending] = useState(false)
   const [error, setError] = useState<string | null>(null)

@@ -29,7 +29,7 @@ function SettingsPage() {
     (q) => q.from({ m: membersCollection }).select(({ m }) => m),
     [membersCollection]
   )
-  const members = liveMembers as { id: number; userId: string; organizationId: number; role: string }[]
+  const members = liveMembers as unknown as { id: number; userId: string; organizationId: number; role: string }[]
 
   return (
     <div className="p-6 lg:p-8 max-w-3xl mx-auto font-sans">

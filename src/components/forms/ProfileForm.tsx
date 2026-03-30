@@ -32,6 +32,7 @@ export function ProfileForm({ initialName, email, onSubmit, isPending: externalP
       setSaved(false)
       await onSubmit(value)
       setSaved(true)
+      setTimeout(() => setSaved(false), 3000)
     },
   })
 

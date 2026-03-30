@@ -3,6 +3,7 @@ import { z } from 'zod'
 import { FormError } from '@/components/ui/form-error'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { nameField } from '@/lib/validators'
 
 interface AddEmployeeFormProps {
   onSubmit: (values: z.infer<typeof empSchema>) => Promise<void>
@@ -11,8 +12,8 @@ interface AddEmployeeFormProps {
 }
 
 const empSchema = z.object({
-  name: z.string().trim().min(2, 'Name must be at least 2 characters'),
-  role: z.string().trim(),
+  name: nameField,
+  role: z.string().trim().max(255),
   fte: z.string().refine(v => !isNaN(Number(v)) && Number(v) > 0, 'FTE must be a positive number'),
 })
 

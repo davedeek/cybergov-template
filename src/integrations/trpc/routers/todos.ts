@@ -2,6 +2,7 @@ import { desc, eq } from 'drizzle-orm'
 import { z } from 'zod'
 import { createTRPCRouter, orgScopedProcedure } from '../init'
 import { todos } from '@/db/schema'
+import { logAudit } from '@/lib/audit'
 
 export const todosRouter = createTRPCRouter({
   list: orgScopedProcedure
@@ -30,6 +31,7 @@ export const todosRouter = createTRPCRouter({
         })
         .returning()
 
+      await logAudit(ctx.db, { userId: ctx.user.id, action: 'create', entityType: 'todo', entityId: String(inserted[0].id) })
       return inserted[0]
     }),
 
@@ -54,6 +56,7 @@ export const todosRouter = createTRPCRouter({
         .where(eq(todos.id, input.id))
         .returning()
 
+      await logAudit(ctx.db, { userId: ctx.user.id, action: 'update', entityType: 'todo', entityId: String(input.id) })
       return updated[0]
     }),
 
@@ -66,6 +69,7 @@ export const todosRouter = createTRPCRouter({
     )
     .mutation(async ({ ctx, input }) => {
       await ctx.db.delete(todos).where(eq(todos.id, input.id))
+      await logAudit(ctx.db, { userId: ctx.user.id, action: 'delete', entityType: 'todo', entityId: String(input.id) })
       return { success: true }
     }),
 })

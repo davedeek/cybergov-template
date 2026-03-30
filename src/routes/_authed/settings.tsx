@@ -29,7 +29,7 @@ function SettingsPage() {
     (q) => q.from({ m: membersCollection }).select(({ m }) => m),
     [membersCollection]
   )
-  const members = liveMembers as any[]
+  const members = liveMembers as { id: number; userId: string; organizationId: number; role: string }[]
 
   return (
     <div className="p-6 lg:p-8 max-w-3xl mx-auto font-sans">
@@ -86,7 +86,7 @@ function SettingsPage() {
                   () => trpcClient.organization.invite.mutate({
                     organizationId: orgId,
                     email: values.email,
-                    role: values.role as any,
+                    role: values.role,
                   }),
                   { 
                     label: 'Invite Team Member',

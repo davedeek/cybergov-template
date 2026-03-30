@@ -13,7 +13,7 @@ function SignUpPage() {
   const queryClient = useQueryClient()
   const { handleMutation, isPending } = useMutationHandler()
 
-  const handleSignUp = async (values: any) => {
+  const handleSignUp = async (values: { name: string; email: string; password: string }) => {
     return handleMutation(
       async () => {
         const result = await authClient.signUp.email({

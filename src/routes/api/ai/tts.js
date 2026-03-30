@@ -1,20 +1,28 @@
 import { createFileRoute } from '@tanstack/react-router';
+import { z } from 'zod';
 import { generateSpeech } from '@tanstack/ai';
-import { openaiSpeech } from '@tanstack/ai-openai';
+
+const ttsBodySchema = z.object({
+    text: z.string().min(1, 'Text is required').max(4096),
+    voice: z.enum(['alloy', 'echo', 'fable', 'onyx', 'nova', 'shimmer']).optional().default('alloy'),
+    model: z.enum(['tts-1', 'tts-1-hd']).optional().default('tts-1'),
+    format: z.enum(['mp3', 'opus', 'aac', 'flac']).optional().default('mp3'),
+    speed: z.number().min(0.25).max(4.0).optional().default(1.0),
+});
+
 export const Route = createFileRoute('/api/ai/tts')({
     server: {
         handlers: {
             POST: async ({ request }) => {
-                const body = await request.json();
-                const { text, voice = 'alloy', model = 'tts-1', format = 'mp3', speed = 1.0, } = body;
-                if (!text || text.trim().length === 0) {
-                    return new Response(JSON.stringify({
-                        error: 'Text is required',
-                    }), {
+                const rawBody = await request.json();
+                const parseResult = ttsBodySchema.safeParse(rawBody);
+                if (!parseResult.success) {
+                    return new Response(JSON.stringify({ error: 'Invalid request body', details: parseResult.error.flatten() }), {
                         status: 400,
                         headers: { 'Content-Type': 'application/json' },
                     });
                 }
+                const { text, voice, model, format, speed } = parseResult.data;
                 if (!process.env.OPENAI_API_KEY) {
                     return new Response(JSON.stringify({
                         error: 'OPENAI_API_KEY is not configured',
@@ -24,6 +32,7 @@ export const Route = createFileRoute('/api/ai/tts')({
                     });
                 }
                 try {
+                    const { openaiSpeech } = await import('@tanstack/ai-openai');
                     const adapter = openaiSpeech(model);
                     const result = await generateSpeech({
                         adapter,

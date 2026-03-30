@@ -1,7 +1,9 @@
-import { desc, eq } from 'drizzle-orm'
+import { desc, eq, and } from 'drizzle-orm'
 import { z } from 'zod'
+import { TRPCError } from '@trpc/server'
 import { createTRPCRouter, protectedProcedure, orgScopedProcedure } from '../init'
 import { organizationMemberships, organizations, invitations } from '@/db/schema'
+import { logAudit } from '@/lib/audit'
 
 export const organizationRouter = createTRPCRouter({
   getOrCreateCurrent: protectedProcedure.query(async ({ ctx }) => {
@@ -29,26 +31,28 @@ export const organizationRouter = createTRPCRouter({
       ctx.user.email?.split('@')[0] ||
       'My Workspace'
 
-    const inserted = await ctx.db
-      .insert(organizations)
-      .values({ name: `${organizationName}'s Workspace` })
-      .returning()
+    return ctx.db.transaction((tx) => {
+      const [organization] = tx
+        .insert(organizations)
+        .values({ name: `${organizationName}'s Workspace` })
+        .returning()
+        .all()
 
-    const organization = inserted[0]
+      const [membership] = tx
+        .insert(organizationMemberships)
+        .values({
+          organizationId: organization.id,
+          userId: ctx.user.id,
+          role: 'owner',
+        })
+        .returning()
+        .all()
 
-    const memberships = await ctx.db
-      .insert(organizationMemberships)
-      .values({
-        organizationId: organization.id,
-        userId: ctx.user.id,
-        role: 'owner',
-      })
-      .returning()
-
-    return {
-      organization,
-      membership: memberships[0],
-    }
+      return {
+        organization,
+        membership,
+      }
+    })
   }),
 
   listMine: protectedProcedure.query(async ({ ctx }) => {
@@ -73,26 +77,30 @@ export const organizationRouter = createTRPCRouter({
   create: protectedProcedure
     .input(z.object({ name: z.string().min(2) }))
     .mutation(async ({ ctx, input }) => {
-      const inserted = await ctx.db
-        .insert(organizations)
-        .values({ name: input.name })
-        .returning()
+      const result = ctx.db.transaction((tx) => {
+        const [organization] = tx
+          .insert(organizations)
+          .values({ name: input.name })
+          .returning()
+          .all()
 
-      const organization = inserted[0]
+        const [membership] = tx
+          .insert(organizationMemberships)
+          .values({
+            organizationId: organization.id,
+            userId: ctx.user.id,
+            role: 'owner',
+          })
+          .returning()
+          .all()
 
-      const membershipRows = await ctx.db
-        .insert(organizationMemberships)
-        .values({
-          organizationId: organization.id,
-          userId: ctx.user.id,
-          role: 'owner',
-        })
-        .returning()
-
-      return {
-        organization,
-        membership: membershipRows[0],
-      }
+        return {
+          organization,
+          membership,
+        }
+      })
+      await logAudit(ctx.db, { userId: ctx.user.id, action: 'create', entityType: 'organization', entityId: String(result.organization.id) })
+      return result
     }),
 
   listMembers: orgScopedProcedure
@@ -117,16 +125,31 @@ export const organizationRouter = createTRPCRouter({
     )
     .mutation(async ({ ctx, input }) => {
       if (ctx.membership.role !== 'owner' && ctx.membership.role !== 'admin') {
-        throw new Error('Only owners and admins can change roles')
+        throw new TRPCError({ code: 'FORBIDDEN', message: 'Only owners and admins can change roles' })
+      }
+
+      const targetMembership = await ctx.db.query.organizationMemberships.findFirst({
+        where: and(
+          eq(organizationMemberships.organizationId, ctx.organizationId),
+          eq(organizationMemberships.userId, input.userId),
+        ),
+      })
+
+      if (!targetMembership) {
+        throw new TRPCError({ code: 'NOT_FOUND', message: 'User is not a member of this organization' })
       }
 
       await ctx.db
         .update(organizationMemberships)
         .set({ role: input.role })
         .where(
-          eq(organizationMemberships.organizationId, ctx.organizationId),
+          and(
+            eq(organizationMemberships.organizationId, ctx.organizationId),
+            eq(organizationMemberships.userId, input.userId),
+          ),
         )
 
+      await logAudit(ctx.db, { userId: ctx.user.id, action: 'update', entityType: 'member_role', entityId: input.userId, details: { role: input.role } })
       return { success: true }
     }),
 
@@ -140,7 +163,7 @@ export const organizationRouter = createTRPCRouter({
     )
     .mutation(async ({ ctx, input }) => {
       if (ctx.membership.role !== 'owner' && ctx.membership.role !== 'admin') {
-        throw new Error('Only owners and admins can invite members')
+        throw new TRPCError({ code: 'FORBIDDEN', message: 'Only owners and admins can invite members' })
       }
 
       const inserted = await ctx.db
@@ -153,6 +176,7 @@ export const organizationRouter = createTRPCRouter({
         })
         .returning()
 
+      await logAudit(ctx.db, { userId: ctx.user.id, action: 'create', entityType: 'invitation', entityId: String(inserted[0].id), details: { email: input.email } })
       return inserted[0]
     }),
 })

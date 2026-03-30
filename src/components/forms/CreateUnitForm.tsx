@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog'
+import { shortTextField } from '@/lib/validators'
 
 interface CreateUnitFormProps {
   onSubmit: (values: { name: string, description: string }) => Promise<void>
@@ -13,8 +14,8 @@ interface CreateUnitFormProps {
 }
 
 const unitSchema = z.object({
-  name: z.string().min(3, 'Unit name must be at least 3 characters'),
-  description: z.string(),
+  name: shortTextField.min(3, 'Unit name must be at least 3 characters'),
+  description: z.string().trim().max(2000),
 })
 
 export function CreateUnitForm({ onSubmit, isPending: externalPending, onCancel }: CreateUnitFormProps) {

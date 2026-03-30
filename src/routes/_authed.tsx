@@ -1,6 +1,7 @@
 import { createFileRoute, Outlet, redirect } from '@tanstack/react-router'
 import { z } from 'zod'
 import AppShell from '@/components/AppShell'
+import { ErrorBoundary } from '@/components/ErrorBoundary'
 
 const authedSearchSchema = z.object({
   orgId: z.number().optional(),
@@ -60,7 +61,9 @@ export const Route = createFileRoute('/_authed')({
 function AuthedLayout() {
   return (
     <AppShell>
-      <Outlet />
+      <ErrorBoundary>
+        <Outlet />
+      </ErrorBoundary>
     </AppShell>
   )
 }

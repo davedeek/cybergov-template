@@ -1,0 +1,111 @@
+import { createFileRoute, useSearch } from '@tanstack/react-router'
+import { ClipboardList, AlertCircle } from 'lucide-react'
+import { useTRPC } from '@/integrations/trpc/react'
+import { useQuery } from '@tanstack/react-query'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+
+export const Route = createFileRoute('/_authed/audit-log')({
+  component: AuditLogPage,
+})
+
+function AuditLogPage() {
+  const trpc = useTRPC()
+  const search = useSearch({ strict: false }) as { orgId?: number }
+
+  const { data: currentOrg } = useQuery(
+    trpc.organization.getOrCreateCurrent.queryOptions(),
+  )
+  const orgId = search?.orgId ?? currentOrg?.organization.id
+
+  const { data: logs, isLoading } = useQuery({
+    ...trpc.audit.listAll.queryOptions({ organizationId: orgId ?? -1, limit: 100 }),
+    enabled: !!orgId,
+  })
+
+  const role = currentOrg?.membership.role
+  const canView = role === 'owner' || role === 'admin'
+
+  if (!canView) {
+    return (
+      <div className="p-6 lg:p-8 max-w-3xl mx-auto font-sans">
+        <div className="p-4 bg-nd-accent/10 border-2 border-nd-accent text-nd-accent font-mono text-xs uppercase tracking-widest flex items-center gap-3">
+          <AlertCircle className="w-4 h-4 flex-shrink-0" />
+          <span>Access Denied: Audit log requires owner or admin clearance</span>
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div className="p-6 lg:p-8 max-w-5xl mx-auto font-sans">
+      <div className="mb-8 border-b-2 border-nd-ink pb-6">
+        <h1 className="text-3xl font-bold font-serif text-nd-ink uppercase tracking-tight flex items-center gap-3">
+          <ClipboardList className="w-6 h-6 text-nd-accent" />
+          Audit Log
+        </h1>
+        <p className="text-nd-ink-muted mt-2">
+          Activity record for your organization.
+        </p>
+      </div>
+
+      <Card className="bg-nd-surface border-2 border-nd-ink rounded-none shadow-[4px_4px_0px_#1A1A18] overflow-hidden">
+        <CardHeader className="bg-nd-surface-alt border-b-2 border-nd-ink py-4">
+          <CardTitle className="text-xs font-mono font-bold uppercase tracking-widest text-nd-ink">
+            Activity Records ({logs?.length ?? 0})
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="p-0">
+          {isLoading ? (
+            <div className="p-8 text-center font-mono text-xs text-nd-ink-muted uppercase tracking-widest">
+              Loading records...
+            </div>
+          ) : logs?.length ? (
+            <div className="overflow-x-auto">
+              <table className="w-full text-xs font-mono">
+                <thead>
+                  <tr className="border-b-2 border-nd-ink bg-nd-surface-alt">
+                    <th className="text-left p-3 uppercase tracking-widest text-nd-ink-muted">Timestamp</th>
+                    <th className="text-left p-3 uppercase tracking-widest text-nd-ink-muted">User</th>
+                    <th className="text-left p-3 uppercase tracking-widest text-nd-ink-muted">Action</th>
+                    <th className="text-left p-3 uppercase tracking-widest text-nd-ink-muted">Entity Type</th>
+                    <th className="text-left p-3 uppercase tracking-widest text-nd-ink-muted">Entity ID</th>
+                    <th className="text-left p-3 uppercase tracking-widest text-nd-ink-muted">Details</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {logs.map((log) => (
+                    <tr key={log.id} className="border-b border-nd-border hover:bg-nd-surface-alt transition-colors">
+                      <td className="p-3 text-nd-ink-muted whitespace-nowrap">
+                        {log.createdAt ? new Date(log.createdAt).toISOString().replace('T', ' ').slice(0, 19) : '—'}
+                      </td>
+                      <td className="p-3 text-nd-ink truncate max-w-[120px]">{log.userId ?? '(public)'}</td>
+                      <td className="p-3">
+                        <span className={`px-1.5 py-0.5 uppercase tracking-wider font-bold ${
+                          log.action === 'create' ? 'bg-nd-flag-blue/20 text-nd-flag-blue' :
+                          log.action === 'delete' ? 'bg-nd-accent/20 text-nd-accent' :
+                          log.action === 'access' ? 'bg-nd-border text-nd-ink-muted' :
+                          'bg-nd-surface text-nd-ink'
+                        }`}>
+                          {log.action}
+                        </span>
+                      </td>
+                      <td className="p-3 text-nd-ink">{log.entityType}</td>
+                      <td className="p-3 text-nd-ink-muted">{log.entityId ?? '—'}</td>
+                      <td className="p-3 text-nd-ink-muted truncate max-w-[200px]">
+                        {log.details ?? '—'}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          ) : (
+            <div className="text-center py-20 bg-nd-bg border-2 border-nd-border border-dashed m-4">
+              <p className="font-mono text-[10px] uppercase tracking-widest text-nd-ink-muted">No audit records found.</p>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    </div>
+  )
+}

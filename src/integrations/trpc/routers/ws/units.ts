@@ -2,6 +2,7 @@ import { desc, eq, and } from 'drizzle-orm'
 import { z } from 'zod'
 import { createTRPCRouter, orgScopedProcedure } from '../../init'
 import { units } from '@/db/schema'
+import { logAudit } from '@/lib/audit'
 
 export const unitsRouter = createTRPCRouter({
   list: orgScopedProcedure
@@ -39,6 +40,7 @@ export const unitsRouter = createTRPCRouter({
           createdByUserId: ctx.user.id,
         })
         .returning()
+      await logAudit(ctx.db, { userId: ctx.user.id, action: 'create', entityType: 'unit', entityId: String(inserted[0].id) })
       return inserted[0]
     }),
 })

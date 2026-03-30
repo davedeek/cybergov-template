@@ -3,6 +3,7 @@ import { Send } from 'lucide-react'
 import { z } from 'zod'
 import { FormError } from '@/components/ui/form-error'
 import { Button } from '@/components/ui/button'
+import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 
 interface ChatFormProps {
@@ -11,7 +12,7 @@ interface ChatFormProps {
 }
 
 const chatSchema = z.object({
-  input: z.string().trim().min(1, 'Please enter a command or inquiry'),
+  input: z.string().trim().min(1, 'Please enter a command or inquiry').max(10000, 'Message is too long'),
 })
 
 export function ChatForm({ onSubmit, isPending: externalPending }: ChatFormProps) {
@@ -41,9 +42,11 @@ export function ChatForm({ onSubmit, isPending: externalPending }: ChatFormProps
     >
       <form.Field
         name="input"
-        children={(field: any) => (
+        children={(field) => (
           <div className="flex-1 w-full">
+            <Label htmlFor="chat-input" className="sr-only">Message</Label>
             <Textarea
+              id="chat-input"
               value={field.state.value}
               onBlur={field.handleBlur}
               onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => field.handleChange(e.target.value)}
@@ -64,8 +67,8 @@ export function ChatForm({ onSubmit, isPending: externalPending }: ChatFormProps
         )}
       />
       <form.Subscribe
-        selector={(state: any) => [state.canSubmit, state.isSubmitting]}
-        children={([canSubmit, isSubmitting]: any[]) => (
+        selector={(state) => [state.canSubmit, state.isSubmitting] as const}
+        children={([canSubmit, isSubmitting]) => (
           <Button 
             type="submit" 
             disabled={!canSubmit || isSubmitting || externalPending}

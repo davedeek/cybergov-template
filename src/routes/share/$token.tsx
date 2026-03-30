@@ -25,26 +25,31 @@ function SymbolIcon({ type, size = 16, className = "" }: { type: SymbolType, siz
   const s = size, h = s / 2, strokeW = Math.max(1.5, s * 0.1)
   const color = SYMBOL_META[type].color
 
+  const label = SYMBOL_META[type].label
   if (type === 'operation') return (
-    <svg width={s} height={s} viewBox={`0 0 ${s} ${s}`} className={`shrink-0 ${className}`}>
+    <svg width={s} height={s} viewBox={`0 0 ${s} ${s}`} className={`shrink-0 ${className}`} role="img" aria-label={label}>
+      <title>{label}</title>
       <circle cx={h} cy={h} r={h - strokeW} fill={color} />
     </svg>
   )
   if (type === 'transportation') {
     const sm = s * 0.7
     return (
-      <svg width={sm} height={sm} viewBox={`0 0 ${s} ${s}`} className={`shrink-0 ${className}`}>
+      <svg width={sm} height={sm} viewBox={`0 0 ${s} ${s}`} className={`shrink-0 ${className}`} role="img" aria-label={label}>
+        <title>{label}</title>
         <circle cx={h} cy={h} r={h - strokeW * 1.2} fill="none" stroke={color} strokeWidth={strokeW * 1.5} />
       </svg>
     )
   }
   if (type === 'storage') return (
-    <svg width={s} height={s} viewBox={`0 0 ${s} ${s}`} className={`shrink-0 ${className}`}>
+    <svg width={s} height={s} viewBox={`0 0 ${s} ${s}`} className={`shrink-0 ${className}`} role="img" aria-label={label}>
+      <title>{label}</title>
       <polygon points={`${h},${strokeW} ${s-strokeW},${s-strokeW} ${strokeW},${s-strokeW}`} fill="none" stroke={color} strokeWidth={strokeW} strokeLinejoin="round" />
     </svg>
   )
   if (type === 'inspection') return (
-    <svg width={s} height={s} viewBox={`0 0 ${s} ${s}`} className={`shrink-0 ${className}`}>
+    <svg width={s} height={s} viewBox={`0 0 ${s} ${s}`} className={`shrink-0 ${className}`} role="img" aria-label={label}>
+      <title>{label}</title>
       <rect x={strokeW} y={strokeW} width={s-strokeW*2} height={s-strokeW*2} fill="none" stroke={color} strokeWidth={strokeW} />
     </svg>
   )

@@ -47,12 +47,120 @@ beforeAll(() => {
       completed_at INTEGER,
       created_at INTEGER NOT NULL DEFAULT (unixepoch())
     );
+
+    CREATE TABLE IF NOT EXISTS invitations (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      organization_id INTEGER NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
+      email TEXT NOT NULL,
+      role TEXT NOT NULL DEFAULT 'member',
+      invited_by_user_id TEXT NOT NULL REFERENCES users(id),
+      status TEXT NOT NULL DEFAULT 'pending',
+      created_at INTEGER NOT NULL DEFAULT (unixepoch())
+    );
+
+    CREATE TABLE IF NOT EXISTS units (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      organization_id INTEGER NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
+      name TEXT NOT NULL,
+      description TEXT,
+      created_by_user_id TEXT NOT NULL REFERENCES users(id),
+      created_at INTEGER NOT NULL DEFAULT (unixepoch()),
+      updated_at INTEGER NOT NULL DEFAULT (unixepoch())
+    );
+
+    CREATE TABLE IF NOT EXISTS wdc_charts (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      unit_id INTEGER NOT NULL REFERENCES units(id) ON DELETE CASCADE,
+      name TEXT NOT NULL,
+      snapshot_date INTEGER,
+      hours_threshold INTEGER NOT NULL DEFAULT 40,
+      share_token TEXT UNIQUE,
+      created_at INTEGER NOT NULL DEFAULT (unixepoch()),
+      updated_at INTEGER NOT NULL DEFAULT (unixepoch())
+    );
+
+    CREATE TABLE IF NOT EXISTS wdc_employees (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      wdc_chart_id INTEGER NOT NULL REFERENCES wdc_charts(id) ON DELETE CASCADE,
+      name TEXT NOT NULL,
+      role TEXT,
+      fte TEXT NOT NULL DEFAULT '1.0',
+      sort_order INTEGER NOT NULL DEFAULT 0
+    );
+
+    CREATE TABLE IF NOT EXISTS wdc_activities (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      wdc_chart_id INTEGER NOT NULL REFERENCES wdc_charts(id) ON DELETE CASCADE,
+      name TEXT NOT NULL,
+      sort_order INTEGER NOT NULL DEFAULT 0
+    );
+
+    CREATE TABLE IF NOT EXISTS wdc_tasks (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      wdc_chart_id INTEGER NOT NULL REFERENCES wdc_charts(id) ON DELETE CASCADE,
+      employee_id INTEGER NOT NULL REFERENCES wdc_employees(id) ON DELETE CASCADE,
+      activity_id INTEGER NOT NULL REFERENCES wdc_activities(id) ON DELETE CASCADE,
+      task_name TEXT NOT NULL,
+      hours_per_week INTEGER NOT NULL
+    );
+
+    CREATE TABLE IF NOT EXISTS process_charts (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      unit_id INTEGER NOT NULL REFERENCES units(id) ON DELETE CASCADE,
+      name TEXT NOT NULL,
+      start_point TEXT,
+      end_point TEXT,
+      storage_warn_minutes INTEGER NOT NULL DEFAULT 480,
+      distance_warn_feet INTEGER NOT NULL DEFAULT 200,
+      share_token TEXT,
+      created_at INTEGER NOT NULL DEFAULT (unixepoch()),
+      updated_at INTEGER NOT NULL DEFAULT (unixepoch())
+    );
+
+    CREATE TABLE IF NOT EXISTS process_steps (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      process_chart_id INTEGER NOT NULL REFERENCES process_charts(id) ON DELETE CASCADE,
+      sequence_number INTEGER NOT NULL,
+      symbol TEXT NOT NULL,
+      description TEXT NOT NULL,
+      who TEXT,
+      minutes INTEGER,
+      feet INTEGER
+    );
+
+    CREATE TABLE IF NOT EXISTS step_annotations (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      step_id INTEGER NOT NULL REFERENCES process_steps(id) ON DELETE CASCADE,
+      question TEXT NOT NULL,
+      note TEXT NOT NULL,
+      created_at INTEGER NOT NULL DEFAULT (unixepoch())
+    );
+
+    CREATE TABLE IF NOT EXISTS audit_logs (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      user_id TEXT REFERENCES users(id),
+      action TEXT NOT NULL,
+      entity_type TEXT NOT NULL,
+      entity_id TEXT,
+      details TEXT,
+      created_at INTEGER NOT NULL DEFAULT (unixepoch())
+    );
   `)
 })
 
 afterEach(() => {
-  // Clear tables between tests
+  // Clear tables between tests (in dependency order)
   sqlite.exec(`
+    DELETE FROM audit_logs;
+    DELETE FROM step_annotations;
+    DELETE FROM process_steps;
+    DELETE FROM process_charts;
+    DELETE FROM wdc_tasks;
+    DELETE FROM wdc_activities;
+    DELETE FROM wdc_employees;
+    DELETE FROM wdc_charts;
+    DELETE FROM units;
+    DELETE FROM invitations;
     DELETE FROM todos;
     DELETE FROM organization_memberships;
     DELETE FROM organizations;

@@ -3,6 +3,17 @@ import { queryCollectionOptions } from '@tanstack/query-db-collection'
 import type { QueryClient } from '@tanstack/react-query'
 
 // ---------------------------------------------------------------------------
+// Temporary ID generator for optimistic inserts.
+// Negative IDs never collide with SQLite auto-increment (always positive).
+// After the server responds, queryCollectionOptions refetches and replaces
+// the optimistic row with the real server row.
+// ---------------------------------------------------------------------------
+let tempIdCounter = 0
+export function nextTempId(): number {
+  return --tempIdCounter // -1, -2, -3, …
+}
+
+// ---------------------------------------------------------------------------
 // Collection cache — ensures a single collection instance per unique key
 // ---------------------------------------------------------------------------
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

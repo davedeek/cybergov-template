@@ -248,7 +248,7 @@ export const processChartRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      ctx.db.transaction((tx) => {
+      await ctx.db.transaction((tx) => {
         for (let i = 0; i < input.stepIds.length; i++) {
           tx.update(processSteps)
             .set({ sequenceNumber: i })

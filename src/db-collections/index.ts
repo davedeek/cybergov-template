@@ -346,6 +346,21 @@ export function useWDCEmployeesCollection(orgId?: number, wdcId?: number) {
       queryFn: qo.queryFn,
       enabled: !!orgId && !!wdcId,
       getKey: (e) => e.id,
+      onInsert: async (tx) => {
+        if (!orgId || !wdcId) return
+        const results = []
+        for (const m of tx.mutations) {
+          const res = await trpcClient.ws.wdc.addEmployee.mutate({
+            organizationId: orgId,
+            wdcId,
+            name: m.modified.name,
+            role: m.modified.role ?? undefined,
+            fte: m.modified.fte ?? '1.0',
+          })
+          results.push(res)
+        }
+        return results[0]
+      },
     })
   }, [orgId, wdcId])
 }
@@ -364,6 +379,19 @@ export function useWDCActivitiesCollection(orgId?: number, wdcId?: number) {
       queryFn: qo.queryFn,
       enabled: !!orgId && !!wdcId,
       getKey: (a) => a.id,
+      onInsert: async (tx) => {
+        if (!orgId || !wdcId) return
+        const results = []
+        for (const m of tx.mutations) {
+          const res = await trpcClient.ws.wdc.addActivity.mutate({
+            organizationId: orgId,
+            wdcId,
+            name: m.modified.name,
+          })
+          results.push(res)
+        }
+        return results[0]
+      },
     })
   }, [orgId, wdcId])
 }
@@ -382,6 +410,31 @@ export function useWDCTasksCollection(orgId?: number, wdcId?: number) {
       queryFn: qo.queryFn,
       enabled: !!orgId && !!wdcId,
       getKey: (t) => t.id,
+      onInsert: async (tx) => {
+        if (!orgId || !wdcId) return
+        const results = []
+        for (const m of tx.mutations) {
+          const res = await trpcClient.ws.wdc.addTask.mutate({
+            organizationId: orgId,
+            wdcId,
+            employeeId: m.modified.employeeId,
+            activityId: m.modified.activityId,
+            taskName: m.modified.taskName,
+            hoursPerWeek: m.modified.hoursPerWeek,
+          })
+          results.push(res)
+        }
+        return results[0]
+      },
+      onDelete: async (tx) => {
+        if (!orgId) return
+        for (const m of tx.mutations) {
+          await trpcClient.ws.wdc.removeTask.mutate({
+            organizationId: orgId,
+            taskId: m.key as number,
+          })
+        }
+      },
     })
   }, [orgId, wdcId])
 }

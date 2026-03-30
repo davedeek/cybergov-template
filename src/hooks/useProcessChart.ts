@@ -5,6 +5,7 @@ import { useTRPC } from '@/integrations/trpc/react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useLiveQuery } from '@tanstack/react-db'
 import { useStepsCollection, useAnnotationsCollection } from '@/db-collections'
+import { nextTempId } from '@/db-collections/createTrpcCollection'
 import { useMutationHandler } from '@/hooks/use-mutation-handler'
 import { SymbolType, fmtMinutes } from '@/components/ws/SymbolMeta'
 import { stepFormSchema, STEP_FORM_DEFAULTS } from '@/lib/validators'
@@ -59,6 +60,7 @@ export function useProcessChart(orgId: number | undefined, pPcId: number) {
       await handleMutation(
         () =>
           stepsCollection.insert({
+            id: nextTempId(),
             symbol: value.symbol,
             description: value.description.trim(),
             who: value.who.trim() || null,
@@ -111,6 +113,12 @@ export function useProcessChart(orgId: number | undefined, pPcId: number) {
 
   const invalidatePc = () => {
     queryClient.invalidateQueries(trpc.ws.processChart.get.queryFilter({ processChartId: pPcId }))
+  }
+
+  const invalidateSteps = () => {
+    queryClient.invalidateQueries(
+      trpc.ws.processChart.listSteps.queryFilter({ processChartId: pPcId }),
+    )
   }
 
   // Mermaid Generation
@@ -200,7 +208,7 @@ export function useProcessChart(orgId: number | undefined, pPcId: number) {
         }),
       {
         label: 'Reorder Flow Sequence',
-        onSuccess: () => invalidatePc(),
+        onSuccess: () => invalidateSteps(),
       },
     )
   }

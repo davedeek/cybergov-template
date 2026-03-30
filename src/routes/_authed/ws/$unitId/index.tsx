@@ -9,6 +9,7 @@ import {
   useChangesCollection,
 } from '@/db-collections'
 import { useMutationHandler } from '@/hooks/use-mutation-handler'
+import { nextTempId } from '@/db-collections/createTrpcCollection'
 import type { ProcessChart, WdcChart, ProposedChange } from '@/types/entities'
 import {
   ArrowLeft,
@@ -154,6 +155,7 @@ function UnitDashboardPage() {
                       await handleMutation(
                         async () => {
                           const newChart = await wdcCollection.insert({
+                            id: nextTempId(),
                             name: values.name,
                             // eslint-disable-next-line @typescript-eslint/no-explicit-any
                           } as any)
@@ -202,6 +204,7 @@ function UnitDashboardPage() {
                       await handleMutation(
                         async () => {
                           const newChart = await pcCollection.insert({
+                            id: nextTempId(),
                             name: values.name.trim(),
                             description: values.description,
                             // eslint-disable-next-line @typescript-eslint/no-explicit-any

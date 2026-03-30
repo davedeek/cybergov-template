@@ -8,6 +8,7 @@ import {
   type ProposedAction,
 } from './six-questions'
 import type { ProcessStep, StepAnnotation } from '@/types/entities'
+import { nextTempId } from '@/db-collections/createTrpcCollection'
 
 interface SixQuestionsWorkspaceProps {
   steps: ProcessStep[]
@@ -66,6 +67,7 @@ export function SixQuestionsWorkspace({
           })
         } else {
           annotationsCollection.insert({
+            id: nextTempId(),
             stepId,
             question: questionKey,
             note,

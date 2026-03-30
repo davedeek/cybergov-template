@@ -2,6 +2,7 @@ import { createFileRoute, Link, useSearch } from '@tanstack/react-router'
 import { useState, useMemo } from 'react'
 import { useTRPC } from '@/integrations/trpc/react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { nextTempId } from '@/db-collections/createTrpcCollection'
 import { useLiveQuery } from '@tanstack/react-db'
 import {
   useWDCEmployeesCollection,
@@ -70,12 +71,6 @@ function WdcPage() {
 
   const isLoading = wdcLoading || empLoading || actLoading || tasksLoading
 
-  // -- Mutations --
-  const addEmpMutation = useMutation(trpc.ws.wdc.addEmployee.mutationOptions())
-  const addActivityMutation = useMutation(trpc.ws.wdc.addActivity.mutationOptions())
-  const addTaskMutation = useMutation(trpc.ws.wdc.addTask.mutationOptions())
-  const removeTaskMutation = useMutation(trpc.ws.wdc.removeTask.mutationOptions())
-
   // -- Local State --
   const [activeTab, setActiveTab] = useState('chart')
   const [addingEmployee, setAddingEmployee] = useState(false)
@@ -85,18 +80,14 @@ function WdcPage() {
 
   const regenerateTokenMutation = useMutation(trpc.ws.wdc.regenerateShareToken.mutationOptions())
 
-  const invalidateWdc = () => {
+  const invalidateWdcChart = () => {
     queryClient.invalidateQueries(trpc.ws.wdc.get.queryFilter({ wdcId: pWdcId }))
-    queryClient.invalidateQueries(trpc.ws.wdc.listEmployees.queryFilter({ wdcId: pWdcId }))
-    queryClient.invalidateQueries(trpc.ws.wdc.listActivities.queryFilter({ wdcId: pWdcId }))
-    queryClient.invalidateQueries(trpc.ws.wdc.listTasks.queryFilter({ wdcId: pWdcId }))
   }
 
   const handleRemoveTask = async (taskId: number) => {
     if (!orgId) return
-    await handleMutation(() => removeTaskMutation.mutateAsync({ organizationId: orgId, taskId }), {
+    await handleMutation(() => tasksCollection.delete(taskId), {
       label: 'Remove Task',
-      onSuccess: () => invalidateWdc(),
     })
   }
 
@@ -230,18 +221,19 @@ function WdcPage() {
                       if (!orgId) return
                       await handleMutation(
                         () =>
-                          addEmpMutation.mutateAsync({
-                            organizationId: orgId,
-                            wdcId: pWdcId,
+                          employeesCollection.insert({
+                            id: nextTempId(),
                             name: values.name,
-                            role: values.role || undefined,
+                            role: values.role || null,
                             fte: values.fte,
-                          }),
+                            wdcChartId: pWdcId,
+                            sortOrder: 0,
+                            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                          } as any),
                         {
                           label: 'Add Employee to Roster',
                           onSuccess: () => {
                             setAddingEmployee(false)
-                            invalidateWdc()
                           },
                         },
                       )
@@ -265,16 +257,17 @@ function WdcPage() {
                       if (!orgId) return
                       await handleMutation(
                         () =>
-                          addActivityMutation.mutateAsync({
-                            organizationId: orgId,
-                            wdcId: pWdcId,
+                          activitiesCollection.insert({
+                            id: nextTempId(),
                             name: values.name,
-                          }),
+                            wdcChartId: pWdcId,
+                            sortOrder: 0,
+                            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                          } as any),
                         {
                           label: 'Add Activity Row',
                           onSuccess: () => {
                             setAddingActivity(false)
-                            invalidateWdc()
                           },
                         },
                       )
@@ -298,19 +291,19 @@ function WdcPage() {
                       if (!orgId || !activeCell) return
                       await handleMutation(
                         () =>
-                          addTaskMutation.mutateAsync({
-                            organizationId: orgId,
-                            wdcId: pWdcId,
+                          tasksCollection.insert({
+                            id: nextTempId(),
+                            wdcChartId: pWdcId,
                             employeeId: activeCell.empId,
                             activityId: activeCell.actId,
                             taskName: values.taskName.trim(),
                             hoursPerWeek: Number(values.hours),
-                          }),
+                            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                          } as any),
                         {
                           label: 'Register Individual Task',
                           onSuccess: () => {
                             setActiveCell(null)
-                            invalidateWdc()
                           },
                         },
                       )
@@ -367,7 +360,7 @@ function WdcPage() {
         onRegenerate={async () => {
           if (!orgId) return
           await regenerateTokenMutation.mutateAsync({ organizationId: orgId, wdcId: pWdcId })
-          invalidateWdc()
+          invalidateWdcChart()
         }}
         isRegenerating={regenerateTokenMutation.isPending}
       />

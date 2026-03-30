@@ -4,6 +4,7 @@ import { useTRPC } from '@/integrations/trpc/react'
 import { useQuery } from '@tanstack/react-query'
 import { useLiveQuery } from '@tanstack/react-db'
 import { useUnitsCollection } from '@/db-collections'
+import { nextTempId } from '@/db-collections/createTrpcCollection'
 import { useMutationHandler } from '@/hooks/use-mutation-handler'
 import type { Unit } from '@/types/entities'
 import { Plus, FolderTree, Activity, ArrowRight, AlertCircle } from 'lucide-react'
@@ -66,6 +67,7 @@ function UnitsLandingPage() {
                 onSubmit={async (values) => {
                   await handleMutation(
                     () => unitsCollection.insert({
+                      id: nextTempId(),
                       name: values.name.trim(),
                       description: values.description.trim() || null,
                     } as any),

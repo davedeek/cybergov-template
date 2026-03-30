@@ -4,6 +4,7 @@ import { useTRPC } from '@/integrations/trpc/react'
 import { useQuery } from '@tanstack/react-query'
 import { useLiveQuery } from '@tanstack/react-db'
 import { useTodosCollection } from '@/db-collections'
+import { nextTempId } from '@/db-collections/createTrpcCollection'
 import { useMutationHandler } from '@/hooks/use-mutation-handler'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -70,7 +71,7 @@ function TodosPage() {
           <AddTodoForm 
             onSubmit={async (values) => {
               await handleMutation(
-                () => todosCollection.insert({ name: values.name } as any),
+                () => todosCollection.insert({ id: nextTempId(), name: values.name } as any),
                 { label: 'Create Todo' }
               )
             }} 

@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { useParams } from '@tanstack/react-router'
-import { useMutation } from '@tanstack/react-query'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useOrganization } from '@/hooks/useOrganization'
 import { useTRPC } from '@/integrations/trpc/react'
 import {
@@ -41,6 +41,7 @@ function ProcessChartPageComponent() {
   const { organization } = useOrganization()
   const orgId = organization?.id
   const trpc = useTRPC()
+  const queryClient = useQueryClient()
 
   const {
     chart,
@@ -310,6 +311,12 @@ function ProcessChartPageComponent() {
                   steps={steps}
                   annotations={annotations}
                   annotationsCollection={annotationsCollection}
+                  orgId={orgId!}
+                  onAnnotationSaved={() =>
+                    queryClient.invalidateQueries(
+                      trpc.ws.processChart.listAnnotations.queryFilter({ processChartId: pPcId }),
+                    )
+                  }
                   onDuplicateAsProposal={!isProposed ? handleDuplicateAsProposal : undefined}
                   isDuplicating={duplicateAsProposalMutation.isPending}
                 />

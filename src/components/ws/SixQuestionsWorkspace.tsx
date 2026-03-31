@@ -8,13 +8,15 @@ import {
   type ProposedAction,
 } from './six-questions'
 import type { ProcessStep, StepAnnotation } from '@/types/entities'
-import { nextTempId } from '@/db-collections/createTrpcCollection'
+import { trpcClient } from '@/integrations/tanstack-query/root-provider'
 
 interface SixQuestionsWorkspaceProps {
   steps: ProcessStep[]
   annotations: StepAnnotation[]
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   annotationsCollection: any
+  orgId: number
+  onAnnotationSaved?: () => void
   onDuplicateAsProposal?: () => void
   isDuplicating?: boolean
 }
@@ -23,6 +25,8 @@ export function SixQuestionsWorkspace({
   steps,
   annotations,
   annotationsCollection,
+  orgId,
+  onAnnotationSaved,
   onDuplicateAsProposal,
   isDuplicating,
 }: SixQuestionsWorkspaceProps) {
@@ -58,7 +62,7 @@ export function SixQuestionsWorkspace({
       const timerKey = `${stepId}-${questionKey}`
 
       clearTimeout(debounceTimers.current[timerKey])
-      debounceTimers.current[timerKey] = setTimeout(() => {
+      debounceTimers.current[timerKey] = setTimeout(async () => {
         if (existing) {
           annotationsCollection.update(existing.id, {
             ...existing,
@@ -66,13 +70,16 @@ export function SixQuestionsWorkspace({
             proposedAction,
           })
         } else {
-          annotationsCollection.insert({
-            id: nextTempId(),
+          // Use trpcClient directly for inserts to avoid undefined-key errors
+          // in the collection. The upsert endpoint handles both create and update.
+          await trpcClient.ws.processChart.upsertAnnotation.mutate({
+            organizationId: orgId,
             stepId,
             question: questionKey,
             note,
             proposedAction,
-          } as Partial<StepAnnotation>)
+          })
+          onAnnotationSaved?.()
         }
       }, 500)
     },

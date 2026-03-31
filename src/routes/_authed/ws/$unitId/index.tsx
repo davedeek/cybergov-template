@@ -9,7 +9,6 @@ import {
   useChangesCollection,
 } from '@/db-collections'
 import { useMutationHandler } from '@/hooks/use-mutation-handler'
-import { nextTempId } from '@/db-collections/createTrpcCollection'
 import type { ProcessChart, WdcChart, ProposedChange } from '@/types/entities'
 import {
   ArrowLeft,
@@ -48,6 +47,9 @@ function UnitDashboardPage() {
   const { data: unit, isLoading: unitLoading } = useQuery(
     trpc.ws.units.get.queryOptions({ organizationId: orgId!, unitId: parseInt(unitId) }),
   )
+
+  const createWdcMutation = useMutation(trpc.ws.wdc.create.mutationOptions())
+  const createPcMutation = useMutation(trpc.ws.processChart.create.mutationOptions())
 
   const wdcCollection = useWDCChartsCollection(orgId, parseInt(unitId))
   const { data: rawWdcCharts = [], isLoading: wdcLoading } = useLiveQuery(
@@ -153,19 +155,20 @@ function UnitDashboardPage() {
                   <CreateWdcForm
                     onSubmit={async (values) => {
                       await handleMutation(
-                        async () => {
-                          const newChart = await wdcCollection.insert({
-                            id: nextTempId(),
+                        () =>
+                          createWdcMutation.mutateAsync({
+                            organizationId: orgId!,
+                            unitId: parseInt(unitId),
                             name: values.name,
-                            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                          } as any)
-                          return newChart
-                        },
+                          }),
                         {
                           label: 'Create WDC Register',
                           // eslint-disable-next-line @typescript-eslint/no-explicit-any
                           onSuccess: (newChart: any) => {
                             setIsWdcOpen(false)
+                            queryClient.invalidateQueries(
+                              trpc.ws.wdc.listByUnit.queryFilter({ unitId: parseInt(unitId) }),
+                            )
                             navigate({
                               to: '/ws/$unitId/wdc/$wdcId',
                               params: { unitId, wdcId: newChart.id.toString() },
@@ -202,20 +205,20 @@ function UnitDashboardPage() {
                   <CreateProcessChartForm
                     onSubmit={async (values) => {
                       await handleMutation(
-                        async () => {
-                          const newChart = await pcCollection.insert({
-                            id: nextTempId(),
+                        () =>
+                          createPcMutation.mutateAsync({
+                            organizationId: orgId!,
+                            unitId: parseInt(unitId),
                             name: values.name.trim(),
-                            description: values.description,
-                            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                          } as any)
-                          return newChart
-                        },
+                          }),
                         {
                           label: 'Create Process Definition',
                           // eslint-disable-next-line @typescript-eslint/no-explicit-any
                           onSuccess: (newChart: any) => {
                             setIsPcOpen(false)
+                            queryClient.invalidateQueries(
+                              trpc.ws.processChart.listByUnit.queryFilter({ unitId: parseInt(unitId) }),
+                            )
                             navigate({
                               to: '/ws/$unitId/pc/$pcId',
                               params: { unitId, pcId: newChart.id.toString() },

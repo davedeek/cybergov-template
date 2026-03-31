@@ -1,10 +1,9 @@
 import { createFileRoute, useSearch } from '@tanstack/react-router'
 import { Trash2, CheckCircle, ListTodo, AlertCircle } from 'lucide-react'
 import { useTRPC } from '@/integrations/trpc/react'
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useLiveQuery } from '@tanstack/react-db'
 import { useTodosCollection } from '@/db-collections'
-import { nextTempId } from '@/db-collections/createTrpcCollection'
 import { useMutationHandler } from '@/hooks/use-mutation-handler'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -25,7 +24,9 @@ function TodosPage() {
   )
   const orgId = search?.orgId ?? currentOrg?.organization.id
 
+  const queryClient = useQueryClient()
   const todosCollection = useTodosCollection(orgId)
+  const addTodoMutation = useMutation(trpc.todos.add.mutationOptions())
 
   const { data: liveTodos = [], isLoading } = useLiveQuery(
     (q) =>
@@ -71,8 +72,11 @@ function TodosPage() {
           <AddTodoForm 
             onSubmit={async (values) => {
               await handleMutation(
-                () => todosCollection.insert({ id: nextTempId(), name: values.name } as any),
-                { label: 'Create Todo' }
+                () => addTodoMutation.mutateAsync({ organizationId: orgId!, name: values.name }),
+                {
+                  label: 'Create Todo',
+                  onSuccess: () => queryClient.invalidateQueries(trpc.todos.list.queryFilter({ organizationId: orgId! })),
+                }
               )
             }} 
             isPending={isPending}

@@ -1,10 +1,9 @@
 import { createFileRoute, Link, useSearch } from '@tanstack/react-router'
 import { useState } from 'react'
 import { useTRPC } from '@/integrations/trpc/react'
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useLiveQuery } from '@tanstack/react-db'
 import { useUnitsCollection } from '@/db-collections'
-import { nextTempId } from '@/db-collections/createTrpcCollection'
 import { useMutationHandler } from '@/hooks/use-mutation-handler'
 import type { Unit } from '@/types/entities'
 import { Plus, FolderTree, Activity, ArrowRight, AlertCircle } from 'lucide-react'
@@ -21,11 +20,13 @@ export const Route = createFileRoute('/_authed/ws/')({
 function UnitsLandingPage() {
   const trpc = useTRPC()
   const search = useSearch({ strict: false }) as { orgId?: number }
+  const queryClient = useQueryClient()
   const { handleMutation, isPending, error: mutationError } = useMutationHandler()
   const { data: currentOrg } = useQuery(trpc.organization.getOrCreateCurrent.queryOptions())
   const orgId = search?.orgId ?? currentOrg?.organization.id
 
   const unitsCollection = useUnitsCollection(orgId)
+  const createUnitMutation = useMutation(trpc.ws.units.create.mutationOptions())
   const { data: rawUnits = [], isLoading } = useLiveQuery(
     (q) => q.from({ units: unitsCollection }).select(({ units }) => units),
     [unitsCollection],
@@ -66,14 +67,17 @@ function UnitsLandingPage() {
               <CreateUnitForm 
                 onSubmit={async (values) => {
                   await handleMutation(
-                    () => unitsCollection.insert({
-                      id: nextTempId(),
+                    () => createUnitMutation.mutateAsync({
+                      organizationId: orgId!,
                       name: values.name.trim(),
-                      description: values.description.trim() || null,
-                    } as any),
-                    { 
+                      description: values.description.trim() || undefined,
+                    }),
+                    {
                       label: 'Create Unit',
-                      onSuccess: () => setIsCreateOpen(false)
+                      onSuccess: () => {
+                        setIsCreateOpen(false)
+                        queryClient.invalidateQueries(trpc.ws.units.list.queryFilter({ organizationId: orgId! }))
+                      },
                     }
                   )
                 }} 

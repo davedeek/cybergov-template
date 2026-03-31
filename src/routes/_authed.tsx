@@ -11,22 +11,19 @@ export const Route = createFileRoute('/_authed')({
   validateSearch: authedSearchSchema,
 
   beforeLoad: async ({ context }) => {
-    // Check for authenticated session via tRPC
-    try {
-      const session = await context.queryClient.ensureQueryData(
-        context.trpc.me.session.queryOptions(),
-      )
-      if (!session?.user) {
-        throw redirect({ to: '/signin' })
-      }
-      return { session }
-    } catch (e) {
-      // If the query fails (unauthorized), redirect to signin
-      if (e instanceof Error && !('to' in e)) {
-        throw redirect({ to: '/signin' })
-      }
-      throw e
+    // Check for authenticated session via tRPC.
+    // me.session is a publicProcedure that returns null when unauthenticated
+    // (rather than throwing UNAUTHORIZED) so transient network errors don't
+    // cause spurious logouts.
+    const session = await context.queryClient.ensureQueryData({
+      ...context.trpc.me.session.queryOptions(),
+      staleTime: 1000 * 60 * 5, // cache session check for 5 min
+      retry: 2, // retry transient failures before giving up
+    })
+    if (!session?.user) {
+      throw redirect({ to: '/signin' })
     }
+    return { session }
   },
 
   component: AuthedLayout,

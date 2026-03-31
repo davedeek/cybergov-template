@@ -5,7 +5,6 @@ import { useTRPC } from '@/integrations/trpc/react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useLiveQuery } from '@tanstack/react-db'
 import { useStepsCollection, useAnnotationsCollection } from '@/db-collections'
-import { nextTempId } from '@/db-collections/createTrpcCollection'
 import { useMutationHandler } from '@/hooks/use-mutation-handler'
 import { SymbolType, fmtMinutes } from '@/components/ws/SymbolMeta'
 import { stepFormSchema, STEP_FORM_DEFAULTS } from '@/lib/validators'
@@ -45,6 +44,7 @@ export function useProcessChart(orgId: number | undefined, pPcId: number) {
   const isLoading = pcLoading || stepsLoading
 
   // -- Mutations --
+  const addStepMutation = useMutation(trpc.ws.processChart.addStep.mutationOptions())
   const reorderStepsMutation = useMutation(trpc.ws.processChart.reorderSteps.mutationOptions())
 
   // -- Local State --
@@ -59,17 +59,21 @@ export function useProcessChart(orgId: number | undefined, pPcId: number) {
       if (!orgId) return
       await handleMutation(
         () =>
-          stepsCollection.insert({
-            id: nextTempId(),
+          addStepMutation.mutateAsync({
+            organizationId: orgId,
+            processChartId: pPcId,
             symbol: value.symbol,
             description: value.description.trim(),
-            who: value.who.trim() || null,
-            minutes: value.minutes ? Number(value.minutes) : null,
-            feet: value.feet ? Number(value.feet) : null,
-          } as any),
+            who: value.who.trim() || undefined,
+            minutes: value.minutes ? Number(value.minutes) : undefined,
+            feet: value.feet ? Number(value.feet) : undefined,
+          }),
         {
           label: 'Create Process Step',
-          onSuccess: () => addStepForm.reset(),
+          onSuccess: () => {
+            addStepForm.reset()
+            invalidateSteps()
+          },
         },
       )
     },

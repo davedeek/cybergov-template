@@ -1,4 +1,5 @@
 import { useState, useCallback } from 'react'
+import { toast } from 'sonner'
 import { logger } from '@/lib/logger'
 
 export interface MutationError {
@@ -25,6 +26,8 @@ export function useMutationHandler() {
       onError?: (error: unknown) => void
       onSettled?: () => void
       label?: string
+      successToast?: string
+      errorToast?: string
     }
   ) => {
     setIsPending(true)
@@ -46,6 +49,7 @@ export function useMutationHandler() {
       }
 
       logger.info(`[Mutation Success]: ${label}`)
+      if (options?.successToast) toast.success(options.successToast)
       await options?.onSuccess?.(result)
       return result
     } catch (err: unknown) {
@@ -63,6 +67,7 @@ export function useMutationHandler() {
       }
 
       setError(message)
+      if (options?.errorToast) toast.error(options.errorToast)
       options?.onError?.(err)
       return { error: { message } }
     } finally {

@@ -31,6 +31,9 @@ import { OnboardingWizard } from '@/components/ws/OnboardingWizard'
 
 export const Route = createFileRoute('/_authed/ws/')({
   component: UnitsLandingPage,
+  head: () => ({
+    meta: [{ title: 'Units — CyberGov' }],
+  }),
 })
 
 function UnitsLandingPage() {
@@ -77,6 +80,7 @@ function UnitsLandingPage() {
     setImportingExample(true)
     await handleMutation(() => importExampleMutation.mutateAsync({ organizationId: orgId }), {
       label: 'Import Example Data',
+      successToast: 'Example data imported',
       onSuccess: (unit: { id: number }) => {
         queryClient.invalidateQueries(trpc.ws.units.list.queryFilter({ organizationId: orgId }))
         dismissOnboarding()
@@ -148,6 +152,7 @@ function UnitsLandingPage() {
                         }),
                       {
                         label: 'Create Unit',
+                        successToast: 'Unit created',
                         onSuccess: () => {
                           setIsCreateOpen(false)
                           queryClient.invalidateQueries(

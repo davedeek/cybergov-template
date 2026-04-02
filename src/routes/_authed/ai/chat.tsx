@@ -140,7 +140,7 @@ function ChatPage() {
               onSubmit={async (values) => {
                 await handleMutation(
                   () => sendMessage(values),
-                  { label: 'AI Query' }
+                  { label: 'AI Query', successToast: 'Response received' }
                 )
               }} 
               isPending={isLoading || isPending} 
@@ -155,4 +155,7 @@ function ChatPage() {
 
 export const Route = createFileRoute('/_authed/ai/chat')({
   component: ChatPage,
+  head: () => ({
+    meta: [{ title: 'AI Chat — CyberGov' }],
+  }),
 })

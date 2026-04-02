@@ -11,6 +11,9 @@ import { InviteMemberForm } from '@/components/forms/InviteMemberForm'
 
 export const Route = createFileRoute('/_authed/settings')({
   component: SettingsPage,
+  head: () => ({
+    meta: [{ title: 'Settings — CyberGov' }],
+  }),
 })
 
 function SettingsPage() {
@@ -88,8 +91,9 @@ function SettingsPage() {
                     email: values.email,
                     role: values.role,
                   }),
-                  { 
+                  {
                     label: 'Invite Team Member',
+                    successToast: 'Invitation sent',
                     onSuccess: () => queryClient.invalidateQueries()
                   }
                 )

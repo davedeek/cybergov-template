@@ -12,6 +12,9 @@ import { AddTodoForm } from '@/components/forms/AddTodoForm'
 
 export const Route = createFileRoute('/_authed/todos')({
   component: TodosPage,
+  head: () => ({
+    meta: [{ title: 'Todos — CyberGov' }],
+  }),
 })
 
 function TodosPage() {
@@ -75,6 +78,7 @@ function TodosPage() {
                 () => addTodoMutation.mutateAsync({ organizationId: orgId!, name: values.name }),
                 {
                   label: 'Create Todo',
+                  successToast: 'Todo added',
                   onSuccess: () => queryClient.invalidateQueries(trpc.todos.list.queryFilter({ organizationId: orgId! })),
                 }
               )
@@ -111,7 +115,7 @@ function TodosPage() {
             {todos.map((todo) => (
               <li
                 key={todo.id}
-                className={`group relative flex items-center gap-4 p-5 bg-nd-surface border-2 border-nd-ink rounded-none transition-all hover:shadow-[4px_4px_0px_#1A1A18] hover:-translate-y-0.5 ${todo.completedAt ? 'opacity-70 grayscale bg-nd-surface-alt/50 border-nd-border hover:shadow-none hover:translate-y-0' : ''}`}
+                className={`animate-slide-in-row group relative flex items-center gap-4 p-5 bg-nd-surface border-2 border-nd-ink rounded-none transition-all hover:shadow-[4px_4px_0px_#1A1A18] hover:-translate-y-0.5 ${todo.completedAt ? 'opacity-70 grayscale bg-nd-surface-alt/50 border-nd-border hover:shadow-none hover:translate-y-0' : ''}`}
               >
                 <button
                   onClick={() =>
@@ -119,7 +123,7 @@ function TodosPage() {
                       () => todosCollection.update(todo.id, {
                         completedAt: todo.completedAt ? null : new Date(),
                       } as any),
-                      { label: 'Toggle Todo' }
+                      { label: 'Toggle Todo', successToast: 'Todo updated' }
                     )
                   }
                   className={`flex-shrink-0 w-6 h-6 border-2 flex items-center justify-center transition-colors ${todo.completedAt ? 'bg-nd-ink border-nd-ink text-nd-bg' : 'bg-nd-bg border-nd-ink hover:border-nd-accent'}`}
@@ -146,7 +150,7 @@ function TodosPage() {
                     size="icon"
                     onClick={() => handleMutation(
                       () => todosCollection.delete(todo.id),
-                      { label: 'Delete Todo' }
+                      { label: 'Delete Todo', successToast: 'Todo deleted' }
                     )}
                     className="h-9 w-9 text-nd-ink-muted hover:text-nd-accent hover:bg-nd-accent-light rounded-none transition-colors border border-transparent hover:border-nd-accent"
                   >

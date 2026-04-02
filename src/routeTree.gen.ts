@@ -612,7 +612,8 @@ const AuthedRouteChildren: AuthedRouteChildren = {
   AuthedWsUnitIdWdcWdcIdRoute: AuthedWsUnitIdWdcWdcIdRoute,
 }
 
-const AuthedRouteWithChildren = AuthedRoute._addFileChildren(AuthedRouteChildren)
+const AuthedRouteWithChildren =
+  AuthedRoute._addFileChildren(AuthedRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,

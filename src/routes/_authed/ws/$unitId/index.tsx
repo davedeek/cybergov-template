@@ -34,6 +34,9 @@ import { CreateWorkCountForm } from '@/components/forms/CreateWorkCountForm'
 
 export const Route = createFileRoute('/_authed/ws/$unitId/')({
   component: UnitDashboardPage,
+  head: () => ({
+    meta: [{ title: 'Unit — CyberGov' }],
+  }),
 })
 
 function UnitDashboardPage() {
@@ -111,6 +114,7 @@ function UnitDashboardPage() {
       () => updateStatusMutation.mutateAsync({ organizationId: orgId, changeId, status }),
       {
         label: `${status === 'accepted' ? 'Accept' : 'Dismiss'} Proposal`,
+        successToast: `Proposal ${status === 'accepted' ? 'accepted' : 'dismissed'}`,
         onSuccess: () => {
           queryClient.invalidateQueries(
             trpc.ws.changes.listByUnit.queryFilter({ unitId: parseInt(unitId) }),
@@ -166,6 +170,7 @@ function UnitDashboardPage() {
                           }),
                         {
                           label: 'Create WDC Register',
+                          successToast: 'WDC chart created',
                           // eslint-disable-next-line @typescript-eslint/no-explicit-any
                           onSuccess: (newChart: any) => {
                             setIsWdcOpen(false)
@@ -217,6 +222,7 @@ function UnitDashboardPage() {
                           }),
                         {
                           label: 'Create Work Count',
+                          successToast: 'Work count created',
                           onSuccess: (newWc: { id: number }) => {
                             setIsWcOpen(false)
                             queryClient.invalidateQueries(
@@ -268,6 +274,7 @@ function UnitDashboardPage() {
                           }),
                         {
                           label: 'Create Process Definition',
+                          successToast: 'Process chart created',
                           // eslint-disable-next-line @typescript-eslint/no-explicit-any
                           onSuccess: (newChart: any) => {
                             setIsPcOpen(false)

@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { createFileRoute, Link } from '@tanstack/react-router'
+import { toast } from 'sonner'
 import { useParams } from '@tanstack/react-router'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useOrganization } from '@/hooks/useOrganization'
@@ -33,6 +34,9 @@ import { useProcessFlags } from '@/hooks/useProcessFlags'
 
 export const Route = createFileRoute('/_authed/ws/$unitId/pc/$pcId')({
   component: ProcessChartPageComponent,
+  head: () => ({
+    meta: [{ title: 'Process Chart — CyberGov' }],
+  }),
 })
 
 function ProcessChartPageComponent() {
@@ -55,10 +59,6 @@ function ProcessChartPageComponent() {
     editStepForm,
     editingId,
     setEditingId,
-    copiedCsv,
-    setCopiedCsv,
-    copiedMermaid,
-    setCopiedMermaid,
     mermaidSvg,
     mermaidSrc,
     dragId,
@@ -108,14 +108,12 @@ function ProcessChartPageComponent() {
         `${i + 1},${s.symbol},"${s.description}","${s.who || ''}",${s.minutes ?? ''},${s.feet ?? ''}`,
     )
     navigator.clipboard.writeText([header, ...rows].join('\n'))
-    setCopiedCsv(true)
-    setTimeout(() => setCopiedCsv(false), 2000)
+    toast.success('Copied to clipboard')
   }
 
   const copyMermaid = () => {
     navigator.clipboard.writeText(mermaidSrc)
-    setCopiedMermaid(true)
-    setTimeout(() => setCopiedMermaid(false), 2000)
+    toast.success('Copied to clipboard')
   }
 
   const handleStartAnalysis = (_targetQuestion?: string) => {
@@ -261,7 +259,7 @@ function ProcessChartPageComponent() {
 
               <TabsContent
                 value="ledger"
-                className="m-0 border-none mt-0 p-0 ring-offset-transparent focus-visible:ring-0"
+                className="animate-fade-in-tab m-0 border-none mt-0 p-0 ring-offset-transparent focus-visible:ring-0"
               >
                 <ProcessChartLedger
                   steps={steps}
@@ -274,13 +272,12 @@ function ProcessChartPageComponent() {
                   storageWarn={storageWarn}
                   distWarn={distWarn}
                   copyCSV={copyCSV}
-                  copiedCsv={copiedCsv}
                 />
               </TabsContent>
 
               <TabsContent
                 value="flow"
-                className="m-0 border-none mt-0 p-0 ring-offset-transparent focus-visible:ring-0"
+                className="animate-fade-in-tab m-0 border-none mt-0 p-0 ring-offset-transparent focus-visible:ring-0"
               >
                 <ProcessChartListView
                   steps={steps}
@@ -298,14 +295,14 @@ function ProcessChartPageComponent() {
 
               <TabsContent
                 value="analysis"
-                className="m-0 border-none mt-0 p-0 ring-offset-transparent focus-visible:ring-0"
+                className="animate-fade-in-tab m-0 border-none mt-0 p-0 ring-offset-transparent focus-visible:ring-0"
               >
                 <ProcessFlags flags={processFlags} onStartAnalysis={handleStartAnalysis} />
               </TabsContent>
 
               <TabsContent
                 value="six-questions"
-                className="m-0 border-none mt-0 p-0 ring-offset-transparent focus-visible:ring-0"
+                className="animate-fade-in-tab m-0 border-none mt-0 p-0 ring-offset-transparent focus-visible:ring-0"
               >
                 <SixQuestionsWorkspace
                   steps={steps}
@@ -330,20 +327,19 @@ function ProcessChartPageComponent() {
 
               <TabsContent
                 value="workcount"
-                className="m-0 border-none mt-0 p-0 ring-offset-transparent focus-visible:ring-0"
+                className="animate-fade-in-tab m-0 border-none mt-0 p-0 ring-offset-transparent focus-visible:ring-0"
               >
                 {orgId && <WorkCountTab orgId={orgId} unitId={parseInt(unitId)} />}
               </TabsContent>
 
               <TabsContent
                 value="mermaid"
-                className="m-0 border-none mt-0 p-0 ring-offset-transparent focus-visible:ring-0"
+                className="animate-fade-in-tab m-0 border-none mt-0 p-0 ring-offset-transparent focus-visible:ring-0"
               >
                 <ProcessChartMermaidView
                   mermaidSvg={mermaidSvg}
                   mermaidSrc={mermaidSrc}
                   copyMermaid={copyMermaid}
-                  copiedMermaid={copiedMermaid}
                   stepsCount={steps.length}
                 />
               </TabsContent>

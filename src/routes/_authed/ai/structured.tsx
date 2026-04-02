@@ -211,7 +211,7 @@ function StructuredPage() {
         setResult(data)
         return data
       },
-      { label: `AI Structured Synthesis (${mode})` }
+      { label: `AI Structured Synthesis (${mode})`, successToast: 'Recipe generated' }
     )
   }
 
@@ -357,4 +357,7 @@ function StructuredPage() {
 
 export const Route = createFileRoute('/_authed/ai/structured')({
   component: StructuredPage,
+  head: () => ({
+    meta: [{ title: 'AI Structured — CyberGov' }],
+  }),
 })

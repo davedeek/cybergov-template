@@ -70,6 +70,7 @@ export function useProcessChart(orgId: number | undefined, pPcId: number) {
           }),
         {
           label: 'Create Process Step',
+          successToast: 'Step added',
           onSuccess: () => {
             addStepForm.reset()
             invalidateSteps()
@@ -102,13 +103,12 @@ export function useProcessChart(orgId: number | undefined, pPcId: number) {
           } as any),
         {
           label: 'Update Process Step',
+          successToast: 'Step updated',
           onSuccess: () => setEditingId(null),
         },
       )
     },
   })
-  const [copiedCsv, setCopiedCsv] = useState(false)
-  const [copiedMermaid, setCopiedMermaid] = useState(false)
   const [mermaidSvg, setMermaidSvg] = useState<string | null>(null)
 
   // Drag state
@@ -212,6 +212,7 @@ export function useProcessChart(orgId: number | undefined, pPcId: number) {
         }),
       {
         label: 'Reorder Flow Sequence',
+        successToast: 'Steps reordered',
         onSuccess: () => invalidateSteps(),
       },
     )
@@ -241,7 +242,7 @@ export function useProcessChart(orgId: number | undefined, pPcId: number) {
 
   const handleRemoveStep = async (stepId: number) => {
     if (!orgId) return
-    await handleMutation(() => stepsCollection.delete(stepId), { label: 'Unregister Process Step' })
+    await handleMutation(() => stepsCollection.delete(stepId), { label: 'Unregister Process Step', successToast: 'Step deleted' })
   }
 
   return {
@@ -256,10 +257,6 @@ export function useProcessChart(orgId: number | undefined, pPcId: number) {
     editStepForm,
     editingId,
     setEditingId,
-    copiedCsv,
-    setCopiedCsv,
-    copiedMermaid,
-    setCopiedMermaid,
     mermaidSvg,
     mermaidSrc,
     dragId,

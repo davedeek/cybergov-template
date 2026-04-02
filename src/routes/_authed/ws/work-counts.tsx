@@ -10,6 +10,9 @@ import { Button } from '@/components/ui/button'
 
 export const Route = createFileRoute('/_authed/ws/work-counts')({
   component: AllWorkCountsPage,
+  head: () => ({
+    meta: [{ title: 'Work Counts — CyberGov' }],
+  }),
 })
 
 function AllWorkCountsPage() {

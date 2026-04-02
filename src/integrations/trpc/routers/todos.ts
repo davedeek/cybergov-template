@@ -2,7 +2,7 @@ import { desc, eq } from 'drizzle-orm'
 import { z } from 'zod'
 import { createTRPCRouter, orgScopedProcedure } from '../init'
 import { todos } from '@/db/schema'
-import { logAudit } from '@/lib/audit'
+import { logAudit } from '@/lib/server-logger'
 
 export const todosRouter = createTRPCRouter({
   list: orgScopedProcedure

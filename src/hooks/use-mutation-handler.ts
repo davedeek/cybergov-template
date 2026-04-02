@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react'
 import { toast } from 'sonner'
-import { logger } from '@/lib/logger'
+import { logger } from '@/lib/client-logger'
 
 export interface MutationError {
   message: string

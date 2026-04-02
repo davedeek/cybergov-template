@@ -3,7 +3,7 @@ import { z } from 'zod'
 import { TRPCError } from '@trpc/server'
 import { createTRPCRouter, protectedProcedure, orgScopedProcedure } from '../init'
 import { organizationMemberships, organizations, invitations } from '@/db/schema'
-import { logAudit } from '@/lib/audit'
+import { logAudit } from '@/lib/server-logger'
 
 export const organizationRouter = createTRPCRouter({
   getOrCreateCurrent: protectedProcedure.query(async ({ ctx }) => {

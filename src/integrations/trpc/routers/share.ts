@@ -11,7 +11,7 @@ import {
   processSteps,
   units,
 } from '@/db/schema'
-import { logAudit } from '@/lib/audit'
+import { logAudit } from '@/lib/server-logger'
 
 // In-memory rate limiter: max 20 requests per minute per IP
 const shareRateLimit = new Map<string, { count: number; resetAt: number }>()

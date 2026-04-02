@@ -6,15 +6,17 @@ import { useLiveQuery } from '@tanstack/react-db'
 import {
   useProcessChartsCollection,
   useWDCChartsCollection,
+  useWorkCountsCollection,
   useChangesCollection,
 } from '@/db-collections'
 import { useMutationHandler } from '@/hooks/use-mutation-handler'
-import type { ProcessChart, WdcChart, ProposedChange } from '@/types/entities'
+import type { ProcessChart, WdcChart, WorkCount, ProposedChange } from '@/types/entities'
 import {
   ArrowLeft,
   Plus,
   FileSpreadsheet,
   GitBranch,
+  BarChart3,
   Calendar,
   AlertCircle,
   CheckCircle2,
@@ -28,6 +30,7 @@ import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog'
 import { CreateWdcForm } from '@/components/forms/CreateWdcForm'
 import { CreateProcessChartForm } from '@/components/forms/CreateProcessChartForm'
+import { CreateWorkCountForm } from '@/components/forms/CreateWorkCountForm'
 
 export const Route = createFileRoute('/_authed/ws/$unitId/')({
   component: UnitDashboardPage,
@@ -65,6 +68,13 @@ function UnitDashboardPage() {
   )
   const pcCharts = rawPcCharts as unknown as ProcessChart[]
 
+  const wcCollection = useWorkCountsCollection(orgId, parseInt(unitId))
+  const { data: rawWcCharts = [], isLoading: wcLoading } = useLiveQuery(
+    (q) => q.from({ wc: wcCollection }).select(({ wc }) => wc),
+    [wcCollection],
+  )
+  const wcCharts = rawWcCharts as unknown as WorkCount[]
+
   const changesCollection = useChangesCollection(orgId, parseInt(unitId))
   const { data: rawChanges = [] } = useLiveQuery(
     (q) => q.from({ c: changesCollection }).select(({ c }) => c),
@@ -72,23 +82,15 @@ function UnitDashboardPage() {
   )
   const changes = rawChanges as unknown as ProposedChange[]
 
-  // Check if any process chart has work counts
-  const { data: workCountCheck } = useQuery({
-    ...trpc.ws.workCount.listByChart.queryOptions({
-      organizationId: orgId ?? -1,
-      processChartId: pcCharts[0]?.id ?? -1,
-    }),
-    enabled: !!orgId && pcCharts.length > 0,
-  })
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const hasWorkCounts = (workCountCheck as any[])?.length > 0
-
   const updateStatusMutation = useMutation(trpc.ws.changes.updateStatus.mutationOptions())
+
+  const createWcMutation = useMutation(trpc.ws.workCount.create.mutationOptions())
 
   const [isWdcOpen, setIsWdcOpen] = useState(false)
   const [isPcOpen, setIsPcOpen] = useState(false)
+  const [isWcOpen, setIsWcOpen] = useState(false)
 
-  if (unitLoading || wdcLoading || pcLoading) {
+  if (unitLoading || wdcLoading || pcLoading || wcLoading) {
     return (
       <div className="p-8 font-mono text-xs uppercase tracking-widest animate-pulse">
         Retrieving Unit Cache...
@@ -98,6 +100,7 @@ function UnitDashboardPage() {
 
   const hasWdc = wdcCharts.length > 0
   const hasPc = pcCharts.length > 0
+  const hasWc = wcCharts.length > 0
 
   const openChanges = changes.filter((c) => c.status === 'open')
   const resolvedChanges = changes.filter((c) => c.status !== 'open')
@@ -192,6 +195,58 @@ function UnitDashboardPage() {
             </DialogContent>
           </Dialog>
 
+          <Dialog open={isWcOpen} onOpenChange={setIsWcOpen}>
+            <DialogTrigger asChild>
+              <Button className="bg-nd-ink hover:bg-nd-surface-alt hover:text-nd-ink text-nd-bg rounded-none border-2 border-nd-ink shadow-[3px_3px_0px_rgba(26,26,24,0.1)] transition-all flex items-center gap-2 uppercase font-bold text-xs tracking-widest px-6 h-11">
+                <BarChart3 className="w-4 h-4" />
+                New Count
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-[425px] border-2 border-nd-ink rounded-none bg-nd-surface p-0 overflow-hidden shadow-[8px_8px_0px_rgba(26,26,24,0.1)]">
+              {orgId && (
+                <div className="p-6">
+                  <CreateWorkCountForm
+                    onSubmit={async (values) => {
+                      await handleMutation(
+                        () =>
+                          createWcMutation.mutateAsync({
+                            organizationId: orgId!,
+                            unitId: parseInt(unitId),
+                            name: values.name.trim(),
+                            period: values.period,
+                          }),
+                        {
+                          label: 'Create Work Count',
+                          onSuccess: (newWc: { id: number }) => {
+                            setIsWcOpen(false)
+                            queryClient.invalidateQueries(
+                              trpc.ws.workCount.listByUnit.queryFilter({
+                                unitId: parseInt(unitId),
+                              }),
+                            )
+                            navigate({
+                              to: '/ws/$unitId/wc/$wcId',
+                              params: { unitId, wcId: newWc.id.toString() },
+                              search: { orgId },
+                            })
+                          },
+                        },
+                      )
+                    }}
+                    isPending={isPending}
+                    onCancel={() => setIsWcOpen(false)}
+                  />
+                  {mutationError && (
+                    <div className="mt-4 p-3 bg-nd-accent/10 border border-nd-accent text-nd-accent font-mono text-[10px] uppercase tracking-widest flex items-center gap-2">
+                      <AlertCircle className="w-3 h-3 text-nd-accent" />
+                      {mutationError}
+                    </div>
+                  )}
+                </div>
+              )}
+            </DialogContent>
+          </Dialog>
+
           <Dialog open={isPcOpen} onOpenChange={setIsPcOpen}>
             <DialogTrigger asChild>
               <Button className="bg-nd-ink hover:bg-nd-surface-alt hover:text-nd-ink text-nd-bg rounded-none border-2 border-nd-ink shadow-[3px_3px_0px_rgba(26,26,24,0.1)] transition-all flex items-center gap-2 uppercase font-bold text-xs tracking-widest px-6 h-11">
@@ -217,7 +272,9 @@ function UnitDashboardPage() {
                           onSuccess: (newChart: any) => {
                             setIsPcOpen(false)
                             queryClient.invalidateQueries(
-                              trpc.ws.processChart.listByUnit.queryFilter({ unitId: parseInt(unitId) }),
+                              trpc.ws.processChart.listByUnit.queryFilter({
+                                unitId: parseInt(unitId),
+                              }),
                             )
                             navigate({
                               to: '/ws/$unitId/pc/$pcId',
@@ -270,8 +327,8 @@ function UnitDashboardPage() {
             number={3}
             label="Count Work"
             sublabel="Work Count"
-            done={hasWorkCounts}
-            active={hasPc && !hasWorkCounts}
+            done={hasWc}
+            active={hasPc && !hasWc}
           />
         </div>
       </div>
@@ -346,6 +403,40 @@ function UnitDashboardPage() {
           </div>
         </section>
       </div>
+
+      {/* Work Counts Section */}
+      <section className="mt-10">
+        <div className="flex items-center gap-3 mb-6 px-2">
+          <BarChart3 className="w-5 h-5 text-nd-ink" />
+          <h2 className="text-xl font-bold font-serif text-nd-ink uppercase tracking-tight">
+            Work Counts
+          </h2>
+        </div>
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {wcCharts.length === 0 ? (
+            <EmptyState
+              title="No Work Counts"
+              description="Track the volume and frequency of work at each step. This helps determine whether delays come from volume or poor method."
+            />
+          ) : (
+            wcCharts.map((wc) => (
+              <Link
+                key={wc.id}
+                to="/ws/$unitId/wc/$wcId"
+                params={{ unitId, wcId: wc.id.toString() }}
+                search={{ orgId }}
+              >
+                <ChartCard
+                  title={wc.name}
+                  date={new Date(wc.createdAt).toLocaleDateString()}
+                  type="WC"
+                  badge={wc.period.toUpperCase()}
+                />
+              </Link>
+            ))
+          )}
+        </div>
+      </section>
 
       {/* Proposals Section */}
       {changes.length > 0 && (

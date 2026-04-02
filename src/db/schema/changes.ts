@@ -7,12 +7,14 @@ export const proposedChanges = sqliteTable('proposed_changes', {
   unitId: integer('unit_id')
     .notNull()
     .references(() => units.id, { onDelete: 'cascade' }),
-  chartType: text('chart_type', { enum: ['wdc', 'process_chart'] }).notNull(),
+  chartType: text('chart_type', { enum: ['wdc', 'process_chart', 'work_count'] }).notNull(),
   chartId: integer('chart_id').notNull(),
   description: text().notNull(),
   beforeState: text('before_state'),
   afterState: text('after_state'),
-  status: text({ enum: ['open', 'accepted', 'dismissed'] }).notNull().default('open'),
+  status: text({ enum: ['open', 'accepted', 'dismissed'] })
+    .notNull()
+    .default('open'),
   createdAt: integer('created_at', { mode: 'timestamp' })
     .notNull()
     .default(sql`(unixepoch())`),

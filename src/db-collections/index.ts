@@ -13,6 +13,7 @@ import type {
   ProcessStep,
   StepAnnotation,
   ProposedChange,
+  WorkCount,
   WdcChart,
   WdcEmployee,
   WdcActivity,
@@ -384,6 +385,53 @@ export function useWDCTasksCollection(orgId?: number, wdcId?: number) {
       getKey: (t) => t.id,
     })
   }, [orgId, wdcId])
+}
+
+export function useAllWorkCountsCollection(orgId?: number) {
+  const trpc = useTRPC()
+  const queryClient = useQueryClient()
+  return useMemo(() => {
+    const qo = trpc.ws.workCount.listAll.queryOptions({ organizationId: orgId ?? -1 })
+    return buildCollection<WorkCount>(`wc-all-${orgId}`, {
+      queryClient,
+      queryKey: qo.queryKey,
+      queryFn: qo.queryFn,
+      enabled: !!orgId,
+      getKey: (c) => c.id,
+    })
+  }, [orgId])
+}
+
+export function useWorkCountsCollection(orgId?: number, unitId?: number) {
+  const trpc = useTRPC()
+  const queryClient = useQueryClient()
+  return useMemo(() => {
+    const qo = trpc.ws.workCount.listByUnit.queryOptions({
+      organizationId: orgId ?? -1,
+      unitId: unitId ?? -1,
+    })
+    return buildCollection<WorkCount>(`wc-${orgId}-${unitId}`, {
+      queryClient,
+      queryKey: qo.queryKey,
+      queryFn: qo.queryFn,
+      enabled: !!orgId && !!unitId,
+      getKey: (c) => c.id,
+      onInsert: async (tx) => {
+        if (!orgId || !unitId) return
+        const results = []
+        for (const m of tx.mutations) {
+          const res = await trpcClient.ws.workCount.create.mutate({
+            organizationId: orgId,
+            unitId,
+            name: m.modified.name,
+            period: m.modified.period,
+          })
+          results.push(res)
+        }
+        return results[0]
+      },
+    })
+  }, [orgId, unitId])
 }
 
 export function useChangesCollection(orgId?: number, unitId?: number) {

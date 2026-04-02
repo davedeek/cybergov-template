@@ -4,7 +4,7 @@ import { z } from 'zod'
 import { TRPCError } from '@trpc/server'
 import { createTRPCRouter, orgScopedProcedure } from '../../init'
 import { workCounts, workCountEntries, units } from '@/db/schema'
-import { logAudit } from '@/lib/audit'
+import { logAudit } from '@/lib/server-logger'
 
 export const workCountRouter = createTRPCRouter({
   listAll: orgScopedProcedure

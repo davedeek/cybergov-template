@@ -1,14 +1,22 @@
 import type { EventName } from './events'
 
-/**
- * Client-side analytics wrapper.
- *
- * Currently a lightweight abstraction that can be wired to any provider
- * (Plausible, PostHog, etc.) by updating the track() implementation.
- *
- * To enable Plausible: add the script tag to __root.tsx and uncomment the plausible call.
- * To enable PostHog: install posthog-js, init in root, and uncomment the posthog call.
- */
+// --- Console logger ---
+
+const isDev = import.meta.env.DEV
+
+export const logger = {
+  info: (message: string, ...args: unknown[]) => {
+    if (isDev) console.log(`[INFO] ${message}`, ...args)
+  },
+  warn: (message: string, ...args: unknown[]) => {
+    if (isDev) console.warn(`[WARN] ${message}`, ...args)
+  },
+  error: (message: string, ...args: unknown[]) => {
+    console.error(`[ERROR] ${message}`, ...args)
+  },
+}
+
+// --- Analytics ---
 
 declare global {
   interface Window {
@@ -18,15 +26,14 @@ declare global {
 
 /**
  * Track a custom event with optional properties.
+ * Wired to Plausible (if loaded via script tag). Can be extended to PostHog or other providers.
  */
 export function track(event: EventName, props?: Record<string, string | number>) {
-  // Plausible (if loaded via script tag)
   if (typeof window !== 'undefined' && window.plausible) {
     window.plausible(event, props ? { props } : undefined)
   }
 
-  // Development logging
-  if (import.meta.env.DEV) {
+  if (isDev) {
     console.log(`[Analytics] ${event}`, props ?? '')
   }
 }
@@ -40,7 +47,7 @@ export function trackPageView(path: string) {
     window.plausible('pageview', { props: { path } })
   }
 
-  if (import.meta.env.DEV) {
+  if (isDev) {
     console.log(`[Analytics] pageview`, { path })
   }
 }

@@ -16,7 +16,7 @@ import {
   workCountEntries,
   proposedChanges,
 } from '@/db/schema'
-import { logAudit } from '@/lib/audit'
+import { logAudit } from '@/lib/server-logger'
 import {
   EXAMPLE_UNIT,
   EXAMPLE_WDC,

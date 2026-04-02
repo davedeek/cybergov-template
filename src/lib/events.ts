@@ -41,3 +41,33 @@ export const EVENTS = {
 } as const
 
 export type EventName = (typeof EVENTS)[keyof typeof EVENTS]
+
+// Audit action verbs
+export const AUDIT_ACTIONS = {
+  CREATE: 'create',
+  UPDATE: 'update',
+  DELETE: 'delete',
+  ACCESS: 'access',
+} as const
+export type AuditAction = (typeof AUDIT_ACTIONS)[keyof typeof AUDIT_ACTIONS]
+
+// Audit entity types
+export const ENTITY_TYPES = {
+  ORGANIZATION: 'organization',
+  INVITATION: 'invitation',
+  MEMBER_ROLE: 'member_role',
+  TODO: 'todo',
+  UNIT: 'unit',
+  PROCESS_CHART: 'process_chart',
+  PROCESS_STEP: 'process_step',
+  PROCESS_CHART_STEPS: 'process_chart_steps',
+  STEP_ANNOTATION: 'step_annotation',
+  WDC_CHART: 'wdc_chart',
+  WDC_EMPLOYEE: 'wdc_employee',
+  WDC_ACTIVITY: 'wdc_activity',
+  WDC_TASK: 'wdc_task',
+  WORK_COUNT: 'work_count',
+  SHARE_TOKEN: 'share_token',
+  PROPOSED_CHANGE: 'proposed_change',
+} as const
+export type EntityType = (typeof ENTITY_TYPES)[keyof typeof ENTITY_TYPES]

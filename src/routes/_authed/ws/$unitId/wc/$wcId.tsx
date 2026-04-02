@@ -11,6 +11,9 @@ import { Input } from '@/components/ui/input'
 
 export const Route = createFileRoute('/_authed/ws/$unitId/wc/$wcId')({
   component: WorkCountPage,
+  head: () => ({
+    meta: [{ title: 'Work Count — CyberGov' }],
+  }),
 })
 
 function WorkCountPage() {
@@ -158,6 +161,7 @@ function WorkCountPage() {
                       }),
                     {
                       label: 'Add Entry',
+                      successToast: 'Entry added',
                       onSuccess: () => {
                         setNewDescription('')
                         setNewCount('0')
@@ -246,6 +250,7 @@ function WorkCountPage() {
                                 }),
                               {
                                 label: 'Update Count',
+                                successToast: 'Count updated',
                                 onSuccess: () => invalidate(),
                               },
                             )
@@ -266,6 +271,7 @@ function WorkCountPage() {
                                 }),
                               {
                                 label: 'Remove Entry',
+                                successToast: 'Entry removed',
                                 onSuccess: () => invalidate(),
                               },
                             )
@@ -318,6 +324,7 @@ function WorkCountPage() {
                   }),
                 {
                   label: 'Delete Work Count',
+                  successToast: 'Work count deleted',
                   onSuccess: () => {
                     invalidate()
                     window.history.back()

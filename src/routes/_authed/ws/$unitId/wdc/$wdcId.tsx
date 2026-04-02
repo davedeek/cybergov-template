@@ -25,6 +25,9 @@ import { ShareDialog } from '@/components/ws/ShareDialog'
 
 export const Route = createFileRoute('/_authed/ws/$unitId/wdc/$wdcId')({
   component: WdcPage,
+  head: () => ({
+    meta: [{ title: 'WDC Chart — CyberGov' }],
+  }),
 })
 
 function WdcPage() {
@@ -97,6 +100,7 @@ function WdcPage() {
       () => removeTaskMutation.mutateAsync({ organizationId: orgId, taskId }),
       {
         label: 'Remove Task',
+        successToast: 'Task removed',
         onSuccess: () => invalidateWdc(),
       },
     )
@@ -223,7 +227,7 @@ function WdcPage() {
           {/* Tab Contents */}
           <div className="p-8 pb-32">
             {/* 1. CHART VIEW */}
-            <TabsContent value="chart" className="m-0 border-none outline-none">
+            <TabsContent value="chart" className="animate-fade-in-tab m-0 border-none outline-none">
               {/* Toolbar */}
               <div className="flex flex-wrap gap-3 mb-5 items-start print:hidden">
                 {addingEmployee ? (
@@ -241,6 +245,7 @@ function WdcPage() {
                           }),
                         {
                           label: 'Add Employee to Roster',
+                          successToast: 'Employee added',
                           onSuccess: () => {
                             setAddingEmployee(false)
                             invalidateWdc()
@@ -274,6 +279,7 @@ function WdcPage() {
                           }),
                         {
                           label: 'Add Activity Row',
+                          successToast: 'Activity added',
                           onSuccess: () => {
                             setAddingActivity(false)
                             invalidateWdc()
@@ -310,6 +316,7 @@ function WdcPage() {
                           }),
                         {
                           label: 'Register Individual Task',
+                          successToast: 'Task added',
                           onSuccess: () => {
                             setActiveCell(null)
                             invalidateWdc()
@@ -350,12 +357,12 @@ function WdcPage() {
             </TabsContent>
 
             {/* 2. FLAGS VIEW (extracted component) */}
-            <TabsContent value="flags" className="m-0 border-none outline-none">
+            <TabsContent value="flags" className="animate-fade-in-tab m-0 border-none outline-none">
               <WdcFlags flags={flags} onNavigateToReference={() => setActiveTab('legend')} />
             </TabsContent>
 
             {/* 3. SIX QUESTIONS VIEW (extracted component) */}
-            <TabsContent value="legend" className="m-0 border-none outline-none">
+            <TabsContent value="legend" className="animate-fade-in-tab m-0 border-none outline-none">
               <WdcLegend />
             </TabsContent>
           </div>

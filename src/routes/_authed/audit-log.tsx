@@ -6,6 +6,9 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 
 export const Route = createFileRoute('/_authed/audit-log')({
   component: AuditLogPage,
+  head: () => ({
+    meta: [{ title: 'Audit Log — CyberGov' }],
+  }),
 })
 
 function AuditLogPage() {

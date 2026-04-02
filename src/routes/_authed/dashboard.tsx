@@ -7,6 +7,7 @@ import {
   FileSpreadsheet,
   GitBranch,
   Building2,
+  BookOpen,
 } from 'lucide-react'
 import { useTRPC } from '@/integrations/trpc/react'
 import { useQuery } from '@tanstack/react-query'
@@ -23,6 +24,9 @@ import { Button } from '@/components/ui/button'
 
 export const Route = createFileRoute('/_authed/dashboard')({
   component: DashboardPage,
+  head: () => ({
+    meta: [{ title: 'Dashboard — CyberGov' }],
+  }),
 })
 
 function DashboardPage() {
@@ -111,6 +115,13 @@ function DashboardPage() {
     },
   ]
 
+  const totalItems =
+    (todos?.length ?? 0) +
+    (members?.length ?? 0) +
+    liveUnits.length +
+    livePcCharts.length +
+    liveWdcCharts.length
+
   return (
     <div className="p-6 lg:p-8 max-w-6xl mx-auto font-sans">
       <div className="mb-8 border-b-2 border-nd-ink pb-6">
@@ -121,6 +132,49 @@ function DashboardPage() {
           Welcome back! Here's an overview of your workspace.
         </p>
       </div>
+
+      {/* Empty state for new users */}
+      {totalItems <= 1 && (
+        <div className="mb-8 bg-nd-ink text-nd-bg border-2 border-nd-ink shadow-[6px_6px_0px_rgba(201,74,30,0.3)] animate-in fade-in slide-in-from-top-2 duration-300">
+          <div className="p-8">
+            <div className="flex items-start gap-4">
+              <div className="w-10 h-10 bg-nd-accent flex items-center justify-center shrink-0">
+                <BookOpen className="w-5 h-5 text-white" />
+              </div>
+              <div className="flex-1">
+                <h3 className="text-lg font-serif font-bold mb-2">
+                  Get started with Work Simplification
+                </h3>
+                <p className="text-sm font-serif leading-relaxed text-nd-bg/80 mb-6">
+                  Your workspace is empty. Start by creating a unit and charting
+                  your team's processes, or load example data to explore the
+                  tools.
+                </p>
+                <div className="flex flex-col sm:flex-row gap-3">
+                  <Button
+                    className="bg-nd-accent hover:bg-nd-accent/80 text-white rounded-none font-mono text-xs uppercase tracking-widest"
+                    asChild
+                  >
+                    <a href={orgId ? `/ws?orgId=${orgId}` : '/ws'}>
+                      <Building2 className="w-4 h-4 mr-2" />
+                      Create Your First Unit
+                    </a>
+                  </Button>
+                  <Button
+                    variant="outline"
+                    className="border-nd-bg/30 text-nd-bg/70 hover:text-nd-bg hover:border-nd-bg rounded-none font-mono text-xs uppercase tracking-widest bg-transparent"
+                    asChild
+                  >
+                    <a href={orgId ? `/ws?orgId=${orgId}` : '/ws'}>
+                      Load Example Data
+                    </a>
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Stats grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">

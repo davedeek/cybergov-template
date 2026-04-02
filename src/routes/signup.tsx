@@ -6,6 +6,9 @@ import { useMutationHandler } from '@/hooks/use-mutation-handler'
 
 export const Route = createFileRoute('/signup')({
   component: SignUpPage,
+  head: () => ({
+    meta: [{ title: 'Sign Up — CyberGov' }],
+  }),
 })
 
 function SignUpPage() {
@@ -25,7 +28,7 @@ function SignUpPage() {
         await queryClient.invalidateQueries()
         navigate({ to: '/dashboard' })
       },
-      { label: 'User Registration' }
+      { label: 'User Registration', successToast: 'Account created' }
     )
   }
 

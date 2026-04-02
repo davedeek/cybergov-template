@@ -27,7 +27,6 @@ interface ProcessChartLedgerProps {
   storageWarn: number
   distWarn: number
   copyCSV: () => void
-  copiedCsv: boolean
 }
 
 export function ProcessChartLedger({
@@ -41,7 +40,6 @@ export function ProcessChartLedger({
   storageWarn,
   distWarn,
   copyCSV,
-  copiedCsv,
 }: ProcessChartLedgerProps) {
   const totalMinutes = useMemo(() => steps.reduce((sum, s) => sum + (s.minutes || 0), 0), [steps])
   const totalFeet = useMemo(() => steps.reduce((sum, s) => sum + (s.feet || 0), 0), [steps])
@@ -289,7 +287,7 @@ export function ProcessChartLedger({
           className="font-mono text-[10px] tracking-wider bg-nd-ink text-nd-bg hover:bg-nd-ink/90 hover:text-white rounded-none border-none"
         >
           <Copy className="w-3 h-3 mr-2" />
-          {copiedCsv ? 'COPIED' : 'COPY CSV'}
+          COPY CSV
         </Button>
       </div>
 

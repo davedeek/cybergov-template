@@ -29,10 +29,15 @@ export const Route = createFileRoute('/_authed')({
   component: AuthedLayout,
 
   pendingComponent: () => (
-    <div className="min-h-screen flex items-center justify-center bg-nd-bg">
-      <div className="flex flex-col items-center gap-6">
-        <div className="w-12 h-12 border-4 border-nd-accent border-t-transparent rounded-full animate-spin" />
-        <p className="text-nd-ink-muted text-[10px] font-mono uppercase tracking-[0.2em] font-bold">Loading Data...</p>
+    <div className="min-h-screen bg-nd-bg flex flex-col items-center justify-center">
+      <div className="text-center">
+        <div className="text-2xl font-serif font-bold text-nd-ink uppercase tracking-tight mb-2">
+          CyberGov
+        </div>
+        <div className="w-12 h-1 bg-nd-accent mx-auto mb-6 animate-pulse" />
+        <div className="text-[10px] font-mono tracking-[0.2em] uppercase text-nd-ink-muted">
+          Loading workspace...
+        </div>
       </div>
     </div>
   ),

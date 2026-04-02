@@ -53,7 +53,7 @@ function ImagePage() {
         setImages(data.images)
         return data
       },
-      { label: 'AI Image Synthesis' }
+      { label: 'AI Image Synthesis', successToast: 'Image generated' }
     )
   }
 
@@ -80,7 +80,7 @@ function ImagePage() {
         document.body.removeChild(a)
         URL.revokeObjectURL(url)
       },
-      { label: 'Artifact Download' }
+      { label: 'Artifact Download', successToast: 'Image downloaded' }
     )
   }
 
@@ -238,4 +238,7 @@ function ImagePage() {
 
 export const Route = createFileRoute('/_authed/ai/image')({
   component: ImagePage,
+  head: () => ({
+    meta: [{ title: 'AI Image — CyberGov' }],
+  }),
 })

@@ -59,7 +59,7 @@ export function OnboardingWizard({
   const isLast = currentStep === STEPS.length - 1
 
   return (
-    <div className="mb-8 bg-nd-ink text-nd-bg border-2 border-nd-ink shadow-[6px_6px_0px_rgba(201,74,30,0.3)]">
+    <div className="mb-8 bg-nd-ink text-nd-bg border-2 border-nd-ink shadow-[6px_6px_0px_rgba(201,74,30,0.3)] animate-in slide-in-from-top-4 fade-in duration-300">
       {/* Header */}
       <div className="flex items-center justify-between px-6 py-3 border-b border-nd-bg/10">
         <div className="flex items-center gap-2">

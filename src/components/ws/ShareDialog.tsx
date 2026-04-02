@@ -1,5 +1,5 @@
-import { useState } from 'react'
-import { Copy, RefreshCw, Check } from 'lucide-react'
+import { Copy, RefreshCw } from 'lucide-react'
+import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent } from '@/components/ui/dialog'
 
@@ -18,8 +18,6 @@ export function ShareDialog({
   onRegenerate,
   isRegenerating,
 }: ShareDialogProps) {
-  const [copied, setCopied] = useState(false)
-
   const shareUrl = shareToken
     ? `${typeof window !== 'undefined' ? window.location.origin : ''}/share/${shareToken}`
     : null
@@ -27,8 +25,7 @@ export function ShareDialog({
   const handleCopy = async () => {
     if (!shareUrl) return
     await navigator.clipboard.writeText(shareUrl)
-    setCopied(true)
-    setTimeout(() => setCopied(false), 2000)
+    toast.success('Copied to clipboard')
   }
 
   return (
@@ -51,11 +48,7 @@ export function ShareDialog({
                   variant="outline"
                   className="rounded-none border-2 border-nd-ink shrink-0 px-4"
                 >
-                  {copied ? (
-                    <Check className="w-4 h-4 text-green-600" />
-                  ) : (
-                    <Copy className="w-4 h-4" />
-                  )}
+                  <Copy className="w-4 h-4" />
                 </Button>
               </div>
 

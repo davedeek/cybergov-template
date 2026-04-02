@@ -10,6 +10,9 @@ import { Button } from '@/components/ui/button'
 
 export const Route = createFileRoute('/_authed/ws/process-charts')({
   component: AllProcessChartsPage,
+  head: () => ({
+    meta: [{ title: 'Process Charts — CyberGov' }],
+  }),
 })
 
 function AllProcessChartsPage() {

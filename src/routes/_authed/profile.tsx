@@ -7,6 +7,9 @@ import { useMutationHandler } from '@/hooks/use-mutation-handler'
 
 export const Route = createFileRoute('/_authed/profile')({
   component: ProfilePage,
+  head: () => ({
+    meta: [{ title: 'Profile — CyberGov' }],
+  }),
 })
 
 function ProfilePage() {
@@ -16,7 +19,7 @@ function ProfilePage() {
   const handleUpdateProfile = async (values: { name: string }) => {
     await handleMutation(
       () => authClient.updateUser({ name: values.name }),
-      { label: 'Update User Profile' }
+      { label: 'Update User Profile', successToast: 'Profile updated' }
     )
   }
 

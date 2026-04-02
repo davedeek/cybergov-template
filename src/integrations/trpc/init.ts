@@ -2,6 +2,7 @@ import { initTRPC, TRPCError } from '@trpc/server'
 import { and, eq } from 'drizzle-orm'
 import superjson from 'superjson'
 import { organizationMemberships } from '@/db/schema'
+import { logger } from '@/lib/server-logger'
 import type { createTRPCContext } from './context'
 
 type Context = Awaited<ReturnType<typeof createTRPCContext>>
@@ -12,7 +13,30 @@ const t = initTRPC.context<Context>().create({
 
 export const createTRPCRouter = t.router
 
-export const publicProcedure = t.procedure
+// ─── Request logging middleware ───────────────────────────────────────────────
+
+const requestLogger = t.middleware(async ({ ctx, path, type, next }) => {
+  const start = Date.now()
+  const result = await next()
+  const durationMs = Date.now() - start
+
+  const logData = {
+    procedure: path,
+    type,
+    userId: ctx.user?.id ?? null,
+    durationMs,
+  }
+
+  if (result.ok) {
+    logger.info(logData, `trpc.${path} OK`)
+  } else {
+    logger.error({ ...logData, error: result.error.message }, `trpc.${path} ERROR`)
+  }
+
+  return result
+})
+
+export const publicProcedure = t.procedure.use(requestLogger)
 
 // ─── Auth middleware ───────────────────────────────────────────────────────────
 
@@ -28,7 +52,7 @@ const isAuthed = t.middleware(({ ctx, next }) => {
   })
 })
 
-export const protectedProcedure = t.procedure.use(isAuthed)
+export const protectedProcedure = publicProcedure.use(isAuthed)
 
 // ─── Org-scoped middleware ─────────────────────────────────────────────────────
 

@@ -5,12 +5,11 @@ interface ProcessChartMermaidViewProps {
   mermaidSvg: string | null
   mermaidSrc: string
   copyMermaid: () => void
-  copiedMermaid: boolean
   stepsCount: number
 }
 
 export function ProcessChartMermaidView({
-  mermaidSvg, mermaidSrc, copyMermaid, copiedMermaid, stepsCount
+  mermaidSvg, mermaidSrc, copyMermaid, stepsCount
 }: ProcessChartMermaidViewProps) {
   return (
     <div className="m-0 border-none outline-none">
@@ -21,7 +20,7 @@ export function ProcessChartMermaidView({
         </div>
         <Button onClick={copyMermaid} variant="outline" size="sm" className="font-mono text-[10px] tracking-wider bg-nd-ink text-nd-bg hover:bg-nd-ink/90 hover:text-white rounded-none border-none">
           <Copy className="w-3 h-3 mr-2" />
-          {copiedMermaid ? 'COPIED SOURCE' : 'COPY SOURCE'}
+          COPY SOURCE
         </Button>
       </div>
 

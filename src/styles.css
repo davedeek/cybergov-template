@@ -124,6 +124,67 @@ code {
   }
 }
 
+/* ─── Micro-interaction animations ─── */
+
+@keyframes slide-in-row {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slide-out-row {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
+
+@keyframes fade-in-tab {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.animate-slide-in-row {
+  animation: slide-in-row 200ms ease-out;
+}
+
+.animate-slide-out-row {
+  animation: slide-out-row 150ms ease-in forwards;
+}
+
+.animate-fade-in-tab {
+  animation: fade-in-tab 150ms ease-out;
+}
+
+/* Stamp-press button effect for New Deal aesthetic */
+.btn-stamp {
+  transition: all 150ms ease;
+  shadow: 4px 4px 0px #1A1A18;
+}
+
+.btn-stamp:hover {
+  transform: translateY(-2px);
+  box-shadow: 6px 6px 0px #1A1A18;
+}
+
+.btn-stamp:active {
+  transform: translateY(2px);
+  box-shadow: 1px 1px 0px #1A1A18;
+}
+
 @media print {
   @page {
     size: auto;

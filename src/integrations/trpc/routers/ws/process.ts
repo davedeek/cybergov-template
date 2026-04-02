@@ -1,4 +1,4 @@
-import { desc, eq, and } from 'drizzle-orm'
+import { desc, eq, and, sql } from 'drizzle-orm'
 import { randomBytes } from 'node:crypto'
 import { z } from 'zod'
 import { TRPCError } from '@trpc/server'
@@ -182,6 +182,71 @@ export const processChartRouter = createTRPCRouter({
         entityId: String(inserted[0].id),
       })
       return inserted[0]
+    }),
+
+  insertStepAt: orgScopedProcedure
+    .input(
+      z.object({
+        organizationId: z.number().int().positive(),
+        processChartId: z.number().int().positive(),
+        afterStepId: z.number().int().positive().optional(),
+        symbol: z.enum(['operation', 'transportation', 'storage', 'inspection']),
+        description: z.string().min(1),
+        who: z.string().optional(),
+        minutes: z.number().int().optional(),
+        feet: z.number().int().optional(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      let targetSeq = 0
+
+      if (input.afterStepId) {
+        const afterStep = await ctx.db.query.processSteps.findFirst({
+          where: eq(processSteps.id, input.afterStepId),
+        })
+        if (afterStep) {
+          targetSeq = afterStep.sequenceNumber + 1
+        }
+      }
+
+      const inserted = await ctx.db.transaction((tx) => {
+        // Bump all steps at or after the target position
+        tx.update(processSteps)
+          .set({ sequenceNumber: sql`${processSteps.sequenceNumber} + 1` })
+          .where(
+            and(
+              eq(processSteps.processChartId, input.processChartId),
+              sql`${processSteps.sequenceNumber} >= ${targetSeq}`,
+            ),
+          )
+          .run()
+
+        // Insert the new step
+        const [newStep] = tx
+          .insert(processSteps)
+          .values({
+            processChartId: input.processChartId,
+            sequenceNumber: targetSeq,
+            symbol: input.symbol,
+            description: input.description,
+            who: input.who ?? null,
+            minutes: input.minutes ?? null,
+            feet: input.feet ?? null,
+          })
+          .returning()
+          .all()
+
+        return newStep
+      })
+
+      await logAudit(ctx.db, {
+        userId: ctx.user.id,
+        action: 'create',
+        entityType: 'process_step',
+        entityId: String(inserted.id),
+        details: { insertedAfter: input.afterStepId },
+      })
+      return inserted
     }),
 
   updateStep: orgScopedProcedure

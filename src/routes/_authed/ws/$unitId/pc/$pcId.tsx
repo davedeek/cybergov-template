@@ -312,6 +312,12 @@ function ProcessChartPageComponent() {
                   annotations={annotations}
                   annotationsCollection={annotationsCollection}
                   orgId={orgId!}
+                  processChartId={pPcId}
+                  onStepInserted={() =>
+                    queryClient.invalidateQueries(
+                      trpc.ws.processChart.listSteps.queryFilter({ processChartId: pPcId }),
+                    )
+                  }
                   onAnnotationSaved={() =>
                     queryClient.invalidateQueries(
                       trpc.ws.processChart.listAnnotations.queryFilter({ processChartId: pPcId }),
@@ -326,7 +332,7 @@ function ProcessChartPageComponent() {
                 value="workcount"
                 className="m-0 border-none mt-0 p-0 ring-offset-transparent focus-visible:ring-0"
               >
-                {orgId && <WorkCountTab orgId={orgId} processChartId={pPcId} steps={steps} />}
+                {orgId && <WorkCountTab orgId={orgId} unitId={parseInt(unitId)} />}
               </TabsContent>
 
               <TabsContent

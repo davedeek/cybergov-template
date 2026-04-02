@@ -9,6 +9,7 @@ import {
 } from './six-questions'
 import type { ProcessStep, StepAnnotation } from '@/types/entities'
 import { trpcClient } from '@/integrations/tanstack-query/root-provider'
+import { Plus } from 'lucide-react'
 
 interface SixQuestionsWorkspaceProps {
   steps: ProcessStep[]
@@ -16,6 +17,8 @@ interface SixQuestionsWorkspaceProps {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   annotationsCollection: any
   orgId: number
+  processChartId?: number
+  onStepInserted?: () => void
   onAnnotationSaved?: () => void
   onDuplicateAsProposal?: () => void
   isDuplicating?: boolean
@@ -26,6 +29,8 @@ export function SixQuestionsWorkspace({
   annotations,
   annotationsCollection,
   orgId,
+  processChartId,
+  onStepInserted,
   onAnnotationSaved,
   onDuplicateAsProposal,
   isDuplicating,
@@ -130,19 +135,46 @@ export function SixQuestionsWorkspace({
         <div className="text-xs font-mono text-nd-accent opacity-80">
           Look for: {question.lookFor}
         </div>
+        {question.example && (
+          <details className="mt-3">
+            <summary className="text-[10px] font-mono uppercase tracking-widest text-nd-bg/60 cursor-pointer hover:text-nd-bg/80">
+              See example
+            </summary>
+            <div className="mt-2 text-xs font-serif italic text-nd-bg/70 pl-3 border-l-2 border-nd-accent/40">
+              {question.example}
+            </div>
+          </details>
+        )}
       </div>
 
       {/* Steps list for this question */}
       <div className="space-y-4">
-        {steps.map((step, idx) => (
-          <StepAnnotationCard
-            key={step.id}
-            step={step}
-            index={idx}
-            questionKey={activeQuestion}
-            annotation={getAnnotation(step.id, activeQuestion)}
-            onSave={saveAnnotation}
+        {activeQuestion === 'what' && processChartId && (
+          <InsertStepButton
+            orgId={orgId}
+            processChartId={processChartId}
+            afterStepId={undefined}
+            onInserted={onStepInserted}
           />
+        )}
+        {steps.map((step, idx) => (
+          <div key={step.id}>
+            <StepAnnotationCard
+              step={step}
+              index={idx}
+              questionKey={activeQuestion}
+              annotation={getAnnotation(step.id, activeQuestion)}
+              onSave={saveAnnotation}
+            />
+            {activeQuestion === 'what' && processChartId && (
+              <InsertStepButton
+                orgId={orgId}
+                processChartId={processChartId}
+                afterStepId={step.id}
+                onInserted={onStepInserted}
+              />
+            )}
+          </div>
         ))}
       </div>
 
@@ -175,6 +207,121 @@ export function SixQuestionsWorkspace({
           )}
         </div>
       )}
+    </div>
+  )
+}
+
+// Insert step button — shown between cards in the "What" question
+function InsertStepButton({
+  orgId,
+  processChartId,
+  afterStepId,
+  onInserted,
+}: {
+  orgId: number
+  processChartId: number
+  afterStepId: number | undefined
+  onInserted?: () => void
+}) {
+  const [expanded, setExpanded] = useState(false)
+  const [symbol, setSymbol] = useState<'operation' | 'transportation' | 'storage' | 'inspection'>(
+    'operation',
+  )
+  const [description, setDescription] = useState('')
+  const [submitting, setSubmitting] = useState(false)
+
+  if (!expanded) {
+    return (
+      <button
+        onClick={() => setExpanded(true)}
+        className="w-full flex items-center gap-2 py-1.5 group"
+      >
+        <div className="flex-1 h-[1px] bg-nd-border group-hover:bg-nd-accent transition-colors" />
+        <div className="flex items-center gap-1 text-[10px] font-mono uppercase tracking-widest text-nd-ink-muted group-hover:text-nd-accent transition-colors">
+          <Plus className="w-3 h-3" />
+          Add Missing Step
+        </div>
+        <div className="flex-1 h-[1px] bg-nd-border group-hover:bg-nd-accent transition-colors" />
+      </button>
+    )
+  }
+
+  const handleSubmit = async () => {
+    if (!description.trim() || submitting) return
+    setSubmitting(true)
+    try {
+      await trpcClient.ws.processChart.insertStepAt.mutate({
+        organizationId: orgId,
+        processChartId,
+        afterStepId,
+        symbol,
+        description: description.trim(),
+      })
+      setExpanded(false)
+      setDescription('')
+      setSymbol('operation')
+      onInserted?.()
+    } finally {
+      setSubmitting(false)
+    }
+  }
+
+  const symbols = ['operation', 'transportation', 'storage', 'inspection'] as const
+
+  return (
+    <div className="border-2 border-nd-accent bg-nd-surface p-4 my-2">
+      <div className="text-[10px] font-mono uppercase tracking-widest text-nd-accent mb-3 font-bold">
+        Insert Step {afterStepId ? 'After' : 'At Start'}
+      </div>
+      <div className="flex gap-3 items-start">
+        <div className="flex gap-1">
+          {symbols.map((s) => (
+            <button
+              key={s}
+              onClick={() => setSymbol(s)}
+              className={`w-8 h-8 flex items-center justify-center border-2 transition-colors ${
+                symbol === s
+                  ? 'border-nd-ink bg-nd-ink'
+                  : 'border-nd-border bg-nd-bg hover:border-nd-ink'
+              }`}
+              title={SYMBOL_META[s].label}
+            >
+              <SymbolIcon type={s} size={14} color={symbol === s ? '#F5F0E8' : undefined} />
+            </button>
+          ))}
+        </div>
+        <input
+          type="text"
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') handleSubmit()
+            if (e.key === 'Escape') {
+              setExpanded(false)
+              setDescription('')
+            }
+          }}
+          placeholder="Describe the missing step..."
+          className="flex-1 border border-nd-border bg-white px-3 py-2 text-sm font-serif focus:outline-none focus:border-nd-accent"
+          autoFocus
+        />
+        <button
+          onClick={handleSubmit}
+          disabled={!description.trim() || submitting}
+          className="px-4 py-2 bg-nd-ink text-nd-bg font-mono text-xs uppercase tracking-widest hover:bg-nd-accent transition-colors disabled:opacity-50"
+        >
+          {submitting ? '...' : 'Insert'}
+        </button>
+        <button
+          onClick={() => {
+            setExpanded(false)
+            setDescription('')
+          }}
+          className="px-3 py-2 border border-nd-border text-nd-ink-muted font-mono text-xs hover:text-nd-ink transition-colors"
+        >
+          Cancel
+        </button>
+      </div>
     </div>
   )
 }

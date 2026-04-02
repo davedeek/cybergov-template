@@ -27,6 +27,7 @@ import { Route as ApiAiTranscriptionRouteImport } from './routes/api/ai/transcri
 import { Route as ApiAiStructuredRouteImport } from './routes/api/ai/structured'
 import { Route as ApiAiImageRouteImport } from './routes/api/ai/image'
 import { Route as ApiAiChatRouteImport } from './routes/api/ai/chat'
+import { Route as AuthedWsWorkCountsRouteImport } from './routes/_authed/ws/work-counts'
 import { Route as AuthedWsWdcChartsRouteImport } from './routes/_authed/ws/wdc-charts'
 import { Route as AuthedWsProcessChartsRouteImport } from './routes/_authed/ws/process-charts'
 import { Route as AuthedAiStructuredRouteImport } from './routes/_authed/ai/structured'
@@ -34,6 +35,7 @@ import { Route as AuthedAiImageRouteImport } from './routes/_authed/ai/image'
 import { Route as AuthedAiChatRouteImport } from './routes/_authed/ai/chat'
 import { Route as AuthedWsUnitIdIndexRouteImport } from './routes/_authed/ws/$unitId/index'
 import { Route as AuthedWsUnitIdWdcWdcIdRouteImport } from './routes/_authed/ws/$unitId/wdc/$wdcId'
+import { Route as AuthedWsUnitIdWcWcIdRouteImport } from './routes/_authed/ws/$unitId/wc/$wcId'
 import { Route as AuthedWsUnitIdPcPcIdRouteImport } from './routes/_authed/ws/$unitId/pc/$pcId'
 
 const SignupRoute = SignupRouteImport.update({
@@ -125,6 +127,11 @@ const ApiAiChatRoute = ApiAiChatRouteImport.update({
   path: '/api/ai/chat',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthedWsWorkCountsRoute = AuthedWsWorkCountsRouteImport.update({
+  id: '/ws/work-counts',
+  path: '/ws/work-counts',
+  getParentRoute: () => AuthedRoute,
+} as any)
 const AuthedWsWdcChartsRoute = AuthedWsWdcChartsRouteImport.update({
   id: '/ws/wdc-charts',
   path: '/ws/wdc-charts',
@@ -160,6 +167,11 @@ const AuthedWsUnitIdWdcWdcIdRoute = AuthedWsUnitIdWdcWdcIdRouteImport.update({
   path: '/ws/$unitId/wdc/$wdcId',
   getParentRoute: () => AuthedRoute,
 } as any)
+const AuthedWsUnitIdWcWcIdRoute = AuthedWsUnitIdWcWcIdRouteImport.update({
+  id: '/ws/$unitId/wc/$wcId',
+  path: '/ws/$unitId/wc/$wcId',
+  getParentRoute: () => AuthedRoute,
+} as any)
 const AuthedWsUnitIdPcPcIdRoute = AuthedWsUnitIdPcPcIdRouteImport.update({
   id: '/ws/$unitId/pc/$pcId',
   path: '/ws/$unitId/pc/$pcId',
@@ -181,6 +193,7 @@ export interface FileRoutesByFullPath {
   '/ai/structured': typeof AuthedAiStructuredRoute
   '/ws/process-charts': typeof AuthedWsProcessChartsRoute
   '/ws/wdc-charts': typeof AuthedWsWdcChartsRoute
+  '/ws/work-counts': typeof AuthedWsWorkCountsRoute
   '/api/ai/chat': typeof ApiAiChatRoute
   '/api/ai/image': typeof ApiAiImageRoute
   '/api/ai/structured': typeof ApiAiStructuredRoute
@@ -191,6 +204,7 @@ export interface FileRoutesByFullPath {
   '/ws/': typeof AuthedWsIndexRoute
   '/ws/$unitId/': typeof AuthedWsUnitIdIndexRoute
   '/ws/$unitId/pc/$pcId': typeof AuthedWsUnitIdPcPcIdRoute
+  '/ws/$unitId/wc/$wcId': typeof AuthedWsUnitIdWcWcIdRoute
   '/ws/$unitId/wdc/$wdcId': typeof AuthedWsUnitIdWdcWdcIdRoute
 }
 export interface FileRoutesByTo {
@@ -208,6 +222,7 @@ export interface FileRoutesByTo {
   '/ai/structured': typeof AuthedAiStructuredRoute
   '/ws/process-charts': typeof AuthedWsProcessChartsRoute
   '/ws/wdc-charts': typeof AuthedWsWdcChartsRoute
+  '/ws/work-counts': typeof AuthedWsWorkCountsRoute
   '/api/ai/chat': typeof ApiAiChatRoute
   '/api/ai/image': typeof ApiAiImageRoute
   '/api/ai/structured': typeof ApiAiStructuredRoute
@@ -218,6 +233,7 @@ export interface FileRoutesByTo {
   '/ws': typeof AuthedWsIndexRoute
   '/ws/$unitId': typeof AuthedWsUnitIdIndexRoute
   '/ws/$unitId/pc/$pcId': typeof AuthedWsUnitIdPcPcIdRoute
+  '/ws/$unitId/wc/$wcId': typeof AuthedWsUnitIdWcWcIdRoute
   '/ws/$unitId/wdc/$wdcId': typeof AuthedWsUnitIdWdcWdcIdRoute
 }
 export interface FileRoutesById {
@@ -237,6 +253,7 @@ export interface FileRoutesById {
   '/_authed/ai/structured': typeof AuthedAiStructuredRoute
   '/_authed/ws/process-charts': typeof AuthedWsProcessChartsRoute
   '/_authed/ws/wdc-charts': typeof AuthedWsWdcChartsRoute
+  '/_authed/ws/work-counts': typeof AuthedWsWorkCountsRoute
   '/api/ai/chat': typeof ApiAiChatRoute
   '/api/ai/image': typeof ApiAiImageRoute
   '/api/ai/structured': typeof ApiAiStructuredRoute
@@ -247,6 +264,7 @@ export interface FileRoutesById {
   '/_authed/ws/': typeof AuthedWsIndexRoute
   '/_authed/ws/$unitId/': typeof AuthedWsUnitIdIndexRoute
   '/_authed/ws/$unitId/pc/$pcId': typeof AuthedWsUnitIdPcPcIdRoute
+  '/_authed/ws/$unitId/wc/$wcId': typeof AuthedWsUnitIdWcWcIdRoute
   '/_authed/ws/$unitId/wdc/$wdcId': typeof AuthedWsUnitIdWdcWdcIdRoute
 }
 export interface FileRouteTypes {
@@ -266,6 +284,7 @@ export interface FileRouteTypes {
     | '/ai/structured'
     | '/ws/process-charts'
     | '/ws/wdc-charts'
+    | '/ws/work-counts'
     | '/api/ai/chat'
     | '/api/ai/image'
     | '/api/ai/structured'
@@ -276,6 +295,7 @@ export interface FileRouteTypes {
     | '/ws/'
     | '/ws/$unitId/'
     | '/ws/$unitId/pc/$pcId'
+    | '/ws/$unitId/wc/$wcId'
     | '/ws/$unitId/wdc/$wdcId'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -293,6 +313,7 @@ export interface FileRouteTypes {
     | '/ai/structured'
     | '/ws/process-charts'
     | '/ws/wdc-charts'
+    | '/ws/work-counts'
     | '/api/ai/chat'
     | '/api/ai/image'
     | '/api/ai/structured'
@@ -303,6 +324,7 @@ export interface FileRouteTypes {
     | '/ws'
     | '/ws/$unitId'
     | '/ws/$unitId/pc/$pcId'
+    | '/ws/$unitId/wc/$wcId'
     | '/ws/$unitId/wdc/$wdcId'
   id:
     | '__root__'
@@ -321,6 +343,7 @@ export interface FileRouteTypes {
     | '/_authed/ai/structured'
     | '/_authed/ws/process-charts'
     | '/_authed/ws/wdc-charts'
+    | '/_authed/ws/work-counts'
     | '/api/ai/chat'
     | '/api/ai/image'
     | '/api/ai/structured'
@@ -331,6 +354,7 @@ export interface FileRouteTypes {
     | '/_authed/ws/'
     | '/_authed/ws/$unitId/'
     | '/_authed/ws/$unitId/pc/$pcId'
+    | '/_authed/ws/$unitId/wc/$wcId'
     | '/_authed/ws/$unitId/wdc/$wdcId'
   fileRoutesById: FileRoutesById
 }
@@ -477,6 +501,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiAiChatRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authed/ws/work-counts': {
+      id: '/_authed/ws/work-counts'
+      path: '/ws/work-counts'
+      fullPath: '/ws/work-counts'
+      preLoaderRoute: typeof AuthedWsWorkCountsRouteImport
+      parentRoute: typeof AuthedRoute
+    }
     '/_authed/ws/wdc-charts': {
       id: '/_authed/ws/wdc-charts'
       path: '/ws/wdc-charts'
@@ -526,6 +557,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthedWsUnitIdWdcWdcIdRouteImport
       parentRoute: typeof AuthedRoute
     }
+    '/_authed/ws/$unitId/wc/$wcId': {
+      id: '/_authed/ws/$unitId/wc/$wcId'
+      path: '/ws/$unitId/wc/$wcId'
+      fullPath: '/ws/$unitId/wc/$wcId'
+      preLoaderRoute: typeof AuthedWsUnitIdWcWcIdRouteImport
+      parentRoute: typeof AuthedRoute
+    }
     '/_authed/ws/$unitId/pc/$pcId': {
       id: '/_authed/ws/$unitId/pc/$pcId'
       path: '/ws/$unitId/pc/$pcId'
@@ -547,9 +585,11 @@ interface AuthedRouteChildren {
   AuthedAiStructuredRoute: typeof AuthedAiStructuredRoute
   AuthedWsProcessChartsRoute: typeof AuthedWsProcessChartsRoute
   AuthedWsWdcChartsRoute: typeof AuthedWsWdcChartsRoute
+  AuthedWsWorkCountsRoute: typeof AuthedWsWorkCountsRoute
   AuthedWsIndexRoute: typeof AuthedWsIndexRoute
   AuthedWsUnitIdIndexRoute: typeof AuthedWsUnitIdIndexRoute
   AuthedWsUnitIdPcPcIdRoute: typeof AuthedWsUnitIdPcPcIdRoute
+  AuthedWsUnitIdWcWcIdRoute: typeof AuthedWsUnitIdWcWcIdRoute
   AuthedWsUnitIdWdcWdcIdRoute: typeof AuthedWsUnitIdWdcWdcIdRoute
 }
 
@@ -564,14 +604,15 @@ const AuthedRouteChildren: AuthedRouteChildren = {
   AuthedAiStructuredRoute: AuthedAiStructuredRoute,
   AuthedWsProcessChartsRoute: AuthedWsProcessChartsRoute,
   AuthedWsWdcChartsRoute: AuthedWsWdcChartsRoute,
+  AuthedWsWorkCountsRoute: AuthedWsWorkCountsRoute,
   AuthedWsIndexRoute: AuthedWsIndexRoute,
   AuthedWsUnitIdIndexRoute: AuthedWsUnitIdIndexRoute,
   AuthedWsUnitIdPcPcIdRoute: AuthedWsUnitIdPcPcIdRoute,
+  AuthedWsUnitIdWcWcIdRoute: AuthedWsUnitIdWcWcIdRoute,
   AuthedWsUnitIdWdcWdcIdRoute: AuthedWsUnitIdWdcWdcIdRoute,
 }
 
-const AuthedRouteWithChildren =
-  AuthedRoute._addFileChildren(AuthedRouteChildren)
+const AuthedRouteWithChildren = AuthedRoute._addFileChildren(AuthedRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,

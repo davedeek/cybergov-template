@@ -199,7 +199,7 @@ function UnitsLandingPage() {
                 onClick={handleImportExample}
                 disabled={importingExample}
                 variant="outline"
-                className="rounded-none border-nd-border hover:border-nd-accent hover:text-nd-accent"
+                className="border-nd-border hover:border-nd-accent hover:text-nd-accent"
               >
                 <BookOpen className="w-4 h-4 mr-2" />
                 {importingExample ? 'Importing...' : 'Load Example Data'}

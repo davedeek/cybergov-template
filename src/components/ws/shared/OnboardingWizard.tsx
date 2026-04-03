@@ -59,7 +59,7 @@ export function OnboardingWizard({
   const isLast = currentStep === STEPS.length - 1
 
   return (
-    <div className="mb-8 bg-nd-ink text-nd-bg border-2 border-nd-ink shadow-[6px_6px_0px_rgba(201,74,30,0.3)] animate-in slide-in-from-top-4 fade-in duration-300">
+    <div className="mb-8 bg-nd-ink text-nd-bg border-2 border-nd-ink shadow-stamp-hover animate-in slide-in-from-top-4 fade-in duration-300">
       {/* Header */}
       <div className="flex items-center justify-between px-6 py-3 border-b border-nd-bg/10">
         <div className="flex items-center gap-2">
@@ -117,7 +117,7 @@ export function OnboardingWizard({
               <Button
                 onClick={onImportExample}
                 disabled={isImporting}
-                className="bg-nd-accent hover:bg-nd-accent/80 text-white rounded-none font-mono text-xs uppercase tracking-widest"
+                className="bg-nd-accent hover:bg-nd-accent/80 text-white font-mono text-xs uppercase tracking-widest"
               >
                 <BookOpen className="w-3 h-3 mr-2" />
                 {isImporting ? 'Importing...' : 'Load Example Data'}
@@ -126,7 +126,7 @@ export function OnboardingWizard({
             {!isLast ? (
               <Button
                 onClick={() => setCurrentStep(currentStep + 1)}
-                className="bg-nd-bg text-nd-ink hover:bg-nd-bg/90 rounded-none font-mono text-xs uppercase tracking-widest"
+                className="bg-nd-bg text-nd-ink hover:bg-nd-bg/90 font-mono text-xs uppercase tracking-widest"
               >
                 Next <ArrowRight className="w-3 h-3 ml-2" />
               </Button>
@@ -134,7 +134,7 @@ export function OnboardingWizard({
               <Button
                 onClick={onDismiss}
                 variant="outline"
-                className="border-nd-bg/30 text-nd-bg/70 hover:text-nd-bg hover:border-nd-bg rounded-none font-mono text-xs uppercase tracking-widest bg-transparent"
+                className="border-nd-bg/30 text-nd-bg/70 hover:text-nd-bg hover:border-nd-bg font-mono text-xs uppercase tracking-widest bg-transparent"
               >
                 Get Started
               </Button>

@@ -1,22 +1,22 @@
 // Shared table styling constants for work simplification tables
 export const TABLE_STYLES = {
-  th: 'bg-nd-ink text-nd-bg font-mono text-xs uppercase tracking-wider p-3 text-left border-r border-[#2E2E2C] whitespace-nowrap align-middle select-none h-auto rounded-none',
+  th: 'bg-nd-ink text-nd-bg font-mono text-xs uppercase tracking-wider p-3 text-left border-r border-nd-surface-dark whitespace-nowrap align-middle select-none h-auto',
   thAlignTop:
-    'bg-nd-ink text-nd-bg font-mono text-xs uppercase tracking-wider p-3 text-left border-r border-[#2E2E2C] whitespace-nowrap align-top select-none',
+    'bg-nd-ink text-nd-bg font-mono text-xs uppercase tracking-wider p-3 text-left border-r border-nd-surface-dark whitespace-nowrap align-top select-none',
   td: 'border-b border-r border-nd-border px-3 py-2 align-middle bg-nd-surface group-hover:bg-black/5 transition-colors cursor-pointer',
   tdWdc: 'border border-nd-border p-2 align-top bg-nd-surface min-w-[140px]',
   actLabel:
-    'bg-[#2A2A28] text-nd-bg font-mono text-xs min-w-[160px] max-w-[160px] border-none select-none',
+    'bg-nd-surface-dark text-nd-bg font-mono text-xs min-w-[160px] max-w-[160px] border-none select-none',
 } as const
 
 // Semantic color tokens for warning/status indicators
 export const STATUS_COLORS = {
-  storageWarn: { bg: 'bg-[#FDFAED]', text: 'text-[#9A7000]', border: 'border-[#D4A017]' },
-  distanceWarn: { bg: 'bg-[#EDF1FB]', text: 'text-[#2B5EA7]', border: 'border-[#2B5EA7]/30' },
-  overloaded: { bg: 'bg-[#FDF0ED]', text: 'text-[#C94A1E]', border: 'border-l-[#C94A1E]' },
-  caution: { bg: 'bg-nd-bg', text: 'text-[#9A7000]', border: 'border-l-[#D4A017]' },
-  info: { bg: 'bg-[#EDF1FB]', text: 'text-[#2B5EA7]', border: 'border-l-[#2B5EA7]' },
-  neutral: { bg: 'bg-[#F5F5F5]', text: 'text-[#5C5A52]', border: 'border-l-[#8A8880]' },
+  storageWarn: { bg: 'bg-nd-status-warn-bg', text: 'text-nd-status-warn', border: 'border-nd-flag-yellow' },
+  distanceWarn: { bg: 'bg-nd-flag-blue/10', text: 'text-nd-flag-blue', border: 'border-nd-flag-blue/30' },
+  overloaded: { bg: 'bg-nd-accent/10', text: 'text-nd-accent', border: 'border-l-nd-accent' },
+  caution: { bg: 'bg-nd-bg', text: 'text-nd-status-warn', border: 'border-l-nd-flag-yellow' },
+  info: { bg: 'bg-nd-flag-blue/10', text: 'text-nd-flag-blue', border: 'border-l-nd-flag-blue' },
+  neutral: { bg: 'bg-nd-surface-alt', text: 'text-nd-ink-muted', border: 'border-l-nd-ink-muted' },
 } as const
 
 export type FlagSeverity = 'red' | 'yellow' | 'blue' | 'gray'
@@ -33,4 +33,4 @@ export const FLAG_SEVERITY_COLORS: Record<
 
 // Shared tab trigger class for consistent styling across chart pages
 export const TAB_TRIGGER_CLASS =
-  'rounded-none border-none bg-none p-0 pb-3 text-sm font-nd-display uppercase tracking-widest text-nd-ink-muted data-[state=active]:text-nd-ink data-[state=active]:border-b-4 data-[state=active]:border-nd-accent transition-none' as const
+  'border-none bg-none p-0 pb-3 text-sm font-nd-display uppercase tracking-widest text-nd-ink-muted data-[state=active]:text-nd-ink data-[state=active]:border-b-4 data-[state=active]:border-nd-accent transition-none' as const

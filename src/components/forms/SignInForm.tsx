@@ -71,7 +71,7 @@ export function SignInForm({ onSubmit, isPending: externalPending }: SignInFormP
                 value={field.state.value}
                 onBlur={field.handleBlur}
                 onChange={(e) => field.handleChange(e.target.value)}
-                className="h-10 bg-nd-bg border-nd-border rounded-none text-nd-ink placeholder:text-nd-ink-muted/50 focus-visible:ring-nd-accent transition-colors font-sans"
+                className="h-10 bg-nd-bg border-nd-border text-nd-ink placeholder:text-nd-ink-muted/50 focus-visible:ring-nd-accent transition-colors font-sans"
                 placeholder="you@example.com"
               />
               <FormError errors={field.state.meta.errors} />
@@ -92,7 +92,7 @@ export function SignInForm({ onSubmit, isPending: externalPending }: SignInFormP
                 value={field.state.value}
                 onBlur={field.handleBlur}
                 onChange={(e) => field.handleChange(e.target.value)}
-                className="h-10 bg-nd-bg border-nd-border rounded-none text-nd-ink placeholder:text-nd-ink-muted/50 focus-visible:ring-nd-accent transition-colors font-sans"
+                className="h-10 bg-nd-bg border-nd-border text-nd-ink placeholder:text-nd-ink-muted/50 focus-visible:ring-nd-accent transition-colors font-sans"
                 placeholder="••••••••"
               />
               <FormError errors={field.state.meta.errors} />
@@ -106,7 +106,7 @@ export function SignInForm({ onSubmit, isPending: externalPending }: SignInFormP
         children={([canSubmit, isSubmitting]) => (
           <Button 
             type="submit" 
-            className="w-full h-12 bg-nd-ink hover:bg-nd-accent text-nd-bg font-serif font-bold tracking-[0.1em] uppercase rounded-none transition-all border-2 border-nd-ink shadow-[4px_4px_0px_#C94A1E]"
+            className="w-full h-12 bg-nd-ink hover:bg-nd-accent text-nd-bg font-serif font-bold tracking-[0.1em] uppercase transition-all border-2 border-nd-ink shadow-stamp-accent"
             disabled={!canSubmit || isSubmitting || externalPending}
           >
             {isSubmitting || externalPending ? 'Authenticating...' : 'Sign In'}

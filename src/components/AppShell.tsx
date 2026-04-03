@@ -109,7 +109,7 @@ export default function AppShell({ children }: AppShellProps) {
       <Sidebar variant="inset" className="border-r-0">
         <SidebarHeader className="bg-nd-ink py-4">
           <div className="flex items-center gap-3 px-2">
-            <div className="w-8 h-8 bg-nd-accent flex items-center justify-center rounded-none shadow-sm">
+            <div className="w-8 h-8 bg-nd-accent flex items-center justify-center shadow-sm">
               <Activity className="w-5 h-5 text-white" />
             </div>
             <span className="text-xl font-serif font-bold text-white tracking-widest uppercase">
@@ -124,7 +124,7 @@ export default function AppShell({ children }: AppShellProps) {
               aria-haspopup="listbox"
               aria-expanded={orgDropdownOpen}
               aria-label="Switch workspace"
-              className="w-full flex items-center justify-between gap-2 px-3 py-2 bg-nd-surface-dark hover:bg-nd-surface-dark/90 transition-colors text-sm text-white border border-nd-ink-muted rounded-none shadow-inner"
+              className="w-full flex items-center justify-between gap-2 px-3 py-2 bg-nd-surface-dark hover:bg-nd-surface-dark/90 transition-colors text-sm text-white border border-nd-ink-muted shadow-inner"
             >
               <div className="flex items-center gap-2 overflow-hidden">
                 <Building2 className="w-4 h-4 text-nd-accent flex-shrink-0" />
@@ -139,7 +139,7 @@ export default function AppShell({ children }: AppShellProps) {
               <div
                 role="listbox"
                 aria-label="Select workspace"
-                className="absolute left-2 right-2 mt-1 bg-nd-surface-dark border border-nd-ink-muted shadow-xl z-50 py-1 max-h-60 overflow-auto rounded-none"
+                className="absolute left-2 right-2 mt-1 bg-nd-surface-dark border border-nd-ink-muted shadow-xl z-50 py-1 max-h-60 overflow-auto"
               >
                 {orgs.map((o) => (
                   <button
@@ -174,7 +174,7 @@ export default function AppShell({ children }: AppShellProps) {
                       asChild
                       isActive={isActive(item.to)}
                       tooltip={item.label}
-                      className="rounded-none hover:bg-transparent hover:text-white"
+                      className="hover:bg-transparent hover:text-white"
                     >
                       <Link
                         to={item.to as string}
@@ -207,7 +207,7 @@ export default function AppShell({ children }: AppShellProps) {
                       asChild
                       isActive={isActive(item.to)}
                       tooltip={item.label}
-                      className="rounded-none hover:bg-transparent hover:text-white"
+                      className="hover:bg-transparent hover:text-white"
                     >
                       <Link
                         to={item.to as string}
@@ -215,7 +215,7 @@ export default function AppShell({ children }: AppShellProps) {
                         className={`flex items-center gap-3 px-4 py-2 decoration-transparent font-serif text-sm transition-all ${isActive(item.to) ? 'text-white bg-nd-surface-dark border-l-2 border-nd-flag-yellow font-bold' : 'text-white/70 hover:text-white hover:bg-nd-surface-dark/50 border-l-2 border-transparent'}`}
                       >
                         <item.icon
-                          className={`w-4 h-4 ${isActive(item.to) ? 'text-[#D4A017]' : 'text-white/50'}`}
+                          className={`w-4 h-4 ${isActive(item.to) ? 'text-nd-flag-yellow' : 'text-white/50'}`}
                         />
                         <span>{item.label}</span>
                       </Link>
@@ -236,7 +236,7 @@ export default function AppShell({ children }: AppShellProps) {
                     <SidebarMenuButton
                       asChild
                       isActive={isActive(item.to)}
-                      className="rounded-none hover:bg-transparent hover:text-white"
+                      className="hover:bg-transparent hover:text-white"
                     >
                       <Link
                         to={item.to as string}
@@ -261,7 +261,7 @@ export default function AppShell({ children }: AppShellProps) {
                 to="/profile"
                 className="flex items-center gap-3 px-4 py-3 hover:bg-nd-surface-dark transition-colors w-full decoration-transparent group"
               >
-                <div className="w-8 h-8 rounded-none bg-nd-surface-alt flex items-center justify-center text-nd-ink text-sm font-bold font-mono flex-shrink-0 border border-[#C8C3B4]">
+                <div className="w-8 h-8 bg-nd-surface-alt flex items-center justify-center text-nd-ink text-sm font-bold font-mono flex-shrink-0 border border-nd-border">
                   {session?.user?.name?.charAt(0).toUpperCase() ?? 'U'}
                 </div>
                 <div className="flex-1 min-w-0">
@@ -289,8 +289,8 @@ export default function AppShell({ children }: AppShellProps) {
 
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col min-w-0 h-[100dvh] bg-nd-bg overflow-hidden font-sans text-nd-ink w-full relative">
-        <header className="flex h-14 lg:h-16 items-center gap-4 border-b-2 border-nd-ink bg-[#FAF9F5] px-6 shrink-0 transition-colors z-10 relative">
-          <SidebarTrigger className="text-nd-ink hover:text-nd-bg hover:bg-nd-ink transition-colors w-8 h-8 flex items-center justify-center border-2 border-nd-ink bg-white shadow-[2px_2px_0px_#1A1A18] rounded-none cursor-pointer" />
+        <header className="flex h-14 lg:h-16 items-center gap-4 border-b-2 border-nd-ink bg-nd-surface-warm px-6 shrink-0 transition-colors z-10 relative">
+          <SidebarTrigger className="text-nd-ink hover:text-nd-bg hover:bg-nd-ink transition-colors w-8 h-8 flex items-center justify-center border-2 border-nd-ink bg-white shadow-stamp-sm cursor-pointer" />
           <div className="flex-1 flex items-center gap-4 ml-2">
             <div className="h-5 w-[2px] bg-nd-accent rotate-12 opacity-50" />
             <span className="font-mono text-[11px] font-bold uppercase tracking-[0.2em] text-nd-ink-muted">

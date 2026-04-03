@@ -11,7 +11,6 @@ import {
   Share2,
   Hammer,
   Info,
-  AlertCircle,
   Flag,
   HelpCircle,
   BarChart3,
@@ -31,6 +30,8 @@ import { FlagList } from '@/components/ws/shared/FlagList'
 import { SixQuestionsWorkspace } from '@/components/ws/pc/SixQuestionsWorkspace'
 import { WorkCountTab } from '@/components/ws/wc/WorkCountTab'
 import { useProcessFlags } from '@/components/ws/pc/useProcessFlags'
+import { InlineError } from '@/components/ui/inline-error'
+import { TAB_TRIGGER_CLASS } from '@/components/ws/shared/table-styles'
 
 export const Route = createFileRoute('/_authed/ws/$unitId/pc/$pcId')({
   component: ProcessChartPageComponent,
@@ -151,14 +152,14 @@ function ProcessChartPageComponent() {
             <Button
               variant="outline"
               onClick={() => setShareOpen(true)}
-              className="rounded-none border-2 border-nd-bg/30 text-nd-bg/70 hover:text-white hover:border-white font-mono text-[10px] uppercase tracking-widest bg-transparent"
+              className="border-2 border-nd-bg/30 text-nd-bg/70 hover:text-white hover:border-white font-mono text-[10px] uppercase tracking-widest bg-transparent"
             >
               <Share2 className="w-3 h-3 mr-2" /> Share
             </Button>
             <Button
               variant="outline"
               onClick={() => window.print()}
-              className="rounded-none border-2 border-nd-bg/30 text-nd-bg/70 hover:text-white hover:border-white font-mono text-[10px] uppercase tracking-widest bg-transparent"
+              className="border-2 border-nd-bg/30 text-nd-bg/70 hover:text-white hover:border-white font-mono text-[10px] uppercase tracking-widest bg-transparent"
             >
               Generate PDF
             </Button>
@@ -187,10 +188,7 @@ function ProcessChartPageComponent() {
 
       <div className="p-8 max-w-[1600px] mx-auto">
         {mutationError && (
-          <div className="mb-8 p-4 bg-nd-accent/10 border-2 border-nd-accent text-nd-accent font-mono text-xs uppercase tracking-widest flex items-center gap-3 animate-in fade-in slide-in-from-top-2">
-            <AlertCircle className="w-4 h-4 flex-shrink-0" />
-            <span>Process Error: {mutationError}</span>
-          </div>
+          <InlineError className="mb-8">Process Error: {mutationError}</InlineError>
         )}
 
         <div className="flex flex-col lg:flex-row gap-12">
@@ -200,27 +198,18 @@ function ProcessChartPageComponent() {
             <Tabs value={activeTab} onValueChange={setActiveTab} className="p-0 border-none">
               <div className="flex items-center justify-between mb-8 border-b-2 border-nd-ink print:hidden">
                 <div className="overflow-x-auto -mx-2 px-2">
-                  <TabsList className="bg-transparent h-auto p-0 gap-8 rounded-none flex-nowrap whitespace-nowrap">
-                    <TabsTrigger
-                      value="ledger"
-                      className="rounded-none border-none bg-none p-0 pb-3 text-sm font-nd-display uppercase tracking-widest text-nd-ink-muted data-[state=active]:text-nd-ink data-[state=active]:border-b-4 data-[state=active]:border-nd-accent transition-none"
-                    >
+                  <TabsList className="bg-transparent h-auto p-0 gap-8 flex-nowrap whitespace-nowrap">
+                    <TabsTrigger value="ledger" className={TAB_TRIGGER_CLASS}>
                       <LayoutList className="w-4 h-4 mr-2" />{' '}
                       <span className="hidden sm:inline">Ledger View</span>
                       <span className="sm:hidden">Ledger</span>
                     </TabsTrigger>
-                    <TabsTrigger
-                      value="flow"
-                      className="rounded-none border-none bg-none p-0 pb-3 text-sm font-nd-display uppercase tracking-widest text-nd-ink-muted data-[state=active]:text-nd-ink data-[state=active]:border-b-4 data-[state=active]:border-nd-accent transition-none"
-                    >
+                    <TabsTrigger value="flow" className={TAB_TRIGGER_CLASS}>
                       <Hammer className="w-4 h-4 mr-2" />{' '}
                       <span className="hidden sm:inline">Flow View</span>
                       <span className="sm:hidden">Flow</span>
                     </TabsTrigger>
-                    <TabsTrigger
-                      value="analysis"
-                      className="rounded-none border-none bg-none p-0 pb-3 text-sm font-nd-display uppercase tracking-widest text-nd-ink-muted data-[state=active]:text-nd-ink data-[state=active]:border-b-4 data-[state=active]:border-nd-accent transition-none"
-                    >
+                    <TabsTrigger value="analysis" className={TAB_TRIGGER_CLASS}>
                       <Flag className="w-4 h-4 mr-2" />{' '}
                       <span className="hidden sm:inline">Analysis</span>
                       {processFlags.length > 0 && (
@@ -229,26 +218,17 @@ function ProcessChartPageComponent() {
                         </span>
                       )}
                     </TabsTrigger>
-                    <TabsTrigger
-                      value="six-questions"
-                      className="rounded-none border-none bg-none p-0 pb-3 text-sm font-nd-display uppercase tracking-widest text-nd-ink-muted data-[state=active]:text-nd-ink data-[state=active]:border-b-4 data-[state=active]:border-nd-accent transition-none"
-                    >
+                    <TabsTrigger value="six-questions" className={TAB_TRIGGER_CLASS}>
                       <HelpCircle className="w-4 h-4 mr-2" />{' '}
                       <span className="hidden sm:inline">Six Questions</span>
                       <span className="sm:hidden">6Q</span>
                     </TabsTrigger>
-                    <TabsTrigger
-                      value="workcount"
-                      className="rounded-none border-none bg-none p-0 pb-3 text-sm font-nd-display uppercase tracking-widest text-nd-ink-muted data-[state=active]:text-nd-ink data-[state=active]:border-b-4 data-[state=active]:border-nd-accent transition-none"
-                    >
+                    <TabsTrigger value="workcount" className={TAB_TRIGGER_CLASS}>
                       <BarChart3 className="w-4 h-4 mr-2" />{' '}
                       <span className="hidden sm:inline">Work Count</span>
                       <span className="sm:hidden">Count</span>
                     </TabsTrigger>
-                    <TabsTrigger
-                      value="mermaid"
-                      className="rounded-none border-none bg-none p-0 pb-3 text-sm font-nd-display uppercase tracking-widest text-nd-ink-muted data-[state=active]:text-nd-ink data-[state=active]:border-b-4 data-[state=active]:border-nd-accent transition-none"
-                    >
+                    <TabsTrigger value="mermaid" className={TAB_TRIGGER_CLASS}>
                       <Info className="w-4 h-4 mr-2" />{' '}
                       <span className="hidden sm:inline">Diagram Map</span>
                       <span className="sm:hidden">Map</span>

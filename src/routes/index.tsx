@@ -49,7 +49,7 @@ function LandingPage() {
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <a
               href={session?.user ? '/dashboard' : '/signup'}
-              className="px-8 py-3.5 bg-nd-accent hover:bg-nd-accent-hover text-white font-serif tracking-wide border-2 border-transparent transition-all shadow-[4px_4px_0px_#1A1A18] hover:shadow-[6px_6px_0px_#1A1A18] hover:-translate-y-0.5 active:shadow-[1px_1px_0px_#1A1A18] active:translate-y-0.5 flex items-center justify-center gap-2 w-full sm:w-auto"
+              className="px-8 py-3.5 bg-nd-accent hover:bg-nd-accent-hover text-white font-serif tracking-wide border-2 border-transparent transition-all shadow-stamp hover:shadow-stamp-hover hover:-translate-y-0.5 active:shadow-stamp-pressed active:translate-y-0.5 flex items-center justify-center gap-2 w-full sm:w-auto"
             >
               {session?.user ? 'Go to Dashboard' : 'Try It Free'}
               <ArrowRight className="w-4 h-4" />
@@ -172,7 +172,7 @@ function LandingPage() {
             ].map((feature, index) => (
               <div
                 key={index}
-                className="bg-nd-surface border-2 border-nd-ink p-8 hover:-translate-y-1 hover:shadow-[6px_6px_0px_#1A1A18] transition-all duration-200 shadow-[4px_4px_0px_#1A1A18]"
+                className="bg-nd-surface border-2 border-nd-ink p-8 hover:-translate-y-1 hover:shadow-stamp-hover transition-all duration-200 shadow-stamp"
               >
                 <div className="mb-4">{feature.icon}</div>
                 <h3 className="text-sm font-bold font-serif text-nd-ink mb-2 uppercase tracking-wide">
@@ -221,7 +221,7 @@ function LandingPage() {
           </p>
           <a
             href={session?.user ? '/dashboard' : '/signup'}
-            className="inline-flex items-center gap-2 px-10 py-4 bg-nd-accent hover:bg-nd-accent-hover text-white font-serif text-lg tracking-wide border-2 border-transparent transition-all shadow-[4px_4px_0px_#1A1A18] hover:shadow-[6px_6px_0px_#1A1A18] hover:-translate-y-0.5 active:shadow-[1px_1px_0px_#1A1A18] active:translate-y-0.5"
+            className="inline-flex items-center gap-2 px-10 py-4 bg-nd-accent hover:bg-nd-accent-hover text-white font-serif text-lg tracking-wide border-2 border-transparent transition-all shadow-stamp hover:shadow-stamp-hover hover:-translate-y-0.5 active:shadow-stamp-pressed active:translate-y-0.5"
           >
             {session?.user ? 'Go to Dashboard' : 'Try It Free'}
             <ArrowRight className="w-5 h-5" />

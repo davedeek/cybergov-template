@@ -94,7 +94,7 @@ function ImagePage() {
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Input Panel */}
-          <Card className="bg-nd-surface border-2 border-nd-ink rounded-none shadow-[4px_4px_0px_#1A1A18] h-fit">
+          <Card className="bg-nd-surface border-2 border-nd-ink shadow-stamp h-fit">
             <CardHeader className="bg-nd-surface-alt border-b-2 border-nd-ink py-4">
               <CardTitle className="text-xs font-mono font-bold uppercase tracking-widest text-nd-ink">
                 Configuration
@@ -111,7 +111,7 @@ function ImagePage() {
                     onValueChange={setSize}
                     disabled={isLoading}
                   >
-                    <SelectTrigger className="w-full h-10 rounded-none border border-nd-border bg-nd-bg px-3 text-nd-ink focus:ring-nd-accent font-sans text-xs">
+                    <SelectTrigger className="w-full h-10 border border-nd-border bg-nd-bg px-3 text-nd-ink focus:ring-nd-accent font-sans text-xs">
                       <SelectValue placeholder="Size" />
                     </SelectTrigger>
                     <SelectContent className="rounded-none border-2 border-nd-ink">
@@ -139,7 +139,7 @@ function ImagePage() {
                     min={1}
                     max={4}
                     disabled={isLoading}
-                    className="w-full h-10 rounded-none border border-nd-border bg-nd-bg px-3 text-nd-ink focus-visible:ring-nd-accent font-mono text-xs shadow-inner"
+                    className="w-full h-10 border border-nd-border bg-nd-bg px-3 text-nd-ink focus-visible:ring-nd-accent font-mono text-xs shadow-inner"
                   />
                 </div>
               </div>
@@ -154,7 +154,7 @@ function ImagePage() {
                   onChange={(e) => setPrompt(e.target.value)}
                   disabled={isLoading}
                   rows={6}
-                  className="w-full rounded-none border border-nd-border bg-nd-bg px-4 py-3 text-sm text-nd-ink focus:outline-none focus:border-nd-accent focus:ring-1 focus:ring-nd-accent resize-none font-serif shadow-inner"
+                  className="w-full border border-nd-border bg-nd-bg px-4 py-3 text-sm text-nd-ink focus:outline-none focus:border-nd-accent focus:ring-1 focus:ring-nd-accent resize-none font-serif shadow-inner"
                   placeholder="Describe the image you want to generate..."
                 />
               </div>
@@ -162,7 +162,7 @@ function ImagePage() {
               <Button
                 onClick={handleGenerate}
                 disabled={isLoading || !prompt.trim()}
-                className="w-full h-12 bg-nd-ink hover:bg-nd-accent text-nd-bg font-serif font-bold tracking-widest uppercase rounded-none transition-all border-2 border-nd-ink flex items-center justify-center gap-3 shadow-[3px_3px_0px_#C94A1E]"
+                className="w-full h-12 bg-nd-ink hover:bg-nd-accent text-nd-bg font-serif font-bold tracking-widest uppercase transition-all border-2 border-nd-ink flex items-center justify-center gap-3 shadow-stamp-accent"
               >
                 {isLoading ? (
                   <>
@@ -177,7 +177,7 @@ function ImagePage() {
           </Card>
 
           {/* Output Panel */}
-          <div className="lg:col-span-2 bg-nd-surface rounded-none border-2 border-nd-ink p-8 shadow-[4px_4px_0px_#1A1A18]">
+          <div className="lg:col-span-2 bg-nd-surface border-2 border-nd-ink p-8 shadow-stamp">
             <h2 className="text-[10px] font-mono uppercase tracking-[0.2em] text-nd-accent mb-6">
               Generated Artifacts
             </h2>
@@ -200,13 +200,13 @@ function ImagePage() {
                         <img
                           src={getImageSrc(image)}
                           alt={`Generated image ${index + 1}`}
-                          className="w-full rounded-none mix-blend-multiply"
+                          className="w-full mix-blend-multiply"
                         />
                       </div>
                       <Button
                         onClick={() => handleDownload(image, index)}
                         size="icon"
-                        className="absolute top-4 right-4 bg-nd-ink hover:bg-nd-accent shadow-md rounded-none opacity-0 group-hover:opacity-100 transition-all text-nd-bg"
+                        className="absolute top-4 right-4 bg-nd-ink hover:bg-nd-accent shadow-md opacity-0 group-hover:opacity-100 transition-all text-nd-bg"
                         title="Download image"
                       >
                         <Download className="w-5 h-5" />

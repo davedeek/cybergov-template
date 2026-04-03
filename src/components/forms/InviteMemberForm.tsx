@@ -65,7 +65,7 @@ export function InviteMemberForm({ onSubmit, isPending: externalPending }: Invit
                 onBlur={field.handleBlur}
                 onChange={(e) => field.handleChange(e.target.value)}
                 placeholder="representative@domain.gov"
-                className="h-12 bg-nd-bg border-2 border-nd-border rounded-none text-nd-ink placeholder:text-nd-ink-muted/50 focus:border-nd-ink transition-all font-mono text-sm shadow-inner"
+                className="h-12 bg-nd-bg border-2 border-nd-border text-nd-ink placeholder:text-nd-ink-muted/50 focus:border-nd-ink transition-all font-mono text-sm shadow-inner"
               />
               <FormError errors={field.state.meta.errors} />
             </div>
@@ -82,7 +82,7 @@ export function InviteMemberForm({ onSubmit, isPending: externalPending }: Invit
                 value={field.state.value} 
                 onValueChange={(v) => field.handleChange(v as 'member' | 'admin')}
               >
-                <SelectTrigger className="h-12 w-full bg-nd-bg border-2 border-nd-border rounded-none text-nd-ink font-mono text-xs focus:ring-nd-ink shadow-inner uppercase">
+                <SelectTrigger className="h-12 w-full bg-nd-bg border-2 border-nd-border text-nd-ink font-mono text-xs focus:ring-nd-ink shadow-inner uppercase">
                   <SelectValue placeholder="Select Tier" />
                 </SelectTrigger>
                 <SelectContent className="rounded-none border-2 border-nd-ink bg-nd-surface">
@@ -100,7 +100,7 @@ export function InviteMemberForm({ onSubmit, isPending: externalPending }: Invit
             <Button 
               type="submit" 
               disabled={!canSubmit || isSubmitting || externalPending}
-              className="px-8 h-12 bg-nd-ink hover:bg-nd-accent text-nd-bg font-serif font-bold tracking-widest uppercase rounded-none transition-all border-2 border-nd-ink flex items-center gap-3 shadow-[3px_3px_0px_#C94A1E]"
+              className="px-8 h-12 bg-nd-ink hover:bg-nd-accent text-nd-bg font-serif font-bold tracking-widest uppercase transition-all border-2 border-nd-ink flex items-center gap-3 shadow-stamp-accent"
             >
               <UserPlus className="w-4 h-4" />
               {isSubmitting || externalPending ? 'Issuing...' : 'Issue Invitation'}

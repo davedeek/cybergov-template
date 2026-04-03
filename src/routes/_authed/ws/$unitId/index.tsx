@@ -151,12 +151,12 @@ function UnitDashboardPage() {
         <div className="flex items-center gap-3">
           <Dialog open={isWdcOpen} onOpenChange={setIsWdcOpen}>
             <DialogTrigger asChild>
-              <Button className="bg-nd-ink hover:bg-nd-accent text-nd-bg rounded-none border-2 border-nd-ink shadow-[3px_3px_0px_#C94A1E] transition-all flex items-center gap-2 uppercase font-bold text-xs tracking-widest px-6 h-11">
+              <Button className="bg-nd-ink hover:bg-nd-accent text-nd-bg border-2 border-nd-ink shadow-stamp-accent transition-all flex items-center gap-2 uppercase font-bold text-xs tracking-widest px-6 h-11">
                 <FileSpreadsheet className="w-4 h-4" />
                 New WDC
               </Button>
             </DialogTrigger>
-            <DialogContent className="sm:max-w-[425px] border-2 border-nd-ink rounded-none bg-nd-surface p-0 overflow-hidden shadow-[8px_8px_0px_rgba(26,26,24,0.1)]">
+            <DialogContent className="sm:max-w-[425px] border-2 border-nd-ink bg-nd-surface p-0 overflow-hidden shadow-stamp">
               {orgId && (
                 <div className="p-6">
                   <CreateWdcForm
@@ -202,12 +202,12 @@ function UnitDashboardPage() {
 
           <Dialog open={isWcOpen} onOpenChange={setIsWcOpen}>
             <DialogTrigger asChild>
-              <Button className="bg-nd-ink hover:bg-nd-surface-alt hover:text-nd-ink text-nd-bg rounded-none border-2 border-nd-ink shadow-[3px_3px_0px_rgba(26,26,24,0.1)] transition-all flex items-center gap-2 uppercase font-bold text-xs tracking-widest px-6 h-11">
+              <Button className="bg-nd-ink hover:bg-nd-surface-alt hover:text-nd-ink text-nd-bg border-2 border-nd-ink shadow-stamp-sm transition-all flex items-center gap-2 uppercase font-bold text-xs tracking-widest px-6 h-11">
                 <BarChart3 className="w-4 h-4" />
                 New Count
               </Button>
             </DialogTrigger>
-            <DialogContent className="sm:max-w-[425px] border-2 border-nd-ink rounded-none bg-nd-surface p-0 overflow-hidden shadow-[8px_8px_0px_rgba(26,26,24,0.1)]">
+            <DialogContent className="sm:max-w-[425px] border-2 border-nd-ink bg-nd-surface p-0 overflow-hidden shadow-stamp">
               {orgId && (
                 <div className="p-6">
                   <CreateWorkCountForm
@@ -255,12 +255,12 @@ function UnitDashboardPage() {
 
           <Dialog open={isPcOpen} onOpenChange={setIsPcOpen}>
             <DialogTrigger asChild>
-              <Button className="bg-nd-ink hover:bg-nd-surface-alt hover:text-nd-ink text-nd-bg rounded-none border-2 border-nd-ink shadow-[3px_3px_0px_rgba(26,26,24,0.1)] transition-all flex items-center gap-2 uppercase font-bold text-xs tracking-widest px-6 h-11">
+              <Button className="bg-nd-ink hover:bg-nd-surface-alt hover:text-nd-ink text-nd-bg border-2 border-nd-ink shadow-stamp-sm transition-all flex items-center gap-2 uppercase font-bold text-xs tracking-widest px-6 h-11">
                 <GitBranch className="w-4 h-4" />
                 New Process
               </Button>
             </DialogTrigger>
-            <DialogContent className="sm:max-w-[425px] border-2 border-nd-ink rounded-none bg-nd-surface p-0 overflow-hidden shadow-[8px_8px_0px_rgba(26,26,24,0.1)]">
+            <DialogContent className="sm:max-w-[425px] border-2 border-nd-ink bg-nd-surface p-0 overflow-hidden shadow-stamp">
               {orgId && (
                 <div className="p-6">
                   <CreateProcessChartForm
@@ -309,7 +309,7 @@ function UnitDashboardPage() {
       </header>
 
       {/* Workflow Progress Banner */}
-      <div className="mb-10 bg-nd-surface border-2 border-nd-ink p-6 shadow-[4px_4px_0px_rgba(26,26,24,0.08)]">
+      <div className="mb-10 bg-nd-surface border-2 border-nd-ink p-6 shadow-sm">
         <div className="text-[10px] font-mono uppercase tracking-[0.2em] text-nd-ink-muted mb-4 font-bold">
           Work Simplification Workflow
         </div>
@@ -593,7 +593,7 @@ function ChartCard({
   badge?: string
 }) {
   return (
-    <Card className="bg-nd-surface border-2 border-nd-ink rounded-none hover:shadow-[6px_6px_0px_#1A1A18] hover:-translate-y-1 transition-all group overflow-hidden cursor-pointer">
+    <Card className="bg-nd-surface border-2 border-nd-ink hover:shadow-stamp-hover hover:-translate-y-1 transition-all group overflow-hidden cursor-pointer">
       <CardHeader className="p-6">
         <div className="flex justify-between items-start mb-2">
           <div className="flex items-center gap-2">

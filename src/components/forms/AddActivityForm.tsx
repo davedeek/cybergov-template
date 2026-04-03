@@ -50,7 +50,7 @@ export function AddActivityForm({
           <div className="flex flex-col gap-1">
             <Input
               placeholder="e.g., Process incoming mail, Review applications"
-              className="w-[320px] font-mono text-xs h-8 border-nd-border rounded-none focus-visible:ring-1 focus-visible:ring-nd-accent"
+              className="w-[320px] font-mono text-xs h-8 border-nd-border focus-visible:ring-1 focus-visible:ring-nd-accent"
               value={field.state.value}
               onBlur={field.handleBlur}
               onChange={(e) => field.handleChange(e.target.value)}
@@ -67,7 +67,7 @@ export function AddActivityForm({
             type="submit"
             disabled={!canSubmit || isSubmitting || externalPending}
             size="sm"
-            className="h-8 rounded-none bg-nd-accent hover:bg-nd-accent-hover text-white font-serif tracking-wide px-4"
+            className="h-8 bg-nd-accent hover:bg-nd-accent-hover text-white font-serif tracking-wide px-4"
           >
             {isSubmitting || externalPending ? '...' : 'Add'}
           </Button>
@@ -81,7 +81,7 @@ export function AddActivityForm({
         }}
         size="sm"
         variant="ghost"
-        className="h-8 rounded-none text-nd-ink-muted hover:text-nd-ink font-serif hover:bg-transparent"
+        className="h-8 text-nd-ink-muted hover:text-nd-ink font-serif hover:bg-transparent"
       >
         Cancel
       </Button>

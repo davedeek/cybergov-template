@@ -4,10 +4,11 @@ import { useTRPC } from '@/integrations/trpc/react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useMutationHandler } from '@/hooks/use-mutation-handler'
 import type { WorkCountEntry } from '@/types/entities'
-import { ArrowLeft, AlertCircle, Plus, Trash2, BarChart3 } from 'lucide-react'
+import { ArrowLeft, Plus, Trash2, BarChart3 } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { InlineError } from '@/components/ui/inline-error'
 
 export const Route = createFileRoute('/_authed/ws/$unitId/wc/$wcId')({
   component: WorkCountPage,
@@ -98,10 +99,7 @@ function WorkCountPage() {
       </div>
 
       {mutationError && (
-        <div className="mb-4 p-3 bg-nd-accent/10 border border-nd-accent text-nd-accent font-mono text-[10px] uppercase tracking-widest flex items-center gap-2">
-          <AlertCircle className="w-3 h-3" />
-          {mutationError}
-        </div>
+        <InlineError className="mb-4">{mutationError}</InlineError>
       )}
 
       {/* Entries table */}
@@ -222,14 +220,14 @@ function WorkCountPage() {
                     ((prevEntry.count - entry.count) / prevEntry.count) * 100 >= 30
 
                   return (
-                    <tr key={entry.id} className={hasDrop ? 'bg-[#FDF0ED]' : ''}>
+                    <tr key={entry.id} className={hasDrop ? 'bg-nd-accent/5' : ''}>
                       <td className="border-b border-r border-nd-border px-3 py-2 font-mono text-xs text-nd-ink-muted">
                         {idx + 1}
                       </td>
                       <td className="border-b border-r border-nd-border px-3 py-2 text-sm font-serif text-nd-ink">
                         {entry.description}
                         {hasDrop && prevEntry && (
-                          <span className="ml-2 text-[10px] font-mono text-[#C94A1E] uppercase">
+                          <span className="ml-2 text-[10px] font-mono text-nd-accent uppercase">
                             &darr;{' '}
                             {Math.round(((prevEntry.count - entry.count) / prevEntry.count) * 100)}%
                           </span>

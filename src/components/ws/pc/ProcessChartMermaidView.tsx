@@ -25,7 +25,7 @@ export function ProcessChartMermaidView({
       </div>
 
       <div className="flex flex-col lg:flex-row gap-8">
-        <div className="flex-1 bg-white border-2 border-nd-ink p-8 flex items-center justify-center min-h-[500px] overflow-auto shadow-[4px_4px_0px_0px_rgba(26,26,24,1)]">
+        <div className="flex-1 bg-white border-2 border-nd-ink p-8 flex items-center justify-center min-h-[500px] overflow-auto shadow-stamp">
           {mermaidSvg ? (
             <div className="w-full h-full flex items-center justify-center p-4 bg-white" dangerouslySetInnerHTML={{ __html: mermaidSvg }} />
           ) : (

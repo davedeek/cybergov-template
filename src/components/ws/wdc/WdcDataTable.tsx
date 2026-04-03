@@ -78,7 +78,7 @@ export function WdcDataTable({
               </div>
               <button
                 onClick={() => setActiveCell({ actId: act.id, empId: emp.id })}
-                className="w-full text-left font-mono text-[10px] text-nd-border border border-dashed border-nd-border hover:border-nd-accent hover:text-nd-accent px-2 py-1 transition-colors mt-auto rounded-none bg-nd-surface/30 print:hidden"
+                className="w-full text-left font-mono text-[10px] text-nd-border border border-dashed border-nd-border hover:border-nd-accent hover:text-nd-accent px-2 py-1 transition-colors mt-auto bg-nd-surface/30 print:hidden"
                 aria-label={`Add task for ${emp.name} in ${act.name}`}
               >
                 {cellTasks.length === 0 ? '+ add task' : `+ add · ${hrs}h ttl`}
@@ -161,8 +161,8 @@ export function WdcDataTable({
               const threshold = chart.hoursThreshold * parseFloat(e.fte || '1')
               const over = empTotals[e.id] > threshold
               return (
-                <TableCell key={e.id} className={`font-mono text-sm p-3 text-left border-r border-[#2E2E2C] font-semibold tracking-tight ${over ? 'bg-[#FDF0ED] text-[#C94A1E]' : 'bg-nd-ink text-nd-bg'}`}>
-                  {empTotals[e.id] || 0}h {over ? <Flag className="inline w-3 h-3 ml-1 mb-0.5 text-[#C94A1E] fill-current" /> : ''}
+                <TableCell key={e.id} className={`font-mono text-sm p-3 text-left border-r border-nd-surface-dark font-semibold tracking-tight ${over ? 'bg-nd-accent/10 text-nd-accent' : 'bg-nd-ink text-nd-bg'}`}>
+                  {empTotals[e.id] || 0}h {over ? <Flag className="inline w-3 h-3 ml-1 mb-0.5 text-nd-accent fill-current" /> : ''}
                 </TableCell>
               )
             })}

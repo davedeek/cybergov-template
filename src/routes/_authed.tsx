@@ -44,14 +44,14 @@ export const Route = createFileRoute('/_authed')({
 
   errorComponent: ({ error }) => (
     <div className="min-h-screen flex items-center justify-center bg-nd-bg font-sans">
-      <div className="text-center max-w-md bg-nd-surface border-2 border-nd-ink p-8 shadow-[4px_4px_0px_#1A1A18]">
+      <div className="text-center max-w-md bg-nd-surface border-2 border-nd-ink p-8 shadow-stamp">
         <h1 className="text-2xl font-serif font-bold text-nd-flag-red mb-4 uppercase tracking-tight">System Error</h1>
         <p className="text-nd-ink-muted mb-8 font-mono text-xs">
           {error instanceof Error ? error.message : 'An unexpected error occurred'}
         </p>
         <button
           onClick={() => window.location.reload()}
-          className="px-6 py-3 bg-nd-ink hover:bg-nd-ink/90 text-nd-bg font-serif font-bold tracking-wide uppercase text-xs rounded-none border-2 border-nd-ink transition-colors w-full"
+          className="px-6 py-3 bg-nd-ink hover:bg-nd-ink/90 text-nd-bg font-serif font-bold tracking-wide uppercase text-xs border-2 border-nd-ink transition-colors w-full"
         >
           Try Again
         </button>

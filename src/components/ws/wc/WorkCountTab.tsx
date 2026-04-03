@@ -42,7 +42,7 @@ export function WorkCountTab({ orgId, unitId }: WorkCountTabProps) {
           <Button
             asChild
             variant="outline"
-            className="rounded-none border-nd-border hover:border-nd-accent hover:text-nd-accent font-mono text-xs uppercase tracking-widest"
+            className="border-nd-border hover:border-nd-accent hover:text-nd-accent font-mono text-xs uppercase tracking-widest"
           >
             <Link
               to="/ws/$unitId"

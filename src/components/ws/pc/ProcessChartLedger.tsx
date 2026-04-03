@@ -114,7 +114,7 @@ export function ProcessChartLedger({
               onCancel={() => setEditingId(null)}
               fieldName="description"
               autoFocus
-              inputClassName="h-7 text-sm rounded-none border-nd-border focus-visible:ring-nd-accent"
+              inputClassName="h-7 text-sm border-nd-border focus-visible:ring-nd-accent"
               displayValue={
                 <div className="flex justify-between items-center">
                   <span className="text-[13px]">{step.description}</span>
@@ -147,7 +147,7 @@ export function ProcessChartLedger({
               onCommit={commitEdit}
               onCancel={() => setEditingId(null)}
               fieldName="who"
-              inputClassName="h-7 text-xs font-mono rounded-none border-nd-border focus-visible:ring-nd-accent"
+              inputClassName="h-7 text-xs font-mono border-nd-border focus-visible:ring-nd-accent"
               displayValue={
                 <span className="text-xs font-mono text-nd-ink/80">{step.who || '\u2014'}</span>
               }
@@ -172,7 +172,7 @@ export function ProcessChartLedger({
               onCancel={() => setEditingId(null)}
               fieldName="minutes"
               visibleForSymbol="storage"
-              inputClassName="h-7 text-xs font-mono text-right rounded-none border-nd-border focus-visible:ring-nd-accent"
+              inputClassName="h-7 text-xs font-mono text-right border-nd-border focus-visible:ring-nd-accent"
               displayValue={
                 step.minutes ? (
                   <span
@@ -207,7 +207,7 @@ export function ProcessChartLedger({
               onCancel={() => setEditingId(null)}
               fieldName="feet"
               visibleForSymbol="transportation"
-              inputClassName="h-7 text-xs font-mono text-right rounded-none border-nd-border focus-visible:ring-nd-accent"
+              inputClassName="h-7 text-xs font-mono text-right border-nd-border focus-visible:ring-nd-accent"
               displayValue={
                 step.feet ? (
                   <span
@@ -240,7 +240,7 @@ export function ProcessChartLedger({
               onCommit={commitEdit}
               onCancel={() => setEditingId(null)}
               fieldName="notes"
-              inputClassName="h-7 text-xs font-mono rounded-none border-nd-border focus-visible:ring-nd-accent"
+              inputClassName="h-7 text-xs font-mono border-nd-border focus-visible:ring-nd-accent"
               displayValue={
                 step.notes ? (
                   <span
@@ -284,7 +284,7 @@ export function ProcessChartLedger({
           onClick={copyCSV}
           variant="outline"
           size="sm"
-          className="font-mono text-[10px] tracking-wider bg-nd-ink text-nd-bg hover:bg-nd-ink/90 hover:text-white rounded-none border-none"
+          className="font-mono text-[10px] tracking-wider bg-nd-ink text-nd-bg hover:bg-nd-ink/90 hover:text-white border-none"
         >
           <Copy className="w-3 h-3 mr-2" />
           COPY CSV
@@ -335,21 +335,21 @@ export function ProcessChartLedger({
             <TableRow className="bg-nd-ink border-t-[3px] border-nd-ink hover:bg-nd-ink">
               <TableCell
                 colSpan={4}
-                className="p-3 font-mono text-[10px] text-[#8A8880] uppercase tracking-[0.1em]"
+                className="p-3 font-mono text-[10px] text-nd-ink-muted uppercase tracking-[0.1em]"
               >
                 Totals — {steps.length} steps
               </TableCell>
               <TableCell
-                className={`p-3 text-right font-mono text-sm font-bold border-l border-[#333] ${totalMinutes > storageWarn ? 'text-[#D4A017]' : 'text-[#F5F0E8]'}`}
+                className={`p-3 text-right font-mono text-sm font-bold border-l border-nd-surface-dark ${totalMinutes > storageWarn ? 'text-nd-flag-yellow' : 'text-nd-bg'}`}
               >
                 {totalMinutes || '\u2014'}
               </TableCell>
               <TableCell
-                className={`p-3 text-right font-mono text-sm font-bold border-l border-[#333] ${totalFeet > distWarn ? 'text-[#6A9AE0]' : 'text-[#F5F0E8]'}`}
+                className={`p-3 text-right font-mono text-sm font-bold border-l border-nd-surface-dark ${totalFeet > distWarn ? 'text-nd-flag-blue' : 'text-nd-bg'}`}
               >
                 {totalFeet || '\u2014'}
               </TableCell>
-              <TableCell className="p-3 border-l border-[#333]" />
+              <TableCell className="p-3 border-l border-nd-surface-dark" />
             </TableRow>
           </TableBody>
         </Table>

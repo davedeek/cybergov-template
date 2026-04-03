@@ -52,7 +52,7 @@ export function EditableCell(props: EditableCellProps) {
         name={props.fieldName}
         children={(field: any) => (
           <Select value={field.state.value} onValueChange={(v: string) => field.handleChange(v)}>
-            <SelectTrigger className="h-7 text-xs font-mono rounded-none">
+            <SelectTrigger className="h-7 text-xs font-mono">
               <SelectValue />
             </SelectTrigger>
             <SelectContent className="font-mono text-xs">
@@ -87,7 +87,7 @@ export function EditableCell(props: EditableCellProps) {
                     onBlur={field.handleBlur}
                     onChange={(e: React.ChangeEvent<HTMLInputElement>) => field.handleChange(e.target.value)}
                     onKeyDown={handleKeyDown}
-                    className={props.inputClassName ?? "h-7 text-xs font-mono text-right rounded-none border-nd-border focus-visible:ring-nd-accent"}
+                    className={props.inputClassName ?? "h-7 text-xs font-mono text-right border-nd-border focus-visible:ring-nd-accent"}
                   />
                   <div className="absolute right-0 top-full z-20">
                     <FormError errors={field.state.meta.errors} />
@@ -119,7 +119,7 @@ export function EditableCell(props: EditableCellProps) {
             className={
               ('inputClassName' in props && props.inputClassName)
                 ? props.inputClassName
-                : "h-7 text-sm rounded-none border-nd-border focus-visible:ring-nd-accent"
+                : "h-7 text-sm border-nd-border focus-visible:ring-nd-accent"
             }
           />
           <FormError errors={field.state.meta.errors} />

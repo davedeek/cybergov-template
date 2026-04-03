@@ -21,6 +21,8 @@ import {
 } from '@/db-collections'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
+import { PageContainer } from '@/components/ui/page-container'
+import { PageHeader, PageHeaderTitle, PageHeaderDescription } from '@/components/ui/page-header'
 
 export const Route = createFileRoute('/_authed/dashboard')({
   component: DashboardPage,
@@ -75,25 +77,21 @@ function DashboardPage() {
       label: 'Total Todos',
       value: todos?.length ?? 0,
       icon: CheckSquare,
-      color: 'from-cyan-500 to-blue-500',
     },
     {
       label: 'Pending',
       value: pendingCount,
       icon: LayoutDashboard,
-      color: 'from-amber-500 to-orange-500',
     },
     {
       label: 'Completed',
       value: completedCount,
       icon: CheckSquare,
-      color: 'from-emerald-500 to-green-500',
     },
     {
       label: 'Members',
       value: members?.length ?? 0,
       icon: Users,
-      color: 'from-violet-500 to-purple-500',
     },
   ]
 
@@ -123,19 +121,19 @@ function DashboardPage() {
     liveWdcCharts.length
 
   return (
-    <div className="p-6 lg:p-8 max-w-6xl mx-auto font-sans">
-      <div className="mb-8 border-b-2 border-nd-ink pb-6">
-        <h1 className="text-3xl font-bold font-serif text-nd-ink uppercase tracking-tight">
+    <PageContainer size="lg">
+      <PageHeader>
+        <PageHeaderTitle>
           {currentOrg?.organization.name ?? 'Dashboard'}
-        </h1>
-        <p className="text-nd-ink-muted mt-2">
+        </PageHeaderTitle>
+        <PageHeaderDescription>
           Welcome back! Here's an overview of your workspace.
-        </p>
-      </div>
+        </PageHeaderDescription>
+      </PageHeader>
 
       {/* Empty state for new users */}
       {totalItems <= 1 && (
-        <div className="mb-8 bg-nd-ink text-nd-bg border-2 border-nd-ink shadow-[6px_6px_0px_rgba(201,74,30,0.3)] animate-in fade-in slide-in-from-top-2 duration-300">
+        <div className="mb-8 bg-nd-ink text-nd-bg border-2 border-nd-ink shadow-stamp-hover animate-in fade-in slide-in-from-top-2 duration-300">
           <div className="p-8">
             <div className="flex items-start gap-4">
               <div className="w-10 h-10 bg-nd-accent flex items-center justify-center shrink-0">
@@ -152,7 +150,7 @@ function DashboardPage() {
                 </p>
                 <div className="flex flex-col sm:flex-row gap-3">
                   <Button
-                    className="bg-nd-accent hover:bg-nd-accent/80 text-white rounded-none font-mono text-xs uppercase tracking-widest"
+                    variant="accent"
                     asChild
                   >
                     <a href={orgId ? `/ws?orgId=${orgId}` : '/ws'}>
@@ -162,7 +160,7 @@ function DashboardPage() {
                   </Button>
                   <Button
                     variant="outline"
-                    className="border-nd-bg/30 text-nd-bg/70 hover:text-nd-bg hover:border-nd-bg rounded-none font-mono text-xs uppercase tracking-widest bg-transparent"
+                    className="border-nd-bg/30 text-nd-bg/70 hover:text-nd-bg hover:border-nd-bg font-mono text-xs uppercase tracking-widest bg-transparent"
                     asChild
                   >
                     <a href={orgId ? `/ws?orgId=${orgId}` : '/ws'}>
@@ -181,13 +179,13 @@ function DashboardPage() {
         {stats.map((stat) => (
           <Card
             key={stat.label}
-            className="bg-nd-surface border-2 border-nd-ink rounded-none shadow-[4px_4px_0px_#1A1A18] hover:-translate-y-1 hover:shadow-[6px_6px_0px_#1A1A18] transition-all"
+            variant="stamped"
           >
-            <CardHeader className="flex flex-row items-center justify-between pb-2 bg-nd-surface-alt border-b border-nd-border">
+            <CardHeader variant="stamped" className="flex flex-row items-center justify-between pb-2">
               <CardTitle className="text-[10px] font-bold font-mono uppercase tracking-[0.2em] text-nd-ink-muted">
                 {stat.label}
               </CardTitle>
-              <div className="w-8 h-8 rounded-none bg-nd-ink flex items-center justify-center border border-nd-border shadow-inner">
+              <div className="w-8 h-8 bg-nd-ink flex items-center justify-center border border-nd-border shadow-inner">
                 <stat.icon className="w-4 h-4 text-nd-bg" />
               </div>
             </CardHeader>
@@ -199,8 +197,8 @@ function DashboardPage() {
       </div>
 
       {/* Work Simplification Section */}
-      <Card className="bg-nd-surface border-2 border-nd-ink rounded-none shadow-sm mb-8">
-        <CardHeader className="border-b border-nd-border bg-[#FAF9F5]">
+      <Card variant="flat" className="mb-8">
+        <CardHeader variant="warm">
           <CardTitle className="text-sm font-mono tracking-widest uppercase text-nd-ink">
             Work Simplification
           </CardTitle>
@@ -217,7 +215,7 @@ function DashboardPage() {
                 </div>
                 <div>
                   <div className="text-2xl font-serif font-black text-nd-ink">{stat.value}</div>
-                  <div className="text-[10px] font-mono text-nd-ink-muted uppercase tracking-widest">
+                  <div className="text-[10px] font-mono text-nd-ink-muted uppercase tracking-[0.2em]">
                     {stat.label}
                   </div>
                 </div>
@@ -225,21 +223,22 @@ function DashboardPage() {
             ))}
           </div>
           <Button
-            variant="outline"
-            className="h-12 justify-start gap-3 bg-nd-bg border-2 border-nd-border hover:border-nd-ink hover:bg-nd-surface-alt text-nd-ink rounded-none transition-colors w-full sm:w-auto"
+            variant="action"
+            size="tall"
+            className="w-full sm:w-auto"
             asChild
           >
             <a href={orgId ? `/ws?orgId=${orgId}` : '/ws'}>
               <Building2 className="w-5 h-5 text-nd-accent" />
-              <span className="font-serif font-bold tracking-wide">View Units</span>
+              <span>View Units</span>
             </a>
           </Button>
         </CardContent>
       </Card>
 
       {/* Quick actions */}
-      <Card className="bg-nd-surface border-2 border-nd-ink rounded-none shadow-sm">
-        <CardHeader className="border-b border-nd-border bg-[#FAF9F5]">
+      <Card variant="flat">
+        <CardHeader variant="warm">
           <CardTitle className="text-sm font-mono tracking-widest uppercase text-nd-ink">
             Quick Actions
           </CardTitle>
@@ -247,38 +246,38 @@ function DashboardPage() {
         <CardContent className="p-6">
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <Button
-              variant="outline"
-              className="h-16 justify-start gap-3 bg-nd-bg border-2 border-nd-border hover:border-nd-ink hover:bg-nd-surface-alt text-nd-ink rounded-none transition-colors"
+              variant="action"
+              size="hero"
               asChild
             >
               <a href={orgId ? `/todos?orgId=${orgId}` : '/todos'}>
                 <CheckSquare className="w-5 h-5 text-nd-accent" />
-                <span className="font-serif font-bold tracking-wide">Manage Todos</span>
+                <span>Manage Todos</span>
               </a>
             </Button>
             <Button
-              variant="outline"
-              className="h-16 justify-start gap-3 bg-nd-bg border-2 border-nd-border hover:border-nd-ink hover:bg-nd-surface-alt text-nd-ink rounded-none transition-colors"
+              variant="action"
+              size="hero"
               asChild
             >
               <a href={orgId ? `/ai/chat?orgId=${orgId}` : '/ai/chat'}>
                 <MessageSquare className="w-5 h-5 text-nd-accent" />
-                <span className="font-serif font-bold tracking-wide">AI Chat</span>
+                <span>AI Chat</span>
               </a>
             </Button>
             <Button
-              variant="outline"
-              className="h-16 justify-start gap-3 bg-nd-bg border-2 border-nd-border hover:border-nd-ink hover:bg-nd-surface-alt text-nd-ink rounded-none transition-colors"
+              variant="action"
+              size="hero"
               asChild
             >
               <a href={orgId ? `/settings?orgId=${orgId}` : '/settings'}>
                 <Users className="w-5 h-5 text-nd-accent" />
-                <span className="font-serif font-bold tracking-wide">Invite Members</span>
+                <span>Invite Members</span>
               </a>
             </Button>
           </div>
         </CardContent>
       </Card>
-    </div>
+    </PageContainer>
   )
 }

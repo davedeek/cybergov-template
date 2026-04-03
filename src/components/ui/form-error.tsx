@@ -15,7 +15,7 @@ export function FormError({ errors }: FormErrorProps) {
           : String(error)
 
         return (
-          <span key={idx} className="block text-[10px] font-mono font-bold text-[#C94A1E] uppercase tracking-wider leading-tight">
+          <span key={idx} className="block text-[10px] font-mono font-bold text-nd-accent uppercase tracking-wider leading-tight">
             ▸ {message}
           </span>
         )

@@ -15,6 +15,7 @@ import { ArrowLeft, AlertCircle, FileText, BookOpen, UserPlus, Plus, Share2 } fr
 
 import { Button } from '@/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { InlineError } from '@/components/ui/inline-error'
 import { AddEmployeeForm } from '@/components/forms/AddEmployeeForm'
 import { AddActivityForm } from '@/components/forms/AddActivityForm'
 import { AddTaskForm } from '@/components/forms/AddTaskForm'
@@ -155,7 +156,7 @@ function WdcPage() {
               Work Simplification Program — Tool I
             </div>
             <h1 className="m-0 text-3xl font-bold tracking-tight">{chart.name}</h1>
-            <div className="text-xs text-[#8A8880] mt-1.5 font-mono print:text-black">
+            <div className="text-xs text-nd-ink-muted mt-1.5 font-mono print:text-black">
               Who does what — and how many hours it takes
             </div>
           </div>
@@ -163,7 +164,7 @@ function WdcPage() {
             <Button
               variant="outline"
               onClick={() => setShareOpen(true)}
-              className="rounded-none border-2 border-nd-bg/30 text-nd-bg/70 hover:text-white hover:border-white font-mono text-[10px] uppercase tracking-widest bg-transparent"
+              className="border-2 border-nd-bg/30 text-nd-bg/70 hover:text-white hover:border-white font-mono text-[10px] uppercase tracking-widest bg-transparent"
             >
               <Share2 className="w-3 h-3 mr-2" /> Share
             </Button>
@@ -182,18 +183,15 @@ function WdcPage() {
       <div className="flex-1 max-w-full overflow-x-hidden">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           {/* Tab Navigation */}
-          <div className="bg-[#EDE8E0] border-b border-nd-border px-8 print:hidden">
+          <div className="bg-nd-surface-alt border-b border-nd-border px-8 print:hidden">
             {mutationError && (
-              <div className="py-2 px-4 bg-nd-accent text-nd-bg font-mono text-[10px] uppercase tracking-widest flex items-center gap-3">
-                <AlertCircle className="w-3 h-3" />
-                <span>Critical Sync Error: {mutationError}</span>
-              </div>
+              <InlineError className="mb-0">Critical Sync Error: {mutationError}</InlineError>
             )}
             <div className="overflow-x-auto -mx-2 px-2">
               <TabsList className="bg-transparent h-auto p-0 gap-6 flex-nowrap whitespace-nowrap">
                 <TabsTrigger
                   value="chart"
-                  className="data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-nd-accent rounded-none shadow-none px-2 py-3 font-serif font-semibold text-nd-ink text-sm data-[state=inactive]:text-nd-ink-muted"
+                  className="data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-nd-accent shadow-none px-2 py-3 font-serif font-semibold text-nd-ink text-sm data-[state=inactive]:text-nd-ink-muted"
                 >
                   <FileText className="w-4 h-4 mr-2" />
                   <span className="hidden sm:inline">Ledger View</span>
@@ -201,7 +199,7 @@ function WdcPage() {
                 </TabsTrigger>
                 <TabsTrigger
                   value="flags"
-                  className="data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-nd-accent rounded-none shadow-none px-2 py-3 font-serif font-semibold text-nd-ink text-sm data-[state=inactive]:text-nd-ink-muted"
+                  className="data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-nd-accent shadow-none px-2 py-3 font-serif font-semibold text-nd-ink text-sm data-[state=inactive]:text-nd-ink-muted"
                 >
                   <AlertCircle className="w-4 h-4 mr-2" />
                   <span className="hidden sm:inline">Analysis Flags</span>
@@ -214,7 +212,7 @@ function WdcPage() {
                 </TabsTrigger>
                 <TabsTrigger
                   value="legend"
-                  className="data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-nd-accent rounded-none shadow-none px-2 py-3 font-serif font-semibold text-nd-ink text-sm data-[state=inactive]:text-nd-ink-muted"
+                  className="data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-nd-accent shadow-none px-2 py-3 font-serif font-semibold text-nd-ink text-sm data-[state=inactive]:text-nd-ink-muted"
                 >
                   <BookOpen className="w-4 h-4 mr-2" />
                   <span className="hidden sm:inline">Reference Guide</span>
@@ -260,7 +258,7 @@ function WdcPage() {
                   <Button
                     onClick={() => setAddingEmployee(true)}
                     variant="outline"
-                    className="border-nd-border bg-nd-surface hover:bg-nd-surface hover:border-nd-accent hover:text-nd-accent font-serif tracking-wide rounded-none text-nd-ink-muted shadow-sm h-9"
+                    className="border-nd-border bg-nd-surface hover:bg-nd-surface hover:border-nd-accent hover:text-nd-accent font-serif tracking-wide text-nd-ink-muted shadow-sm h-9"
                   >
                     <UserPlus className="w-4 h-4 mr-2" /> Add Employee
                   </Button>
@@ -294,7 +292,7 @@ function WdcPage() {
                   <Button
                     onClick={() => setAddingActivity(true)}
                     variant="outline"
-                    className="border-nd-border bg-nd-surface hover:bg-nd-surface hover:border-nd-accent hover:text-nd-accent font-serif tracking-wide rounded-none text-nd-ink-muted shadow-sm h-9"
+                    className="border-nd-border bg-nd-surface hover:bg-nd-surface hover:border-nd-accent hover:text-nd-accent font-serif tracking-wide text-nd-ink-muted shadow-sm h-9"
                   >
                     <Plus className="w-4 h-4 mr-2" /> Add Activity Row
                   </Button>

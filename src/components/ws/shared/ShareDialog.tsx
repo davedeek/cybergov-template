@@ -30,7 +30,7 @@ export function ShareDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[480px] border-2 border-nd-ink rounded-none bg-nd-surface p-0 overflow-hidden shadow-[8px_8px_0px_rgba(26,26,24,0.1)]">
+      <DialogContent className="sm:max-w-[480px] border-2 border-nd-ink bg-nd-surface p-0 overflow-hidden shadow-stamp">
         <div className="p-6">
           <h3 className="text-lg font-serif font-bold text-nd-ink mb-1">Share This Chart</h3>
           <p className="text-xs font-mono text-nd-ink-muted mb-6">

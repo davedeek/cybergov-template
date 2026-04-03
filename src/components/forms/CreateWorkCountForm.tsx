@@ -106,7 +106,7 @@ export function CreateWorkCountForm({ onSubmit, isPending, onCancel }: CreateWor
             <Button
               type="submit"
               disabled={!canSubmit || isSubmitting || isPending}
-              className="bg-nd-ink hover:bg-nd-accent text-nd-bg rounded-none font-serif tracking-wide px-6"
+              className="bg-nd-ink hover:bg-nd-accent text-nd-bg font-serif tracking-wide px-6"
             >
               {isSubmitting || isPending ? 'Creating...' : 'Create'}
             </Button>

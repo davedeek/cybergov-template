@@ -106,7 +106,7 @@ export function ProcessChartListView({
 
                 {/* Step card */}
                 <Card
-                  className={`flex-1 rounded-none border-nd-border shadow-none mb-0 ${idx === 0 ? '' : 'border-t-0'} group-hover/item:border-nd-accent group-hover/item:z-20 transition-colors relative transition-all duration-200`}
+                  className={`flex-1 border-nd-border shadow-none mb-0 ${idx === 0 ? '' : 'border-t-0'} group-hover/item:border-nd-accent group-hover/item:z-20 transition-colors relative transition-all duration-200`}
                 >
                   <CardContent className="p-4 flex gap-4 items-start">
                     <span className="text-[10px] font-mono text-nd-border group-hover/item:text-nd-accent transition-colors pt-1">

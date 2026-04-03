@@ -25,7 +25,7 @@ export function AddStepForm({ form, isPending: externalPending }: AddStepFormPro
         e.stopPropagation()
         form.handleSubmit()
       }}
-      className="grid grid-cols-1 md:grid-cols-12 gap-1 items-end bg-nd-ink border-2 border-nd-ink shadow-[4px_4px_0px_0px_rgba(26,26,24,0.3)] print:hidden"
+      className="grid grid-cols-1 md:grid-cols-12 gap-1 items-end bg-nd-ink border-2 border-nd-ink shadow-stamp print:hidden"
     >
       <form.Field
         name="symbol"
@@ -38,13 +38,13 @@ export function AddStepForm({ form, isPending: externalPending }: AddStepFormPro
               value={field.state.value}
               onValueChange={(v: string) => field.handleChange(v as SymbolType)}
             >
-              <SelectTrigger className="h-10 bg-nd-ink text-nd-bg border-none hover:bg-white/5 rounded-none font-mono text-xs focus:ring-0">
+              <SelectTrigger className="h-10 bg-nd-ink text-nd-bg border-none hover:bg-white/5 font-mono text-xs focus:ring-0">
                 <div className="flex items-center gap-2">
                   <SymbolIcon type={field.state.value} size={14} />
                   <SelectValue />
                 </div>
               </SelectTrigger>
-              <SelectContent className="bg-nd-ink text-nd-bg border-nd-border font-mono text-xs rounded-none">
+              <SelectContent className="bg-nd-ink text-nd-bg border-nd-border font-mono text-xs">
                 {(Object.keys(SYMBOL_META) as SymbolType[]).map((type) => (
                   <SelectItem
                     key={type}
@@ -80,7 +80,7 @@ export function AddStepForm({ form, isPending: externalPending }: AddStepFormPro
               onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                 field.handleChange(e.target.value)
               }
-              className="h-10 bg-nd-ink text-nd-bg border-none hover:bg-white/5 rounded-none placeholder:text-nd-bg/30 focus-visible:ring-0 text-sm"
+              className="h-10 bg-nd-ink text-nd-bg border-none hover:bg-white/5 placeholder:text-nd-bg/30 focus-visible:ring-0 text-sm"
             />
             <div className="absolute left-2 bottom-0 transform translate-y-full z-10 w-full">
               <FormError errors={field.state.meta.errors} />
@@ -103,7 +103,7 @@ export function AddStepForm({ form, isPending: externalPending }: AddStepFormPro
               onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                 field.handleChange(e.target.value)
               }
-              className="h-10 bg-nd-ink text-nd-bg border-none hover:bg-white/5 rounded-none placeholder:text-nd-bg/30 font-mono text-xs focus-visible:ring-0"
+              className="h-10 bg-nd-ink text-nd-bg border-none hover:bg-white/5 placeholder:text-nd-bg/30 font-mono text-xs focus-visible:ring-0"
             />
             <div className="absolute left-2 bottom-0 transform translate-y-full z-10 w-full">
               <FormError errors={field.state.meta.errors} />
@@ -131,7 +131,7 @@ export function AddStepForm({ form, isPending: externalPending }: AddStepFormPro
                     onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                       field.handleChange(e.target.value)
                     }
-                    className="h-10 bg-nd-ink text-nd-bg border-none hover:bg-white/5 rounded-none placeholder:text-nd-bg/30 font-mono text-xs focus-visible:ring-0 text-right"
+                    className="h-10 bg-nd-ink text-nd-bg border-none hover:bg-white/5 placeholder:text-nd-bg/30 font-mono text-xs focus-visible:ring-0 text-right"
                   />
                 </>
               )}
@@ -159,7 +159,7 @@ export function AddStepForm({ form, isPending: externalPending }: AddStepFormPro
                     onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                       field.handleChange(e.target.value)
                     }
-                    className="h-10 bg-nd-ink text-nd-bg border-none hover:bg-white/5 rounded-none placeholder:text-nd-bg/30 font-mono text-xs focus-visible:ring-0 text-right"
+                    className="h-10 bg-nd-ink text-nd-bg border-none hover:bg-white/5 placeholder:text-nd-bg/30 font-mono text-xs focus-visible:ring-0 text-right"
                   />
                 </>
               )}
@@ -183,7 +183,7 @@ export function AddStepForm({ form, isPending: externalPending }: AddStepFormPro
               disabled={
                 !canSubmit || isSubmitting || externalPending || !(description as string).trim()
               }
-              className="w-full h-10 bg-nd-accent text-nd-bg hover:bg-nd-accent/90 rounded-none font-mono text-[10px] tracking-[0.15em] uppercase border-none disabled:bg-nd-bg/20"
+              className="w-full h-10 bg-nd-accent text-nd-bg hover:bg-nd-accent/90 font-mono text-[10px] tracking-[0.15em] uppercase border-none disabled:bg-nd-bg/20"
             >
               <Plus className="w-4 h-4 mr-2" />
               {isSubmitting || externalPending ? 'Adding...' : 'Add Step'}

@@ -98,9 +98,7 @@ function WorkCountPage() {
         </div>
       </div>
 
-      {mutationError && (
-        <InlineError className="mb-4">{mutationError}</InlineError>
-      )}
+      {mutationError && <InlineError className="mb-4">{mutationError}</InlineError>}
 
       {/* Entries table */}
       <div className="bg-nd-surface border border-nd-border shadow-sm">
@@ -112,7 +110,7 @@ function WorkCountPage() {
             <Button
               onClick={() => setAddingEntry(true)}
               variant="outline"
-              className="rounded-none border-nd-border hover:border-nd-accent hover:text-nd-accent font-mono text-xs uppercase tracking-widest"
+              className="border-nd-border hover:border-nd-accent hover:text-nd-accent font-mono text-xs uppercase tracking-widest"
             >
               <Plus className="w-3 h-3 mr-2" /> Add Entry
             </Button>
@@ -130,7 +128,7 @@ function WorkCountPage() {
                   value={newDescription}
                   onChange={(e) => setNewDescription(e.target.value)}
                   placeholder="e.g., Receive application"
-                  className="rounded-none border-nd-border font-serif"
+                  className="border-nd-border font-serif"
                   autoFocus
                 />
               </div>
@@ -142,7 +140,7 @@ function WorkCountPage() {
                   type="number"
                   value={newCount}
                   onChange={(e) => setNewCount(e.target.value)}
-                  className="rounded-none border-nd-border font-mono text-right"
+                  className="border-nd-border font-mono text-right"
                   min={0}
                 />
               </div>
@@ -170,7 +168,7 @@ function WorkCountPage() {
                   )
                 }}
                 disabled={isPending || !newDescription.trim()}
-                className="bg-nd-ink hover:bg-nd-accent text-nd-bg rounded-none font-mono text-xs uppercase tracking-widest"
+                className="bg-nd-ink hover:bg-nd-accent text-nd-bg font-mono text-xs uppercase tracking-widest"
               >
                 Add
               </Button>
@@ -181,7 +179,7 @@ function WorkCountPage() {
                   setNewCount('0')
                 }}
                 variant="outline"
-                className="rounded-none border-nd-border font-mono text-xs"
+                className="border-nd-border font-mono text-xs"
               >
                 Cancel
               </Button>
@@ -387,7 +385,7 @@ function CountInput({
           setEditing(false)
         }
       }}
-      className="w-[80px] h-7 font-mono text-sm text-right rounded-none border-nd-accent ml-auto"
+      className="w-[80px] h-7 font-mono text-sm text-right border-nd-accent ml-auto"
       autoFocus
       min={0}
     />

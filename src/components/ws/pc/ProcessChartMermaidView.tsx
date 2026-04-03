@@ -9,16 +9,26 @@ interface ProcessChartMermaidViewProps {
 }
 
 export function ProcessChartMermaidView({
-  mermaidSvg, mermaidSrc, copyMermaid, stepsCount
+  mermaidSvg,
+  mermaidSrc,
+  copyMermaid,
+  stepsCount,
 }: ProcessChartMermaidViewProps) {
   return (
     <div className="m-0 border-none outline-none">
       <div className="flex items-center justify-between mb-8">
         <div>
-          <div className="text-[10px] font-mono tracking-[0.15em] uppercase text-nd-accent mb-1">Process Map</div>
+          <div className="text-[10px] font-mono tracking-[0.15em] uppercase text-nd-accent mb-1">
+            Process Map
+          </div>
           <div className="text-xs font-mono text-nd-ink-muted">Auto-generated Mermaid notation</div>
         </div>
-        <Button onClick={copyMermaid} variant="outline" size="sm" className="font-mono text-[10px] tracking-wider bg-nd-ink text-nd-bg hover:bg-nd-ink/90 hover:text-white rounded-none border-none">
+        <Button
+          onClick={copyMermaid}
+          variant="outline"
+          size="sm"
+          className="font-mono text-[10px] tracking-wider bg-nd-ink text-nd-bg hover:bg-nd-ink/90 hover:text-white border-none"
+        >
           <Copy className="w-3 h-3 mr-2" />
           COPY SOURCE
         </Button>
@@ -27,11 +37,16 @@ export function ProcessChartMermaidView({
       <div className="flex flex-col lg:flex-row gap-8">
         <div className="flex-1 bg-white border-2 border-nd-ink p-8 flex items-center justify-center min-h-[500px] overflow-auto shadow-stamp">
           {mermaidSvg ? (
-            <div className="w-full h-full flex items-center justify-center p-4 bg-white" dangerouslySetInnerHTML={{ __html: mermaidSvg }} />
+            <div
+              className="w-full h-full flex items-center justify-center p-4 bg-white"
+              dangerouslySetInnerHTML={{ __html: mermaidSvg }}
+            />
           ) : (
             <div className="text-center p-12">
               <div className="w-12 h-12 border-4 border-nd-border border-t-nd-accent rounded-full animate-spin mx-auto mb-4" />
-              <p className="font-mono text-xs text-nd-ink-muted uppercase tracking-widest">Generating Diagram...</p>
+              <p className="font-mono text-xs text-nd-ink-muted uppercase tracking-widest">
+                Generating Diagram...
+              </p>
             </div>
           )}
         </div>
@@ -45,25 +60,38 @@ export function ProcessChartMermaidView({
             <div className="space-y-4">
               <div className="flex gap-3">
                 <div className="w-4 h-4 bg-nd-ink shrink-0" />
-                <div className="text-[11px] leading-tight"><span className="font-bold">Rectangle:</span> Operation (action taken)</div>
+                <div className="text-[11px] leading-tight">
+                  <span className="font-bold">Rectangle:</span> Operation (action taken)
+                </div>
               </div>
               <div className="flex gap-3">
                 <div className="w-4 h-4 bg-[#EDEAE2] border-nd-border border shrink-0 rounded-full" />
-                <div className="text-[11px] leading-tight"><span className="font-bold">Pill:</span> Transport (movement)</div>
+                <div className="text-[11px] leading-tight">
+                  <span className="font-bold">Pill:</span> Transport (movement)
+                </div>
               </div>
               <div className="flex gap-3">
-                <div className="w-4 h-4 bg-[#FDFAED] border-[#D4A017] border shrink-0" style={{ clipPath: 'polygon(0% 0%, 100% 0%, 50% 100%)' }} />
-                <div className="text-[11px] leading-tight"><span className="font-bold">Triangle:</span> Storage (waiting)</div>
+                <div
+                  className="w-4 h-4 bg-[#FDFAED] border-[#D4A017] border shrink-0"
+                  style={{ clipPath: 'polygon(0% 0%, 100% 0%, 50% 100%)' }}
+                />
+                <div className="text-[11px] leading-tight">
+                  <span className="font-bold">Triangle:</span> Storage (waiting)
+                </div>
               </div>
               <div className="flex gap-3">
                 <div className="w-4 h-4 bg-[#EDF1FB] border-[#2B5EA7] border shrink-0" />
-                <div className="text-[11px] leading-tight"><span className="font-bold">Diamond:</span> Inspection (check)</div>
+                <div className="text-[11px] leading-tight">
+                  <span className="font-bold">Diamond:</span> Inspection (check)
+                </div>
               </div>
             </div>
-            
+
             {stepsCount > 0 && (
               <div className="mt-8 pt-6 border-t border-nd-border">
-                <div className="text-[10px] font-mono uppercase tracking-[0.1em] text-nd-ink mb-2">Mermaid Code</div>
+                <div className="text-[10px] font-mono uppercase tracking-[0.1em] text-nd-ink mb-2">
+                  Mermaid Code
+                </div>
                 <pre className="text-[9px] font-mono bg-nd-bg p-3 border border-nd-border overflow-x-auto max-h-48 text-nd-ink-muted">
                   {mermaidSrc}
                 </pre>

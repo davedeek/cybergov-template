@@ -46,7 +46,7 @@ export function ShareDialog({
                 <Button
                   onClick={handleCopy}
                   variant="outline"
-                  className="rounded-none border-2 border-nd-ink shrink-0 px-4"
+                  className="border-2 border-nd-ink shrink-0 px-4"
                 >
                   <Copy className="w-4 h-4" />
                 </Button>
@@ -60,7 +60,7 @@ export function ShareDialog({
                   onClick={onRegenerate}
                   disabled={isRegenerating}
                   variant="outline"
-                  className="rounded-none border border-nd-border text-xs font-mono hover:border-nd-accent hover:text-nd-accent"
+                  className="border border-nd-border text-xs font-mono hover:border-nd-accent hover:text-nd-accent"
                 >
                   <RefreshCw className={`w-3 h-3 mr-2 ${isRegenerating ? 'animate-spin' : ''}`} />
                   {isRegenerating ? 'Regenerating...' : 'Regenerate Link'}

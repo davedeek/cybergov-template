@@ -58,7 +58,7 @@ export function CreateWorkCountForm({ onSubmit, isPending, onCancel }: CreateWor
             <Input
               id={field.name}
               placeholder="e.g., March 2026 Weekly Count"
-              className="rounded-none border-nd-border font-serif"
+              className="border-nd-border font-serif"
               value={field.state.value}
               onBlur={field.handleBlur}
               onChange={(e) => field.handleChange(e.target.value)}
@@ -116,7 +116,7 @@ export function CreateWorkCountForm({ onSubmit, isPending, onCancel }: CreateWor
           type="button"
           onClick={onCancel}
           variant="outline"
-          className="rounded-none border-nd-border font-serif"
+          className="border-nd-border font-serif"
         >
           Cancel
         </Button>

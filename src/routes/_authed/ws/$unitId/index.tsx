@@ -483,7 +483,7 @@ function UnitDashboardPage() {
                   <Button
                     onClick={() => handleChangeStatus(change.id, 'accepted')}
                     size="sm"
-                    className="rounded-none bg-nd-ink hover:bg-nd-accent text-nd-bg h-8 px-3"
+                    className="bg-nd-ink hover:bg-nd-accent text-nd-bg h-8 px-3"
                   >
                     <Check className="w-3 h-3 mr-1" /> Accept
                   </Button>
@@ -491,7 +491,7 @@ function UnitDashboardPage() {
                     onClick={() => handleChangeStatus(change.id, 'dismissed')}
                     size="sm"
                     variant="outline"
-                    className="rounded-none border-nd-border h-8 px-3 text-nd-ink-muted hover:text-nd-ink"
+                    className="border-nd-border h-8 px-3 text-nd-ink-muted hover:text-nd-ink"
                   >
                     <X className="w-3 h-3 mr-1" /> Dismiss
                   </Button>

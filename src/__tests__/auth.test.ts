@@ -15,7 +15,8 @@ describe('Auth Guards', () => {
     const caller = createTestCaller(user)
 
     const session = await caller.me.session()
-    expect(session.user).toBeDefined()
-    expect(session.user?.id).toBe('test-user')
+    expect(session).not.toBeNull()
+    expect(session!.user).toBeDefined()
+    expect(session!.user?.id).toBe('test-user')
   })
 })

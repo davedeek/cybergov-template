@@ -87,7 +87,7 @@ export default function AppShell({ children }: AppShellProps) {
 
   const switchOrg = (orgId: number) => {
     setOrgDropdownOpen(false)
-    navigate({ search: { orgId } } as Parameters<typeof navigate>[0])
+    navigate({ search: { orgId } } as unknown as Parameters<typeof navigate>[0])
   }
 
   // Helper to determine if a route is active (including nested WS routes)

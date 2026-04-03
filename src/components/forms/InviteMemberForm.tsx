@@ -47,15 +47,15 @@ export function InviteMemberForm({ onSubmit, isPending: externalPending }: Invit
 
   return (
     <div className="space-y-6">
-      <form 
-        onSubmit={handleFormSubmit} 
-        className="flex flex-col md:flex-row gap-4 items-end"
-      >
+      <form onSubmit={handleFormSubmit} className="flex flex-col md:flex-row gap-4 items-end">
         <form.Field
           name="email"
           children={(field) => (
             <div className="flex-1 w-full space-y-2">
-              <Label htmlFor={field.name} className="text-[10px] font-mono uppercase tracking-[0.2em] text-nd-ink-muted">
+              <Label
+                htmlFor={field.name}
+                className="text-[10px] font-mono uppercase tracking-[0.2em] text-nd-ink-muted"
+              >
                 Member Transmission Endpoint (Email)
               </Label>
               <Input
@@ -78,16 +78,23 @@ export function InviteMemberForm({ onSubmit, isPending: externalPending }: Invit
               <Label className="text-[10px] font-mono uppercase tracking-[0.2em] text-nd-ink-muted">
                 Authorization Tier
               </Label>
-              <Select 
-                value={field.state.value} 
+              <Select
+                value={field.state.value}
                 onValueChange={(v) => field.handleChange(v as 'member' | 'admin')}
               >
                 <SelectTrigger className="h-12 w-full bg-nd-bg border-2 border-nd-border text-nd-ink font-mono text-xs focus:ring-nd-ink shadow-inner uppercase">
                   <SelectValue placeholder="Select Tier" />
                 </SelectTrigger>
-                <SelectContent className="rounded-none border-2 border-nd-ink bg-nd-surface">
-                  <SelectItem value="member" className="font-mono text-xs uppercase tracking-widest">Member</SelectItem>
-                  <SelectItem value="admin" className="font-mono text-xs uppercase tracking-widest">Administrator</SelectItem>
+                <SelectContent className="border-2 border-nd-ink bg-nd-surface">
+                  <SelectItem
+                    value="member"
+                    className="font-mono text-xs uppercase tracking-widest"
+                  >
+                    Member
+                  </SelectItem>
+                  <SelectItem value="admin" className="font-mono text-xs uppercase tracking-widest">
+                    Administrator
+                  </SelectItem>
                 </SelectContent>
               </Select>
               <FormError errors={field.state.meta.errors} />
@@ -97,8 +104,8 @@ export function InviteMemberForm({ onSubmit, isPending: externalPending }: Invit
         <form.Subscribe
           selector={(state) => [state.canSubmit, state.isSubmitting]}
           children={([canSubmit, isSubmitting]) => (
-            <Button 
-              type="submit" 
+            <Button
+              type="submit"
               disabled={!canSubmit || isSubmitting || externalPending}
               className="px-8 h-12 bg-nd-ink hover:bg-nd-accent text-nd-bg font-serif font-bold tracking-widest uppercase transition-all border-2 border-nd-ink flex items-center gap-3 shadow-stamp-accent"
             >

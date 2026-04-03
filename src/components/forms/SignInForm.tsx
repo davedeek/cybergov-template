@@ -9,7 +9,9 @@ import { FormError } from '@/components/ui/form-error'
 import { emailField } from '@/lib/validators'
 
 interface SignInFormProps {
-  onSubmit: (values: z.infer<typeof signinSchema>) => Promise<{ error?: { message: string } } | void>
+  onSubmit: (
+    values: z.infer<typeof signinSchema>,
+  ) => Promise<{ error?: { message: string } } | void>
   isPending?: boolean
 }
 
@@ -45,15 +47,10 @@ export function SignInForm({ onSubmit, isPending: externalPending }: SignInFormP
   }
 
   return (
-    <form
-      onSubmit={handleFormSubmit}
-      className="space-y-6"
-    >
+    <form onSubmit={handleFormSubmit} className="space-y-6">
       {error && (
-        <Alert variant="destructive" className="rounded-none border-2 border-nd-flag-red bg-nd-flag-red/5">
-          <AlertDescription className="font-serif">
-            {error}
-          </AlertDescription>
+        <Alert variant="destructive" className="border-2 border-nd-flag-red bg-nd-flag-red/5">
+          <AlertDescription className="font-serif">{error}</AlertDescription>
         </Alert>
       )}
 
@@ -62,7 +59,10 @@ export function SignInForm({ onSubmit, isPending: externalPending }: SignInFormP
           name="email"
           children={(field) => (
             <div className="space-y-2">
-              <Label htmlFor={field.name} className="text-xs font-mono uppercase tracking-wider text-nd-ink-muted">
+              <Label
+                htmlFor={field.name}
+                className="text-xs font-mono uppercase tracking-wider text-nd-ink-muted"
+              >
                 Email
               </Label>
               <Input
@@ -83,7 +83,10 @@ export function SignInForm({ onSubmit, isPending: externalPending }: SignInFormP
           name="password"
           children={(field) => (
             <div className="space-y-2">
-              <Label htmlFor={field.name} className="text-xs font-mono uppercase tracking-wider text-nd-ink-muted">
+              <Label
+                htmlFor={field.name}
+                className="text-xs font-mono uppercase tracking-wider text-nd-ink-muted"
+              >
                 Password
               </Label>
               <Input
@@ -104,8 +107,8 @@ export function SignInForm({ onSubmit, isPending: externalPending }: SignInFormP
       <form.Subscribe
         selector={(state) => [state.canSubmit, state.isSubmitting]}
         children={([canSubmit, isSubmitting]) => (
-          <Button 
-            type="submit" 
+          <Button
+            type="submit"
             className="w-full h-12 bg-nd-ink hover:bg-nd-accent text-nd-bg font-serif font-bold tracking-[0.1em] uppercase transition-all border-2 border-nd-ink shadow-stamp-accent"
             disabled={!canSubmit || isSubmitting || externalPending}
           >

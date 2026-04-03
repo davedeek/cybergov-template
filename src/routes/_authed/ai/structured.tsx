@@ -60,28 +60,38 @@ function RecipeCard({ recipe }: { recipe: Recipe }) {
       {/* Meta info */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <div className="flex flex-col gap-1 p-3 bg-nd-surface border border-nd-border shadow-sm">
-          <span className="text-[10px] font-mono uppercase tracking-widest text-nd-ink-muted">Prep Time</span>
+          <span className="text-[10px] font-mono uppercase tracking-widest text-nd-ink-muted">
+            Prep Time
+          </span>
           <div className="flex items-center gap-2 text-nd-ink">
             <Clock className="w-4 h-4 text-nd-accent" />
             <span className="font-mono text-sm">{recipe.prepTime}</span>
           </div>
         </div>
         <div className="flex flex-col gap-1 p-3 bg-nd-surface border border-nd-border shadow-sm">
-          <span className="text-[10px] font-mono uppercase tracking-widest text-nd-ink-muted">Cook Time</span>
+          <span className="text-[10px] font-mono uppercase tracking-widest text-nd-ink-muted">
+            Cook Time
+          </span>
           <div className="flex items-center gap-2 text-nd-ink">
             <Clock className="w-4 h-4 text-nd-accent" />
             <span className="font-mono text-sm">{recipe.cookTime}</span>
           </div>
         </div>
         <div className="flex flex-col gap-1 p-3 bg-nd-surface border border-nd-border shadow-sm">
-          <span className="text-[10px] font-mono uppercase tracking-widest text-nd-ink-muted">Servings</span>
+          <span className="text-[10px] font-mono uppercase tracking-widest text-nd-ink-muted">
+            Servings
+          </span>
           <div className="flex items-center gap-2 text-nd-ink">
             <Users className="w-4 h-4 text-nd-accent" />
             <span className="font-mono text-sm">{recipe.servings} people</span>
           </div>
         </div>
-        <div className={`flex flex-col gap-1 p-3 border shadow-sm ${difficultyStyles[recipe.difficulty]}`}>
-          <span className="text-[10px] font-mono uppercase tracking-widest opacity-70">Difficulty</span>
+        <div
+          className={`flex flex-col gap-1 p-3 border shadow-sm ${difficultyStyles[recipe.difficulty]}`}
+        >
+          <span className="text-[10px] font-mono uppercase tracking-widest opacity-70">
+            Difficulty
+          </span>
           <div className="flex items-center gap-2">
             <Gauge className="w-4 h-4" />
             <span className="font-mono text-sm font-bold uppercase">{recipe.difficulty}</span>
@@ -97,7 +107,10 @@ function RecipeCard({ recipe }: { recipe: Recipe }) {
         </h4>
         <ul className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-3">
           {recipe.ingredients.map((ing, idx) => (
-            <li key={idx} className="flex items-start gap-3 text-nd-ink border-b border-nd-border border-dashed pb-2">
+            <li
+              key={idx}
+              className="flex items-start gap-3 text-nd-ink border-b border-nd-border border-dashed pb-2"
+            >
               <span className="font-mono text-sm font-bold text-nd-accent">{ing.amount}</span>
               <span className="text-sm">
                 {ing.item}
@@ -112,7 +125,9 @@ function RecipeCard({ recipe }: { recipe: Recipe }) {
 
       {/* Instructions */}
       <div>
-        <h4 className="text-lg font-bold font-serif text-nd-ink uppercase tracking-tight mb-6 border-b border-nd-ink pb-2">Instructions</h4>
+        <h4 className="text-lg font-bold font-serif text-nd-ink uppercase tracking-tight mb-6 border-b border-nd-ink pb-2">
+          Instructions
+        </h4>
         <ol className="space-y-6">
           {recipe.instructions.map((step, idx) => (
             <li key={idx} className="flex gap-4 text-nd-ink group">
@@ -186,7 +201,7 @@ function StructuredPage() {
     provider: string
     model: string
   } | null>(null)
-  
+
   const { handleMutation, isPending: isLoading, error: mutationError } = useMutationHandler()
 
   const handleGenerate = async (mode: Mode) => {
@@ -211,7 +226,7 @@ function StructuredPage() {
         setResult(data)
         return data
       },
-      { label: `AI Structured Synthesis (${mode})`, successToast: 'Recipe generated' }
+      { label: `AI Structured Synthesis (${mode})`, successToast: 'Recipe generated' },
     )
   }
 
@@ -229,14 +244,17 @@ function StructuredPage() {
 
         <p className="text-nd-ink-muted mb-8 max-w-2xl text-sm leading-relaxed">
           Evaluate different generation methodologies.
-          <strong className="text-nd-ink"> One-Shot</strong> produces freeform
-          markdown documentation, whereas <strong className="text-nd-ink">Structured</strong> mandates
+          <strong className="text-nd-ink"> One-Shot</strong> produces freeform markdown
+          documentation, whereas <strong className="text-nd-ink">Structured</strong> mandates
           validated JSON parameters via a strict schema definition.
         </p>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
           <div className="space-y-4">
-            <Label htmlFor="recipe-name" className="text-xs font-mono uppercase tracking-widest text-nd-ink-muted">
+            <Label
+              htmlFor="recipe-name"
+              className="text-xs font-mono uppercase tracking-widest text-nd-ink-muted"
+            >
               Inquiry / Subject
             </Label>
             <Input
@@ -309,7 +327,10 @@ function StructuredPage() {
           </div>
 
           {mutationError && (
-            <Alert variant="destructive" className="rounded-none border-2 border-nd-flag-red bg-nd-flag-red/5 mb-8">
+            <Alert
+              variant="destructive"
+              className="border-2 border-nd-flag-red bg-nd-flag-red/5 mb-8"
+            >
               <AlertCircle className="w-4 h-4 mr-2" />
               <AlertDescription className="font-mono text-sm uppercase">
                 <strong>Transmission Error:</strong> {mutationError}
@@ -345,7 +366,9 @@ function StructuredPage() {
             <div className="flex flex-col items-center justify-center h-80 text-nd-ink-muted border-2 border-dashed border-nd-border bg-nd-surface-alt">
               <ChefHat className="w-16 h-16 mb-6 opacity-20" />
               <p className="font-mono text-xs uppercase tracking-[0.2em] text-center px-8">
-                Standing by for input.<br/>Awaiting generation execution.
+                Standing by for input.
+                <br />
+                Awaiting generation execution.
               </p>
             </div>
           ) : null}

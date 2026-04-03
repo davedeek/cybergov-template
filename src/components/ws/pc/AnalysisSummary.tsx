@@ -37,7 +37,7 @@ export function AnalysisSummary({ steps, annotations }: AnalysisSummaryProps) {
   )
 
   return (
-    <Card className="rounded-none border-2 border-nd-ink bg-nd-surface shadow-none">
+    <Card className="border-2 border-nd-ink bg-nd-surface shadow-none">
       <CardContent className="p-5">
         <h3 className="text-[10px] font-mono tracking-widest uppercase mb-4 text-nd-ink flex items-center">
           <ClipboardCheck className="w-3 h-3 mr-2 text-nd-accent" />

@@ -9,7 +9,7 @@ import {
   useWDCTasksCollection,
 } from '@/db-collections'
 import { useMutationHandler } from '@/hooks/use-mutation-handler'
-import { useWdcFlags } from '@/hooks/useWdcFlags'
+import { useWdcFlags } from '@/components/ws/wdc/useWdcFlags'
 import type { WdcChart, WdcEmployee, WdcActivity, WdcTask } from '@/types/entities'
 import { ArrowLeft, AlertCircle, FileText, BookOpen, UserPlus, Plus, Share2 } from 'lucide-react'
 
@@ -18,10 +18,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { AddEmployeeForm } from '@/components/forms/AddEmployeeForm'
 import { AddActivityForm } from '@/components/forms/AddActivityForm'
 import { AddTaskForm } from '@/components/forms/AddTaskForm'
-import { WdcDataTable } from '@/components/ws/WdcDataTable'
-import { WdcFlags } from '@/components/ws/WdcFlags'
-import { WdcLegend } from '@/components/ws/WdcLegend'
-import { ShareDialog } from '@/components/ws/ShareDialog'
+import { WdcDataTable } from '@/components/ws/wdc/WdcDataTable'
+import { FlagList } from '@/components/ws/shared/FlagList'
+import { WdcLegend } from '@/components/ws/wdc/WdcLegend'
+import { ShareDialog } from '@/components/ws/shared/ShareDialog'
 
 export const Route = createFileRoute('/_authed/ws/$unitId/wdc/$wdcId')({
   component: WdcPage,
@@ -358,7 +358,11 @@ function WdcPage() {
 
             {/* 2. FLAGS VIEW (extracted component) */}
             <TabsContent value="flags" className="animate-fade-in-tab m-0 border-none outline-none">
-              <WdcFlags flags={flags} onNavigateToReference={() => setActiveTab('legend')} />
+              <FlagList
+                flags={flags}
+                emptyMessage="No active flags. Add data to the chart or adjust capacities to see pattern analysis."
+                action={{ label: 'Reference', onClick: () => setActiveTab('legend') }}
+              />
             </TabsContent>
 
             {/* 3. SIX QUESTIONS VIEW (extracted component) */}

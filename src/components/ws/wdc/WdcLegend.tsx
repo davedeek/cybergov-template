@@ -1,4 +1,4 @@
-import { SIX_QUESTIONS } from './six-questions'
+import { SIX_QUESTIONS } from '../shared/six-questions'
 
 export function WdcLegend() {
   return (

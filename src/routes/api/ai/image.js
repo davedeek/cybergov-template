@@ -1,6 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router';
 import { z } from 'zod';
 import { generateImage, createImageOptions } from '@tanstack/ai';
+import { parseBody, requireKey, errorResponse } from './_shared';
 
 const imageBodySchema = z.object({
     prompt: z.string().min(1, 'Prompt is required').max(1000),
@@ -12,23 +13,13 @@ export const Route = createFileRoute('/api/ai/image')({
     server: {
         handlers: {
             POST: async ({ request }) => {
-                const rawBody = await request.json();
-                const parseResult = imageBodySchema.safeParse(rawBody);
-                if (!parseResult.success) {
-                    return new Response(JSON.stringify({ error: 'Invalid request body', details: parseResult.error.flatten() }), {
-                        status: 400,
-                        headers: { 'Content-Type': 'application/json' },
-                    });
-                }
-                const { prompt, numberOfImages, size } = parseResult.data;
-                if (!process.env.OPENAI_API_KEY) {
-                    return new Response(JSON.stringify({
-                        error: 'OPENAI_API_KEY is not configured',
-                    }), {
-                        status: 500,
-                        headers: { 'Content-Type': 'application/json' },
-                    });
-                }
+                const parsed = await parseBody(request, imageBodySchema);
+                if (parsed.error) return parsed.error;
+                const { prompt, numberOfImages, size } = parsed.data;
+
+                const keyError = requireKey('OPENAI_API_KEY');
+                if (keyError) return keyError;
+
                 try {
                     const { openaiImage } = await import('@tanstack/ai-openai');
                     const options = createImageOptions({
@@ -49,12 +40,7 @@ export const Route = createFileRoute('/api/ai/image')({
                     });
                 }
                 catch (error) {
-                    return new Response(JSON.stringify({
-                        error: error.message || 'An error occurred',
-                    }), {
-                        status: 500,
-                        headers: { 'Content-Type': 'application/json' },
-                    });
+                    return errorResponse(error.message || 'An error occurred');
                 }
             },
         },

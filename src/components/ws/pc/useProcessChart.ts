@@ -6,7 +6,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useLiveQuery } from '@tanstack/react-db'
 import { useStepsCollection, useAnnotationsCollection } from '@/db-collections'
 import { useMutationHandler } from '@/hooks/use-mutation-handler'
-import { SymbolType, fmtMinutes } from '@/components/ws/SymbolMeta'
+import { SymbolType, fmtMinutes } from '@/components/ws/pc/SymbolMeta'
 import { stepFormSchema, STEP_FORM_DEFAULTS } from '@/lib/validators'
 import type { ProcessStep, StepAnnotation } from '@/types/entities'
 

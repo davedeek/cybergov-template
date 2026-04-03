@@ -1,7 +1,8 @@
 import { createFileRoute } from '@tanstack/react-router';
 import { chat } from '@tanstack/ai';
 import { z } from 'zod';
-// Schema for structured recipe output
+import { parseBody, errorResponse } from './_shared';
+
 const RecipeSchema = z.object({
     name: z.string().describe('The name of the recipe'),
     description: z.string().describe('A brief description of the dish'),
@@ -30,6 +31,7 @@ const RecipeSchema = z.object({
         .optional()
         .describe('Nutritional information per serving'),
 });
+
 const structuredBodySchema = z.object({
     recipeName: z.string().min(1, 'Recipe name is required').max(255),
     mode: z.enum(['structured', 'oneshot']).optional().default('structured'),
@@ -39,27 +41,16 @@ export const Route = createFileRoute('/api/ai/structured')({
     server: {
         handlers: {
             POST: async ({ request }) => {
-                const rawBody = await request.json();
-                const parseResult = structuredBodySchema.safeParse(rawBody);
-                if (!parseResult.success) {
-                    return new Response(JSON.stringify({ error: 'Invalid request body', details: parseResult.error.flatten() }), {
-                        status: 400,
-                        headers: { 'Content-Type': 'application/json' },
-                    });
-                }
-                const { recipeName, mode } = parseResult.data;
+                const parsed = await parseBody(request, structuredBodySchema);
+                if (parsed.error) return parsed.error;
+                const { recipeName, mode } = parsed.data;
+
                 if (!recipeName || recipeName.trim().length === 0) {
-                    return new Response(JSON.stringify({
-                        error: 'Recipe name is required',
-                    }), {
-                        status: 400,
-                        headers: { 'Content-Type': 'application/json' },
-                    });
+                    return errorResponse('Recipe name is required', 400);
                 }
                 try {
                     const { openaiText } = await import('@tanstack/ai-openai');
                     if (mode === 'structured') {
-                        // Structured output mode - returns validated object
                         const result = await chat({
                             adapter: openaiText('gpt-4o'),
                             messages: [
@@ -81,7 +72,6 @@ export const Route = createFileRoute('/api/ai/structured')({
                         });
                     }
                     else {
-                        // One-shot markdown mode - returns text
                         const markdown = await chat({
                             adapter: openaiText('gpt-4o'),
                             stream: false,
@@ -115,12 +105,7 @@ Make it detailed and easy to follow.`,
                     }
                 }
                 catch (error) {
-                    return new Response(JSON.stringify({
-                        error: error.message || 'An error occurred',
-                    }), {
-                        status: 500,
-                        headers: { 'Content-Type': 'application/json' },
-                    });
+                    return errorResponse(error.message || 'An error occurred');
                 }
             },
         },

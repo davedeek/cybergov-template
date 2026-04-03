@@ -1,14 +1,6 @@
 import { useMemo } from 'react'
 import type { ProcessStep } from '@/types/entities'
-import type { FlagSeverity } from '@/components/ws/table-styles'
-
-export interface ProcessFlag {
-  type: string
-  severity: FlagSeverity
-  message: string
-  guide: string
-  targetQuestion?: 'what' | 'why' | 'where' | 'when' | 'who' | 'how'
-}
+import type { Flag } from '@/types/flag'
 
 interface UseProcessFlagsParams {
   steps: ProcessStep[]
@@ -20,10 +12,10 @@ export function useProcessFlags({
   steps,
   storageWarnMinutes,
   distanceWarnFeet,
-}: UseProcessFlagsParams): ProcessFlag[] {
+}: UseProcessFlagsParams): Flag[] {
   return useMemo(() => {
     if (steps.length === 0) return []
-    const flags: ProcessFlag[] = []
+    const flags: Flag[] = []
 
     // Excessive wait — storage steps over threshold
     steps.forEach((s, idx) => {

@@ -1,13 +1,6 @@
 import { useMemo } from 'react'
 import type { WdcChart, WdcEmployee, WdcActivity, WdcTask } from '@/types/entities'
-import type { FlagSeverity } from '@/components/ws/table-styles'
-
-export interface WdcFlag {
-  type: string
-  severity: FlagSeverity
-  message: string
-  guide: string
-}
+import type { Flag } from '@/types/flag'
 
 interface UseWdcFlagsParams {
   chart: WdcChart | undefined
@@ -18,10 +11,10 @@ interface UseWdcFlagsParams {
   actTotals: Record<number, number>
 }
 
-export function useWdcFlags({ chart, employees, activities, tasks, empTotals, actTotals }: UseWdcFlagsParams): WdcFlag[] {
+export function useWdcFlags({ chart, employees, activities, tasks, empTotals, actTotals }: UseWdcFlagsParams): Flag[] {
   return useMemo(() => {
     if (!chart || (!employees.length && !activities.length)) return []
-    const result: WdcFlag[] = []
+    const result: Flag[] = []
 
     // 1. Overloaded
     employees.forEach(e => {

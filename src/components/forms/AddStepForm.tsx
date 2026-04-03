@@ -9,7 +9,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { SymbolIcon, SYMBOL_META, SymbolType } from '../ws/SymbolMeta'
+import { SymbolIcon, SYMBOL_META, SymbolType } from '../ws/pc/SymbolMeta'
 import { FormError } from '@/components/ui/form-error'
 
 interface AddStepFormProps {

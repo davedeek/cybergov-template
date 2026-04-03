@@ -5,7 +5,7 @@ import {
   PROPOSED_ACTIONS,
   ACTION_COLORS,
   type ProposedAction,
-} from './six-questions'
+} from '../shared/six-questions'
 import type { ProcessStep, StepAnnotation } from '@/types/entities'
 
 interface AnalysisSummaryProps {

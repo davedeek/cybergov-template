@@ -1,7 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router';
 import { chat } from '@tanstack/ai';
 import { z } from 'zod';
-import { parseBody, errorResponse } from './_shared';
+import { parseBody, errorResponse } from './-_shared';
 
 const RecipeSchema = z.object({
     name: z.string().describe('The name of the recipe'),

@@ -1,7 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router';
 import { z } from 'zod';
 import { chat, maxIterations, toServerSentEventsResponse } from '@tanstack/ai';
-import { parseBody, resolveProvider, getTextAdapter, errorResponse } from './_shared';
+import { parseBody, resolveProvider, getTextAdapter, errorResponse } from './-_shared';
 
 const chatBodySchema = z.object({
   messages: z.array(z.object({

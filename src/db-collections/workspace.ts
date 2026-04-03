@@ -162,7 +162,7 @@ export function useAllWorkCountsCollection(orgId?: number) {
   const queryClient = useQueryClient()
   return useMemo(() => {
     const qo = trpc.ws.workCount.listAll.queryOptions({ organizationId: orgId ?? -1 })
-    return buildCollection<WorkCount>(`wc-all-${orgId}`, {
+    return buildCollection<WorkCount & { unitName: string }>(`wc-all-${orgId}`, {
       queryClient,
       queryKey: qo.queryKey,
       queryFn: qo.queryFn,

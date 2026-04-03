@@ -1,7 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router';
 import { z } from 'zod';
 import { generateSpeech } from '@tanstack/ai';
-import { parseBody, requireKey, errorResponse } from './_shared';
+import { parseBody, requireKey, errorResponse } from './-_shared';
 
 const ttsBodySchema = z.object({
     text: z.string().min(1, 'Text is required').max(4096),

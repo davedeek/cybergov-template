@@ -1,7 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router';
 import { generateTranscription } from '@tanstack/ai';
 import { openaiTranscription } from '@tanstack/ai-openai';
-import { requireKey, errorResponse } from './_shared';
+import { requireKey, errorResponse } from './-_shared';
 
 export const Route = createFileRoute('/api/ai/transcription')({
     server: {

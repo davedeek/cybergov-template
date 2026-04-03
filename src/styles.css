@@ -76,6 +76,23 @@ code {
   --color-nd-border: #C8C3B4;
   --color-nd-surface-alt: #EDEAE2;
   --color-nd-surface-dark: #2A2A28;
+  --color-nd-surface-warm: #FAF9F5;
+  --color-nd-status-warn: #9A7000;
+  --color-nd-status-warn-bg: #FDFAED;
+
+  /* ─── Shadow tokens ─── */
+  --shadow-stamp: 4px 4px 0px var(--color-nd-ink);
+  --shadow-stamp-hover: 6px 6px 0px var(--color-nd-ink);
+  --shadow-stamp-pressed: 1px 1px 0px var(--color-nd-ink);
+  --shadow-stamp-accent: 2px 2px 0px var(--color-nd-accent);
+  --shadow-stamp-sm: 2px 2px 0px var(--color-nd-ink);
+
+  /* ─── Animation tokens ─── */
+  --animate-stamp-lift: stamp-lift 200ms ease-out forwards;
+  --animate-stamp-press: stamp-press 100ms ease-out forwards;
+  --animate-fade-up: fade-up 200ms ease-out;
+  --animate-scale-in: scale-in 150ms ease-out;
+  --animate-shimmer: shimmer 1.5s ease-in-out infinite;
 }
 
 :root, .dark {
@@ -171,18 +188,62 @@ code {
 
 /* Stamp-press button effect for New Deal aesthetic */
 .btn-stamp {
-  transition: all 150ms ease;
-  shadow: 4px 4px 0px #1A1A18;
+  transition: transform 150ms ease, box-shadow 150ms ease;
+  box-shadow: var(--shadow-stamp);
 }
 
 .btn-stamp:hover {
   transform: translateY(-2px);
-  box-shadow: 6px 6px 0px #1A1A18;
+  box-shadow: var(--shadow-stamp-hover);
 }
 
 .btn-stamp:active {
   transform: translateY(2px);
-  box-shadow: 1px 1px 0px #1A1A18;
+  box-shadow: var(--shadow-stamp-pressed);
+}
+
+/* ─── Additional keyframes ─── */
+
+@keyframes stamp-lift {
+  from { transform: translateY(0); }
+  to { transform: translateY(-4px); }
+}
+
+@keyframes stamp-press {
+  from { transform: translateY(0); }
+  to { transform: translateY(2px); }
+}
+
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes shimmer {
+  from { background-position: -200% 0; }
+  to { background-position: 200% 0; }
+}
+
+/* Focus ring transition */
+*:focus-visible {
+  transition: box-shadow 100ms ease-out, border-color 100ms ease-out;
 }
 
 @media print {

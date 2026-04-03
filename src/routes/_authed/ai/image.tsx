@@ -30,7 +30,7 @@ function ImagePage() {
   const [size, setSize] = useState('1024x1024')
   const [numberOfImages, setNumberOfImages] = useState(1)
   const [images, setImages] = useState<Array<GeneratedImage>>([])
-  
+
   const { handleMutation, isPending: isLoading, error: mutationError } = useMutationHandler()
 
   const handleGenerate = async () => {
@@ -53,7 +53,7 @@ function ImagePage() {
         setImages(data.images)
         return data
       },
-      { label: 'AI Image Synthesis', successToast: 'Image generated' }
+      { label: 'AI Image Synthesis', successToast: 'Image generated' },
     )
   }
 
@@ -80,7 +80,7 @@ function ImagePage() {
         document.body.removeChild(a)
         URL.revokeObjectURL(url)
       },
-      { label: 'Artifact Download', successToast: 'Image downloaded' }
+      { label: 'Artifact Download', successToast: 'Image downloaded' },
     )
   }
 
@@ -89,12 +89,14 @@ function ImagePage() {
       <div className="max-w-6xl mx-auto">
         <div className="mb-8 border-b-2 border-nd-ink pb-6 flex items-center gap-3">
           <ImageIcon className="w-8 h-8 text-nd-accent" />
-          <h1 className="text-3xl font-bold font-serif text-nd-ink uppercase tracking-tight">Image Generation</h1>
+          <h1 className="text-3xl font-bold font-serif text-nd-ink uppercase tracking-tight">
+            Image Generation
+          </h1>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Input Panel */}
-          <Card className="bg-nd-surface border-2 border-nd-ink rounded-none shadow-[4px_4px_0px_#1A1A18] h-fit">
+          <Card className="bg-nd-surface border-2 border-nd-ink shadow-stamp h-fit">
             <CardHeader className="bg-nd-surface-alt border-b-2 border-nd-ink py-4">
               <CardTitle className="text-xs font-mono font-bold uppercase tracking-widest text-nd-ink">
                 Configuration
@@ -106,15 +108,11 @@ function ImagePage() {
                   <Label className="text-[10px] font-mono uppercase tracking-[0.2em] text-nd-ink-muted">
                     Size
                   </Label>
-                  <Select
-                    value={size}
-                    onValueChange={setSize}
-                    disabled={isLoading}
-                  >
-                    <SelectTrigger className="w-full h-10 rounded-none border border-nd-border bg-nd-bg px-3 text-nd-ink focus:ring-nd-accent font-sans text-xs">
+                  <Select value={size} onValueChange={setSize} disabled={isLoading}>
+                    <SelectTrigger className="w-full h-10 border border-nd-border bg-nd-bg px-3 text-nd-ink focus:ring-nd-accent font-sans text-xs">
                       <SelectValue placeholder="Size" />
                     </SelectTrigger>
-                    <SelectContent className="rounded-none border-2 border-nd-ink">
+                    <SelectContent className="border-2 border-nd-ink">
                       {SIZES.map((s) => (
                         <SelectItem key={s} value={s} className="text-xs font-mono">
                           {s}
@@ -124,7 +122,10 @@ function ImagePage() {
                   </Select>
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="image-count" className="text-[10px] font-mono uppercase tracking-[0.2em] text-nd-ink-muted">
+                  <Label
+                    htmlFor="image-count"
+                    className="text-[10px] font-mono uppercase tracking-[0.2em] text-nd-ink-muted"
+                  >
                     Count
                   </Label>
                   <Input
@@ -132,20 +133,21 @@ function ImagePage() {
                     type="number"
                     value={numberOfImages}
                     onChange={(e) =>
-                      setNumberOfImages(
-                        Math.max(1, Math.min(4, parseInt(e.target.value) || 1)),
-                      )
+                      setNumberOfImages(Math.max(1, Math.min(4, parseInt(e.target.value) || 1)))
                     }
                     min={1}
                     max={4}
                     disabled={isLoading}
-                    className="w-full h-10 rounded-none border border-nd-border bg-nd-bg px-3 text-nd-ink focus-visible:ring-nd-accent font-mono text-xs shadow-inner"
+                    className="w-full h-10 border border-nd-border bg-nd-bg px-3 text-nd-ink focus-visible:ring-nd-accent font-mono text-xs shadow-inner"
                   />
                 </div>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="prompt" className="text-[10px] font-mono uppercase tracking-[0.2em] text-nd-ink-muted">
+                <Label
+                  htmlFor="prompt"
+                  className="text-[10px] font-mono uppercase tracking-[0.2em] text-nd-ink-muted"
+                >
                   Prompt
                 </Label>
                 <textarea
@@ -154,7 +156,7 @@ function ImagePage() {
                   onChange={(e) => setPrompt(e.target.value)}
                   disabled={isLoading}
                   rows={6}
-                  className="w-full rounded-none border border-nd-border bg-nd-bg px-4 py-3 text-sm text-nd-ink focus:outline-none focus:border-nd-accent focus:ring-1 focus:ring-nd-accent resize-none font-serif shadow-inner"
+                  className="w-full border border-nd-border bg-nd-bg px-4 py-3 text-sm text-nd-ink focus:outline-none focus:border-nd-accent focus:ring-1 focus:ring-nd-accent resize-none font-serif shadow-inner"
                   placeholder="Describe the image you want to generate..."
                 />
               </div>
@@ -162,7 +164,7 @@ function ImagePage() {
               <Button
                 onClick={handleGenerate}
                 disabled={isLoading || !prompt.trim()}
-                className="w-full h-12 bg-nd-ink hover:bg-nd-accent text-nd-bg font-serif font-bold tracking-widest uppercase rounded-none transition-all border-2 border-nd-ink flex items-center justify-center gap-3 shadow-[3px_3px_0px_#C94A1E]"
+                className="w-full h-12 bg-nd-ink hover:bg-nd-accent text-nd-bg font-serif font-bold tracking-widest uppercase transition-all border-2 border-nd-ink flex items-center justify-center gap-3 shadow-stamp-accent"
               >
                 {isLoading ? (
                   <>
@@ -177,13 +179,16 @@ function ImagePage() {
           </Card>
 
           {/* Output Panel */}
-          <div className="lg:col-span-2 bg-nd-surface rounded-none border-2 border-nd-ink p-8 shadow-[4px_4px_0px_#1A1A18]">
+          <div className="lg:col-span-2 bg-nd-surface border-2 border-nd-ink p-8 shadow-stamp">
             <h2 className="text-[10px] font-mono uppercase tracking-[0.2em] text-nd-accent mb-6">
               Generated Artifacts
             </h2>
 
             {mutationError && (
-              <Alert variant="destructive" className="rounded-none border-2 border-nd-flag-red bg-nd-flag-red/5 mb-6">
+              <Alert
+                variant="destructive"
+                className="border-2 border-nd-flag-red bg-nd-flag-red/5 mb-6"
+              >
                 <AlertCircle className="w-4 h-4 mr-2" />
                 <AlertDescription className="font-mono text-sm">
                   <strong>Error:</strong> {mutationError}
@@ -200,13 +205,13 @@ function ImagePage() {
                         <img
                           src={getImageSrc(image)}
                           alt={`Generated image ${index + 1}`}
-                          className="w-full rounded-none mix-blend-multiply"
+                          className="w-full mix-blend-multiply"
                         />
                       </div>
                       <Button
                         onClick={() => handleDownload(image, index)}
                         size="icon"
-                        className="absolute top-4 right-4 bg-nd-ink hover:bg-nd-accent shadow-md rounded-none opacity-0 group-hover:opacity-100 transition-all text-nd-bg"
+                        className="absolute top-4 right-4 bg-nd-ink hover:bg-nd-accent shadow-md opacity-0 group-hover:opacity-100 transition-all text-nd-bg"
                         title="Download image"
                       >
                         <Download className="w-5 h-5" />
@@ -224,7 +229,9 @@ function ImagePage() {
               <div className="flex flex-col items-center justify-center h-64 text-nd-ink-muted border-2 border-dashed border-nd-border bg-nd-surface-alt m-4">
                 <ImageIcon className="w-12 h-12 mb-4 opacity-50" />
                 <p className="font-mono text-xs uppercase tracking-widest text-center px-4">
-                  Enter a prompt and click generate<br/>to create an artifact.
+                  Enter a prompt and click generate
+                  <br />
+                  to create an artifact.
                 </p>
               </div>
             ) : null}
@@ -234,7 +241,6 @@ function ImagePage() {
     </div>
   )
 }
-
 
 export const Route = createFileRoute('/_authed/ai/image')({
   component: ImagePage,

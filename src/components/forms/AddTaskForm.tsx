@@ -60,7 +60,7 @@ export function AddTaskForm({ onSubmit, isPending: externalPending, onCancel }: 
             <Input
               id={field.name}
               placeholder="e.g., Sort and distribute letters"
-              className="w-[240px] font-mono text-xs h-8 border-nd-border rounded-none focus-visible:ring-1 focus-visible:ring-nd-accent shadow-inner outline-none"
+              className="w-[240px] font-mono text-xs h-8 border-nd-border focus-visible:ring-1 focus-visible:ring-nd-accent shadow-inner outline-none"
               value={field.state.value}
               onBlur={field.handleBlur}
               onChange={(e) => field.handleChange(e.target.value)}
@@ -81,7 +81,7 @@ export function AddTaskForm({ onSubmit, isPending: externalPending, onCancel }: 
               id={field.name}
               type="number"
               placeholder="hrs/wk"
-              className="w-[80px] font-mono text-xs h-8 border-nd-border rounded-none text-right focus-visible:ring-1 focus-visible:ring-nd-accent shadow-inner outline-none"
+              className="w-[80px] font-mono text-xs h-8 border-nd-border text-right focus-visible:ring-1 focus-visible:ring-nd-accent shadow-inner outline-none"
               value={field.state.value}
               onBlur={field.handleBlur}
               onChange={(e) => field.handleChange(e.target.value)}
@@ -97,7 +97,7 @@ export function AddTaskForm({ onSubmit, isPending: externalPending, onCancel }: 
             type="submit"
             disabled={!canSubmit || isSubmitting || externalPending}
             size="sm"
-            className="h-8 rounded-none bg-nd-accent hover:bg-nd-accent-hover text-white font-serif tracking-wide px-4"
+            className="h-8 bg-nd-accent hover:bg-nd-accent-hover text-white font-serif tracking-wide px-4"
           >
             {isSubmitting || externalPending ? '...' : 'Add'}
           </Button>
@@ -111,7 +111,7 @@ export function AddTaskForm({ onSubmit, isPending: externalPending, onCancel }: 
         }}
         size="sm"
         variant="ghost"
-        className="h-8 rounded-none text-nd-ink-muted hover:text-nd-ink font-serif hover:bg-transparent px-2"
+        className="h-8 text-nd-ink-muted hover:text-nd-ink font-serif hover:bg-transparent px-2"
       >
         Done
       </Button>

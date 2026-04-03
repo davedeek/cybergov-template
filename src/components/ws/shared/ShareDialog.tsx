@@ -30,7 +30,7 @@ export function ShareDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[480px] border-2 border-nd-ink rounded-none bg-nd-surface p-0 overflow-hidden shadow-[8px_8px_0px_rgba(26,26,24,0.1)]">
+      <DialogContent className="sm:max-w-[480px] border-2 border-nd-ink bg-nd-surface p-0 overflow-hidden shadow-stamp">
         <div className="p-6">
           <h3 className="text-lg font-serif font-bold text-nd-ink mb-1">Share This Chart</h3>
           <p className="text-xs font-mono text-nd-ink-muted mb-6">
@@ -46,7 +46,7 @@ export function ShareDialog({
                 <Button
                   onClick={handleCopy}
                   variant="outline"
-                  className="rounded-none border-2 border-nd-ink shrink-0 px-4"
+                  className="border-2 border-nd-ink shrink-0 px-4"
                 >
                   <Copy className="w-4 h-4" />
                 </Button>
@@ -60,7 +60,7 @@ export function ShareDialog({
                   onClick={onRegenerate}
                   disabled={isRegenerating}
                   variant="outline"
-                  className="rounded-none border border-nd-border text-xs font-mono hover:border-nd-accent hover:text-nd-accent"
+                  className="border border-nd-border text-xs font-mono hover:border-nd-accent hover:text-nd-accent"
                 >
                   <RefreshCw className={`w-3 h-3 mr-2 ${isRegenerating ? 'animate-spin' : ''}`} />
                   {isRegenerating ? 'Regenerating...' : 'Regenerate Link'}

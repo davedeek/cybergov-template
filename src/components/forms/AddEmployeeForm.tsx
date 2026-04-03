@@ -56,7 +56,7 @@ export function AddEmployeeForm({
           <div className="flex flex-col gap-1">
             <Input
               placeholder="Name"
-              className="w-[120px] font-mono text-xs h-8 border-nd-border rounded-none focus-visible:ring-1 focus-visible:ring-nd-accent"
+              className="w-[120px] font-mono text-xs h-8 border-nd-border focus-visible:ring-1 focus-visible:ring-nd-accent"
               value={field.state.value}
               onBlur={field.handleBlur}
               onChange={(e) => field.handleChange(e.target.value)}
@@ -71,7 +71,7 @@ export function AddEmployeeForm({
         children={(field) => (
           <Input
             placeholder="Role"
-            className="w-[140px] font-mono text-xs h-8 border-nd-border rounded-none focus-visible:ring-1 focus-visible:ring-nd-accent"
+            className="w-[140px] font-mono text-xs h-8 border-nd-border focus-visible:ring-1 focus-visible:ring-nd-accent"
             value={field.state.value}
             onBlur={field.handleBlur}
             onChange={(e) => field.handleChange(e.target.value)}
@@ -84,7 +84,7 @@ export function AddEmployeeForm({
           <div className="flex flex-col gap-1">
             <Input
               placeholder="FTE (e.g. 1.0)"
-              className="w-[90px] font-mono text-xs h-8 border-nd-border rounded-none focus-visible:ring-1 focus-visible:ring-nd-accent"
+              className="w-[90px] font-mono text-xs h-8 border-nd-border focus-visible:ring-1 focus-visible:ring-nd-accent"
               value={field.state.value}
               onBlur={field.handleBlur}
               onChange={(e) => field.handleChange(e.target.value)}
@@ -101,7 +101,7 @@ export function AddEmployeeForm({
             type="submit"
             disabled={!canSubmit || isSubmitting || externalPending}
             size="sm"
-            className="h-8 rounded-none bg-nd-accent hover:bg-nd-accent-hover text-white font-serif tracking-wide px-4"
+            className="h-8 bg-nd-accent hover:bg-nd-accent-hover text-white font-serif tracking-wide px-4"
           >
             {isSubmitting || externalPending ? '...' : 'Add'}
           </Button>
@@ -115,7 +115,7 @@ export function AddEmployeeForm({
         }}
         size="sm"
         variant="ghost"
-        className="h-8 rounded-none text-nd-ink-muted hover:text-nd-ink font-serif hover:bg-transparent"
+        className="h-8 text-nd-ink-muted hover:text-nd-ink font-serif hover:bg-transparent"
       >
         Cancel
       </Button>

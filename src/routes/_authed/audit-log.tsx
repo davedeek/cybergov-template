@@ -1,8 +1,12 @@
 import { createFileRoute, useSearch } from '@tanstack/react-router'
-import { ClipboardList, AlertCircle } from 'lucide-react'
+import { ClipboardList } from 'lucide-react'
 import { useTRPC } from '@/integrations/trpc/react'
 import { useQuery } from '@tanstack/react-query'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { PageContainer } from '@/components/ui/page-container'
+import { PageHeader, PageHeaderTitle, PageHeaderDescription } from '@/components/ui/page-header'
+import { InlineError } from '@/components/ui/inline-error'
+import { Label } from '@/components/ui/label'
 
 export const Route = createFileRoute('/_authed/audit-log')({
   component: AuditLogPage,
@@ -30,37 +34,34 @@ function AuditLogPage() {
 
   if (!canView) {
     return (
-      <div className="p-6 lg:p-8 max-w-3xl mx-auto font-sans">
-        <div className="p-4 bg-nd-accent/10 border-2 border-nd-accent text-nd-accent font-mono text-xs uppercase tracking-widest flex items-center gap-3">
-          <AlertCircle className="w-4 h-4 flex-shrink-0" />
-          <span>Access Denied: Audit log requires owner or admin clearance</span>
-        </div>
-      </div>
+      <PageContainer size="sm">
+        <InlineError>Access Denied: Audit log requires owner or admin clearance</InlineError>
+      </PageContainer>
     )
   }
 
   return (
-    <div className="p-6 lg:p-8 max-w-5xl mx-auto font-sans">
-      <div className="mb-8 border-b-2 border-nd-ink pb-6">
-        <h1 className="text-3xl font-bold font-serif text-nd-ink uppercase tracking-tight flex items-center gap-3">
+    <PageContainer size="lg" className="max-w-5xl">
+      <PageHeader>
+        <PageHeaderTitle className="flex items-center gap-3">
           <ClipboardList className="w-6 h-6 text-nd-accent" />
           Audit Log
-        </h1>
-        <p className="text-nd-ink-muted mt-2">
+        </PageHeaderTitle>
+        <PageHeaderDescription>
           Activity record for your organization.
-        </p>
-      </div>
+        </PageHeaderDescription>
+      </PageHeader>
 
-      <Card className="bg-nd-surface border-2 border-nd-ink rounded-none shadow-[4px_4px_0px_#1A1A18] overflow-hidden">
-        <CardHeader className="bg-nd-surface-alt border-b-2 border-nd-ink py-4">
+      <Card variant="stamped" className="overflow-hidden hover:translate-y-0 hover:shadow-stamp">
+        <CardHeader variant="stamped">
           <CardTitle className="text-xs font-mono font-bold uppercase tracking-widest text-nd-ink">
             Activity Records ({logs?.length ?? 0})
           </CardTitle>
         </CardHeader>
         <CardContent className="p-0">
           {isLoading ? (
-            <div className="p-8 text-center font-mono text-xs text-nd-ink-muted uppercase tracking-widest">
-              Loading records...
+            <div className="p-8 text-center">
+              <Label variant="section">Loading records...</Label>
             </div>
           ) : logs?.length ? (
             <div className="overflow-x-auto">
@@ -77,7 +78,7 @@ function AuditLogPage() {
                 </thead>
                 <tbody>
                   {logs.map((log) => (
-                    <tr key={log.id} className="border-b border-nd-border hover:bg-nd-surface-alt transition-colors">
+                    <tr key={log.id} className="animate-slide-in-row border-b border-nd-border hover:bg-nd-surface-alt transition-colors">
                       <td className="p-3 text-nd-ink-muted whitespace-nowrap">
                         {log.createdAt ? new Date(log.createdAt).toISOString().replace('T', ' ').slice(0, 19) : '—'}
                       </td>
@@ -104,11 +105,11 @@ function AuditLogPage() {
             </div>
           ) : (
             <div className="text-center py-20 bg-nd-bg border-2 border-nd-border border-dashed m-4">
-              <p className="font-mono text-[10px] uppercase tracking-widest text-nd-ink-muted">No audit records found.</p>
+              <Label variant="section">No audit records found.</Label>
             </div>
           )}
         </CardContent>
       </Card>
-    </div>
+    </PageContainer>
   )
 }

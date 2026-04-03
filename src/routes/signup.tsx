@@ -34,7 +34,7 @@ function SignUpPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-nd-bg px-4 py-12">
-      <div className="w-full max-w-md bg-nd-surface border-2 border-nd-ink shadow-[4px_4px_0px_#1A1A18] p-6">
+      <div className="w-full max-w-md bg-nd-surface border-2 border-nd-ink shadow-stamp p-6">
         <div className="text-center mb-8">
           <div className="text-[10px] font-mono tracking-[0.2em] uppercase text-nd-accent mb-4">New Registration</div>
           <h1 className="text-3xl font-serif font-bold text-nd-ink">Create account</h1>

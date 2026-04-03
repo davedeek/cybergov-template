@@ -56,7 +56,7 @@ export function ProfileForm({ initialName, email, onSubmit, isPending: externalP
           type="email"
           value={email}
           disabled
-          className="h-12 bg-nd-bg border-2 border-nd-border rounded-none text-nd-ink-muted cursor-not-allowed font-mono text-sm opacity-60 shadow-inner"
+          className="h-12 bg-nd-bg border-2 border-nd-border text-nd-ink-muted cursor-not-allowed font-mono text-sm opacity-60 shadow-inner"
         />
       </div>
 
@@ -76,7 +76,7 @@ export function ProfileForm({ initialName, email, onSubmit, isPending: externalP
                 setSaved(false)
                 field.handleChange(e.target.value)
               }}
-              className="h-12 bg-nd-bg border-2 border-nd-border focus:border-nd-ink rounded-none text-nd-ink font-serif text-lg shadow-inner"
+              className="h-12 bg-nd-bg border-2 border-nd-border focus:border-nd-ink text-nd-ink font-serif text-lg shadow-inner"
             />
             <FormError errors={field.state.meta.errors} />
           </div>
@@ -90,7 +90,7 @@ export function ProfileForm({ initialName, email, onSubmit, isPending: externalP
             <Button
               type="submit"
               disabled={!canSubmit || isSubmitting || externalPending}
-              className="px-8 h-12 bg-nd-ink hover:bg-nd-accent text-nd-bg font-serif font-bold tracking-widest uppercase rounded-none transition-all border-2 border-nd-ink flex items-center gap-3 shadow-[3px_3px_0px_#C94A1E]"
+              className="px-8 h-12 bg-nd-ink hover:bg-nd-accent text-nd-bg font-serif font-bold tracking-widest uppercase transition-all border-2 border-nd-ink flex items-center gap-3 shadow-stamp-accent"
             >
               <Save className="w-4 h-4" />
               {isSubmitting || externalPending ? 'Processing...' : 'Save Artifacts'}

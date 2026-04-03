@@ -1,7 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router';
 import { z } from 'zod';
 import { generateImage, createImageOptions } from '@tanstack/ai';
-import { parseBody, requireKey, errorResponse } from './_shared';
+import { parseBody, requireKey, errorResponse } from './-_shared';
 
 const imageBodySchema = z.object({
     prompt: z.string().min(1, 'Prompt is required').max(1000),

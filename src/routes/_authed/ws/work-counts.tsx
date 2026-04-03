@@ -74,55 +74,46 @@ function AllWorkCountsPage() {
         </Card>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {wcList.map(
-            (wc: {
-              id: number
-              name: string
-              period: string
-              unitId: number
-              unitName: string
-              createdAt: string
-            }) => (
-              <Card
-                key={wc.id}
-                className="border-nd-border bg-nd-surface shadow-sm hover:border-nd-accent/50 transition-colors flex flex-col"
-              >
-                <CardHeader className="pb-4">
-                  <div className="flex justify-between items-start">
-                    <span className="text-[10px] font-mono uppercase tracking-widest text-nd-flag-blue bg-nd-flag-blue/10 px-2 py-0.5 rounded">
-                      {wc.unitName}
-                    </span>
-                    <span className="text-xs text-nd-ink-muted flex items-center gap-1">
-                      <Calendar className="w-3 h-3" />
-                      {new Date(wc.createdAt).toLocaleDateString()}
-                    </span>
-                  </div>
-                  <CardTitle className="text-xl font-heading text-nd-ink mt-2">{wc.name}</CardTitle>
-                </CardHeader>
-                <CardContent className="flex-1 pb-4">
-                  <span className="text-[10px] font-mono uppercase tracking-widest text-nd-ink-muted bg-nd-surface-alt px-2 py-1">
-                    {wc.period}
+          {wcList.map((wc) => (
+            <Card
+              key={wc.id}
+              className="border-nd-border bg-nd-surface shadow-sm hover:border-nd-accent/50 transition-colors flex flex-col"
+            >
+              <CardHeader className="pb-4">
+                <div className="flex justify-between items-start">
+                  <span className="text-[10px] font-mono uppercase tracking-widest text-nd-flag-blue bg-nd-flag-blue/10 px-2 py-0.5 rounded">
+                    {wc.unitName}
                   </span>
-                </CardContent>
-                <CardFooter className="pt-0">
-                  <Button
-                    asChild
-                    variant="outline"
-                    className="w-full justify-between hover:bg-nd-bg hover:text-nd-accent"
+                  <span className="text-xs text-nd-ink-muted flex items-center gap-1">
+                    <Calendar className="w-3 h-3" />
+                    {new Date(wc.createdAt).toLocaleDateString()}
+                  </span>
+                </div>
+                <CardTitle className="text-xl font-heading text-nd-ink mt-2">{wc.name}</CardTitle>
+              </CardHeader>
+              <CardContent className="flex-1 pb-4">
+                <span className="text-[10px] font-mono uppercase tracking-widest text-nd-ink-muted bg-nd-surface-alt px-2 py-1">
+                  {wc.period}
+                </span>
+              </CardContent>
+              <CardFooter className="pt-0">
+                <Button
+                  asChild
+                  variant="outline"
+                  className="w-full justify-between hover:bg-nd-bg hover:text-nd-accent"
+                >
+                  <Link
+                    to="/ws/$unitId/wc/$wcId"
+                    params={{ unitId: wc.unitId.toString(), wcId: wc.id.toString() }}
+                    search={orgId ? { orgId } : {}}
                   >
-                    <Link
-                      to="/ws/$unitId/wc/$wcId"
-                      params={{ unitId: wc.unitId.toString(), wcId: wc.id.toString() }}
-                      search={orgId ? { orgId } : {}}
-                    >
-                      Open Work Count
-                      <ArrowRight className="w-4 h-4 ml-2" />
-                    </Link>
-                  </Button>
-                </CardFooter>
-              </Card>
-            ),
-          )}
+                    Open Work Count
+                    <ArrowRight className="w-4 h-4 ml-2" />
+                  </Link>
+                </Button>
+              </CardFooter>
+            </Card>
+          ))}
         </div>
       )}
     </div>

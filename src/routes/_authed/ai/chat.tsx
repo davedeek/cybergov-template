@@ -66,11 +66,11 @@ function Messages({ messages }: { messages: ChatMessages }) {
           >
             <div className="flex items-start gap-4 w-full">
               {message.role === 'assistant' ? (
-                <div className="w-8 h-8 rounded-none border border-nd-ink bg-nd-ink mt-1 flex items-center justify-center text-sm font-bold font-mono text-nd-bg flex-shrink-0">
+                <div className="w-8 h-8 border border-nd-ink bg-nd-ink mt-1 flex items-center justify-center text-sm font-bold font-mono text-nd-bg flex-shrink-0">
                   AI
                 </div>
               ) : (
-                <div className="w-8 h-8 rounded-none border border-nd-border bg-nd-surface-alt flex items-center justify-center text-sm font-bold font-mono text-nd-ink flex-shrink-0">
+                <div className="w-8 h-8 border border-nd-border bg-nd-surface-alt flex items-center justify-center text-sm font-bold font-mono text-nd-ink flex-shrink-0">
                   Y
                 </div>
               )}
@@ -129,7 +129,7 @@ function ChatPage() {
                 <Button
                   variant="outline"
                   onClick={stop}
-                  className="px-6 h-10 border-2 border-nd-accent text-nd-accent rounded-none text-xs tracking-widest uppercase font-mono transition-colors flex items-center gap-2 font-bold shadow-[2px_2px_0px_#C94A1E]"
+                  className="px-6 h-10 border-2 border-nd-accent text-nd-accent text-xs tracking-widest uppercase font-mono transition-colors flex items-center gap-2 font-bold shadow-stamp-accent"
                 >
                   <Square className="w-3 h-3 fill-current" />
                   Halt Execution

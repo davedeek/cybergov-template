@@ -60,28 +60,38 @@ function RecipeCard({ recipe }: { recipe: Recipe }) {
       {/* Meta info */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <div className="flex flex-col gap-1 p-3 bg-nd-surface border border-nd-border shadow-sm">
-          <span className="text-[10px] font-mono uppercase tracking-widest text-nd-ink-muted">Prep Time</span>
+          <span className="text-[10px] font-mono uppercase tracking-widest text-nd-ink-muted">
+            Prep Time
+          </span>
           <div className="flex items-center gap-2 text-nd-ink">
             <Clock className="w-4 h-4 text-nd-accent" />
             <span className="font-mono text-sm">{recipe.prepTime}</span>
           </div>
         </div>
         <div className="flex flex-col gap-1 p-3 bg-nd-surface border border-nd-border shadow-sm">
-          <span className="text-[10px] font-mono uppercase tracking-widest text-nd-ink-muted">Cook Time</span>
+          <span className="text-[10px] font-mono uppercase tracking-widest text-nd-ink-muted">
+            Cook Time
+          </span>
           <div className="flex items-center gap-2 text-nd-ink">
             <Clock className="w-4 h-4 text-nd-accent" />
             <span className="font-mono text-sm">{recipe.cookTime}</span>
           </div>
         </div>
         <div className="flex flex-col gap-1 p-3 bg-nd-surface border border-nd-border shadow-sm">
-          <span className="text-[10px] font-mono uppercase tracking-widest text-nd-ink-muted">Servings</span>
+          <span className="text-[10px] font-mono uppercase tracking-widest text-nd-ink-muted">
+            Servings
+          </span>
           <div className="flex items-center gap-2 text-nd-ink">
             <Users className="w-4 h-4 text-nd-accent" />
             <span className="font-mono text-sm">{recipe.servings} people</span>
           </div>
         </div>
-        <div className={`flex flex-col gap-1 p-3 border shadow-sm ${difficultyStyles[recipe.difficulty]}`}>
-          <span className="text-[10px] font-mono uppercase tracking-widest opacity-70">Difficulty</span>
+        <div
+          className={`flex flex-col gap-1 p-3 border shadow-sm ${difficultyStyles[recipe.difficulty]}`}
+        >
+          <span className="text-[10px] font-mono uppercase tracking-widest opacity-70">
+            Difficulty
+          </span>
           <div className="flex items-center gap-2">
             <Gauge className="w-4 h-4" />
             <span className="font-mono text-sm font-bold uppercase">{recipe.difficulty}</span>
@@ -90,14 +100,17 @@ function RecipeCard({ recipe }: { recipe: Recipe }) {
       </div>
 
       {/* Ingredients */}
-      <div className="bg-nd-surface p-6 border-2 border-nd-ink shadow-[4px_4px_0px_#1A1A18]">
+      <div className="bg-nd-surface p-6 border-2 border-nd-ink shadow-stamp">
         <h4 className="text-lg font-bold font-serif text-nd-ink uppercase tracking-tight mb-6 border-b border-nd-border pb-2 flex items-center gap-2">
           <span className="w-2 h-4 bg-nd-accent inline-block" />
           Ingredients
         </h4>
         <ul className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-3">
           {recipe.ingredients.map((ing, idx) => (
-            <li key={idx} className="flex items-start gap-3 text-nd-ink border-b border-nd-border border-dashed pb-2">
+            <li
+              key={idx}
+              className="flex items-start gap-3 text-nd-ink border-b border-nd-border border-dashed pb-2"
+            >
               <span className="font-mono text-sm font-bold text-nd-accent">{ing.amount}</span>
               <span className="text-sm">
                 {ing.item}
@@ -112,11 +125,13 @@ function RecipeCard({ recipe }: { recipe: Recipe }) {
 
       {/* Instructions */}
       <div>
-        <h4 className="text-lg font-bold font-serif text-nd-ink uppercase tracking-tight mb-6 border-b border-nd-ink pb-2">Instructions</h4>
+        <h4 className="text-lg font-bold font-serif text-nd-ink uppercase tracking-tight mb-6 border-b border-nd-ink pb-2">
+          Instructions
+        </h4>
         <ol className="space-y-6">
           {recipe.instructions.map((step, idx) => (
             <li key={idx} className="flex gap-4 text-nd-ink group">
-              <span className="flex-shrink-0 w-8 h-8 bg-nd-ink text-nd-bg font-mono flex items-center justify-center text-sm font-bold shadow-[2px_2px_0px_#C94A1E]">
+              <span className="flex-shrink-0 w-8 h-8 bg-nd-ink text-nd-bg font-mono flex items-center justify-center text-sm font-bold shadow-stamp-accent">
                 {idx + 1}
               </span>
               <span className="text-sm leading-relaxed pt-1 flex-1">{step}</span>
@@ -127,7 +142,7 @@ function RecipeCard({ recipe }: { recipe: Recipe }) {
 
       {/* Tips */}
       {recipe.tips && recipe.tips.length > 0 && (
-        <div className="bg-[#FAF9F5] p-5 border border-nd-border italic">
+        <div className="bg-nd-surface-warm p-5 border border-nd-border italic">
           <h4 className="text-sm font-mono uppercase tracking-widest text-nd-ink mb-3 flex items-center gap-2">
             <span className="w-1 h-3 bg-nd-ink inline-block" />
             Chef's Notes
@@ -186,7 +201,7 @@ function StructuredPage() {
     provider: string
     model: string
   } | null>(null)
-  
+
   const { handleMutation, isPending: isLoading, error: mutationError } = useMutationHandler()
 
   const handleGenerate = async (mode: Mode) => {
@@ -211,7 +226,7 @@ function StructuredPage() {
         setResult(data)
         return data
       },
-      { label: `AI Structured Synthesis (${mode})`, successToast: 'Recipe generated' }
+      { label: `AI Structured Synthesis (${mode})`, successToast: 'Recipe generated' },
     )
   }
 
@@ -229,14 +244,17 @@ function StructuredPage() {
 
         <p className="text-nd-ink-muted mb-8 max-w-2xl text-sm leading-relaxed">
           Evaluate different generation methodologies.
-          <strong className="text-nd-ink"> One-Shot</strong> produces freeform
-          markdown documentation, whereas <strong className="text-nd-ink">Structured</strong> mandates
+          <strong className="text-nd-ink"> One-Shot</strong> produces freeform markdown
+          documentation, whereas <strong className="text-nd-ink">Structured</strong> mandates
           validated JSON parameters via a strict schema definition.
         </p>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
           <div className="space-y-4">
-            <Label htmlFor="recipe-name" className="text-xs font-mono uppercase tracking-widest text-nd-ink-muted">
+            <Label
+              htmlFor="recipe-name"
+              className="text-xs font-mono uppercase tracking-widest text-nd-ink-muted"
+            >
               Inquiry / Subject
             </Label>
             <Input
@@ -246,7 +264,7 @@ function StructuredPage() {
               onChange={(e) => setRecipeName(e.target.value)}
               disabled={isLoading}
               placeholder="e.g., Chocolate Chip Cookies"
-              className="h-12 rounded-none border-2 border-nd-ink bg-nd-surface px-4 text-nd-ink focus-visible:ring-nd-accent font-sans shadow-sm"
+              className="h-12 border-2 border-nd-ink bg-nd-surface px-4 text-nd-ink focus-visible:ring-nd-accent font-sans shadow-sm"
             />
 
             <div className="pt-2">
@@ -259,7 +277,7 @@ function StructuredPage() {
                     key={name}
                     onClick={() => setRecipeName(name)}
                     disabled={isLoading}
-                    className="px-3 py-1 text-[10px] font-mono bg-nd-surface hover:bg-nd-surface-alt text-nd-ink rounded-none border border-nd-border transition-colors uppercase tracking-tight"
+                    className="px-3 py-1 text-[10px] font-mono bg-nd-surface hover:bg-nd-surface-alt text-nd-ink border border-nd-border transition-colors uppercase tracking-tight"
                   >
                     {name}
                   </button>
@@ -274,14 +292,14 @@ function StructuredPage() {
                 onClick={() => handleGenerate('oneshot')}
                 disabled={!canExecute}
                 variant="outline"
-                className="h-14 rounded-none border-2 border-nd-ink font-serif font-bold text-nd-ink hover:bg-nd-surface-alt shadow-[4px_4px_0px_#1A1A18] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-all uppercase tracking-tight"
+                className="h-14 border-2 border-nd-ink font-serif font-bold text-nd-ink hover:bg-nd-surface-alt shadow-stamp active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-all uppercase tracking-tight"
               >
                 Execute One-Shot
               </Button>
               <Button
                 onClick={() => handleGenerate('structured')}
                 disabled={!canExecute}
-                className="h-14 rounded-none bg-nd-ink text-nd-bg font-serif font-bold hover:bg-nd-ink/90 shadow-[4px_4px_0px_#C94A1E] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-all uppercase tracking-tight"
+                className="h-14 bg-nd-ink text-nd-bg font-serif font-bold hover:bg-nd-ink/90 shadow-stamp-accent active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-all uppercase tracking-tight"
               >
                 Execute Structured
               </Button>
@@ -290,7 +308,7 @@ function StructuredPage() {
         </div>
 
         {/* Output Panel */}
-        <div className="bg-nd-surface rounded-none p-10 border-2 border-nd-ink shadow-[8px_8px_0px_#1A1A18]">
+        <div className="bg-nd-surface p-10 border-2 border-nd-ink shadow-stamp-hover">
           <div className="flex items-center justify-between mb-8 border-b border-nd-border pb-4">
             <h2 className="text-xs font-mono font-bold uppercase tracking-[0.3em] text-nd-accent">
               Generated Artifact
@@ -309,7 +327,10 @@ function StructuredPage() {
           </div>
 
           {mutationError && (
-            <Alert variant="destructive" className="rounded-none border-2 border-nd-flag-red bg-nd-flag-red/5 mb-8">
+            <Alert
+              variant="destructive"
+              className="border-2 border-nd-flag-red bg-nd-flag-red/5 mb-8"
+            >
               <AlertCircle className="w-4 h-4 mr-2" />
               <AlertDescription className="font-mono text-sm uppercase">
                 <strong>Transmission Error:</strong> {mutationError}
@@ -345,7 +366,9 @@ function StructuredPage() {
             <div className="flex flex-col items-center justify-center h-80 text-nd-ink-muted border-2 border-dashed border-nd-border bg-nd-surface-alt">
               <ChefHat className="w-16 h-16 mb-6 opacity-20" />
               <p className="font-mono text-xs uppercase tracking-[0.2em] text-center px-8">
-                Standing by for input.<br/>Awaiting generation execution.
+                Standing by for input.
+                <br />
+                Awaiting generation execution.
               </p>
             </div>
           ) : null}

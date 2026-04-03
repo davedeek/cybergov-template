@@ -88,7 +88,7 @@ function SharePage() {
   if (isError || !data) {
     return (
       <div className="flex bg-nd-bg min-h-screen items-center justify-center p-6">
-        <div className="bg-nd-surface border-2 border-nd-ink max-w-md w-full p-8 text-center shadow-[4px_4px_0px_#1A1A18]">
+        <div className="bg-nd-surface border-2 border-nd-ink max-w-md w-full p-8 text-center shadow-stamp">
           <AlertCircle className="w-12 h-12 mx-auto mb-4 text-nd-ink" />
           <h2 className="font-serif text-2xl font-bold mb-2">Unavailable</h2>
           <p className="font-mono text-xs text-nd-ink-muted leading-relaxed uppercase tracking-tight">This share link is invalid or the document has been removed by its owner.</p>
@@ -169,7 +169,7 @@ function SharePage() {
     <div className="min-h-screen bg-nd-bg p-8 print:p-0 print:bg-nd-surface text-nd-ink">
       <div className="max-w-[90vw] mx-auto print:max-w-full">
         <Header />
-        <div className="bg-nd-surface border-2 border-nd-ink overflow-x-auto text-sm shadow-[4px_4px_0px_#1A1A18]">
+        <div className="bg-nd-surface border-2 border-nd-ink overflow-x-auto text-sm shadow-stamp">
           <Table className="w-full border-collapse font-sans">
             <TableHeader className="bg-nd-surface-alt">
               <TableRow className="border-b-2 border-nd-ink hover:bg-transparent">

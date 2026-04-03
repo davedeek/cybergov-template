@@ -21,7 +21,7 @@ export function ProcessChartSidebar({ chart, steps, storageWarn, distWarn }: Pro
 
   return (
     <div className="space-y-6">
-      <Card className="rounded-none border-2 border-nd-ink shadow-none">
+      <Card className="border-2 border-nd-ink shadow-none">
         <CardContent className="p-5">
           <h3 className="text-[10px] font-mono tracking-widest uppercase mb-4 text-nd-ink flex items-center">
             <Info className="w-3 h-3 mr-2 text-nd-accent" />
@@ -44,7 +44,7 @@ export function ProcessChartSidebar({ chart, steps, storageWarn, distWarn }: Pro
         </CardContent>
       </Card>
 
-      <Card className="rounded-none border-2 border-nd-ink bg-nd-surface shadow-none">
+      <Card className="border-2 border-nd-ink bg-nd-surface shadow-none">
         <CardContent className="p-5">
           <h3 className="text-[10px] font-mono tracking-widest uppercase mb-4 text-nd-ink flex items-center">
             <HelpCircle className="w-3 h-3 mr-2 text-nd-accent" />
@@ -80,7 +80,7 @@ export function ProcessChartSidebar({ chart, steps, storageWarn, distWarn }: Pro
       </Card>
 
       {warnings.length > 0 && (
-        <Card className="rounded-none border-2 border-nd-accent/30 bg-white shadow-none">
+        <Card className="border-2 border-nd-accent/30 bg-white shadow-none">
           <CardContent className="p-5">
             <h3 className="text-[10px] font-mono tracking-widest uppercase mb-3 text-nd-accent flex items-center">
               ⚑ Critical Findings

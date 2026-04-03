@@ -46,7 +46,7 @@ export function AddTodoForm({ onSubmit, isPending }: AddTodoFormProps) {
               onBlur={field.handleBlur}
               onChange={(e) => field.handleChange(e.target.value)}
               placeholder="Enter task description..."
-              className="w-full bg-nd-bg border-2 border-nd-border focus:border-nd-ink rounded-none font-serif h-12 shadow-inner"
+              className="w-full bg-nd-bg border-2 border-nd-border focus:border-nd-ink font-serif h-12 shadow-inner"
             />
             <FormError errors={field.state.meta.errors} />
           </div>
@@ -57,7 +57,7 @@ export function AddTodoForm({ onSubmit, isPending }: AddTodoFormProps) {
         children={([canSubmit, isSubmitting]) => (
           <Button 
             type="submit" 
-            className="bg-nd-ink hover:bg-nd-accent text-nd-bg px-8 h-12 rounded-none transition-all shadow-[2px_2px_0px_#C94A1E]"
+            className="bg-nd-ink hover:bg-nd-accent text-nd-bg px-8 h-12 transition-all shadow-stamp-accent"
             disabled={!canSubmit || isSubmitting || !!isPending}
           >
             <Plus className="w-5 h-5 mr-2" />

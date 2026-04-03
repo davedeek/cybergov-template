@@ -1,4 +1,4 @@
-import { auth } from '@/lib/auth.ts'
+import { auth } from '@/lib/auth'
 import { db } from '@/db'
 
 export type Session = Awaited<ReturnType<typeof auth.api.getSession>>

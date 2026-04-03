@@ -19,18 +19,18 @@ import {
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { useProcessChart } from '@/hooks/useProcessChart'
-import { ProcessChartLedger } from '@/components/ws/ProcessChartLedger'
-import { ProcessChartListView } from '@/components/ws/ProcessChartListView'
-import { ProcessChartMermaidView } from '@/components/ws/ProcessChartMermaidView'
-import { ProcessChartSidebar } from '@/components/ws/ProcessChartSidebar'
-import { AnalysisSummary } from '@/components/ws/AnalysisSummary'
-import { ShareDialog } from '@/components/ws/ShareDialog'
+import { useProcessChart } from '@/components/ws/pc/useProcessChart'
+import { ProcessChartLedger } from '@/components/ws/pc/ProcessChartLedger'
+import { ProcessChartListView } from '@/components/ws/pc/ProcessChartListView'
+import { ProcessChartMermaidView } from '@/components/ws/pc/ProcessChartMermaidView'
+import { ProcessChartSidebar } from '@/components/ws/pc/ProcessChartSidebar'
+import { AnalysisSummary } from '@/components/ws/pc/AnalysisSummary'
+import { ShareDialog } from '@/components/ws/shared/ShareDialog'
 import { AddStepForm } from '@/components/forms/AddStepForm'
-import { ProcessFlags } from '@/components/ws/ProcessFlags'
-import { SixQuestionsWorkspace } from '@/components/ws/SixQuestionsWorkspace'
-import { WorkCountTab } from '@/components/ws/WorkCountTab'
-import { useProcessFlags } from '@/hooks/useProcessFlags'
+import { FlagList } from '@/components/ws/shared/FlagList'
+import { SixQuestionsWorkspace } from '@/components/ws/pc/SixQuestionsWorkspace'
+import { WorkCountTab } from '@/components/ws/wc/WorkCountTab'
+import { useProcessFlags } from '@/components/ws/pc/useProcessFlags'
 
 export const Route = createFileRoute('/_authed/ws/$unitId/pc/$pcId')({
   component: ProcessChartPageComponent,
@@ -297,7 +297,11 @@ function ProcessChartPageComponent() {
                 value="analysis"
                 className="animate-fade-in-tab m-0 border-none mt-0 p-0 ring-offset-transparent focus-visible:ring-0"
               >
-                <ProcessFlags flags={processFlags} onStartAnalysis={handleStartAnalysis} />
+                <FlagList
+                  flags={processFlags}
+                  emptyMessage="No active flags. Add steps to your process chart to see pattern analysis."
+                  action={{ label: 'Start Analysis', onClick: (f) => handleStartAnalysis(f.targetQuestion) }}
+                />
               </TabsContent>
 
               <TabsContent

@@ -27,7 +27,7 @@ import {
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog'
 import { CreateUnitForm } from '@/components/forms/CreateUnitForm'
-import { OnboardingWizard } from '@/components/ws/OnboardingWizard'
+import { OnboardingWizard } from '@/components/ws/shared/OnboardingWizard'
 
 export const Route = createFileRoute('/_authed/ws/')({
   component: UnitsLandingPage,

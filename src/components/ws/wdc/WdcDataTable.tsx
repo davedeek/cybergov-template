@@ -15,7 +15,7 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import type { WdcChart, WdcEmployee, WdcActivity, WdcTask } from '@/types/entities'
-import { TABLE_STYLES } from './table-styles'
+import { TABLE_STYLES } from '../shared/table-styles'
 
 interface WdcDataTableProps {
   activities: WdcActivity[]

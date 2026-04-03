@@ -1,6 +1,8 @@
 import { createFileRoute } from '@tanstack/react-router';
 import { generateTranscription } from '@tanstack/ai';
 import { openaiTranscription } from '@tanstack/ai-openai';
+import { requireKey, errorResponse } from './_shared';
+
 export const Route = createFileRoute('/api/ai/transcription')({
     server: {
         handlers: {
@@ -12,24 +14,14 @@ export const Route = createFileRoute('/api/ai/transcription')({
                 const language = formData.get('language');
                 const responseFormat = formData.get('responseFormat');
                 if (!audioFile && !audioBase64) {
-                    return new Response(JSON.stringify({
-                        error: 'Audio file or base64 data is required',
-                    }), {
-                        status: 400,
-                        headers: { 'Content-Type': 'application/json' },
-                    });
+                    return errorResponse('Audio file or base64 data is required', 400);
                 }
-                if (!process.env.OPENAI_API_KEY) {
-                    return new Response(JSON.stringify({
-                        error: 'OPENAI_API_KEY is not configured',
-                    }), {
-                        status: 500,
-                        headers: { 'Content-Type': 'application/json' },
-                    });
-                }
+
+                const keyError = requireKey('OPENAI_API_KEY');
+                if (keyError) return keyError;
+
                 try {
                     const adapter = openaiTranscription(model);
-                    // Prepare audio data
                     let audioData;
                     if (audioFile) {
                         audioData = audioFile;
@@ -60,12 +52,7 @@ export const Route = createFileRoute('/api/ai/transcription')({
                     });
                 }
                 catch (error) {
-                    return new Response(JSON.stringify({
-                        error: error.message || 'An error occurred',
-                    }), {
-                        status: 500,
-                        headers: { 'Content-Type': 'application/json' },
-                    });
+                    return errorResponse(error.message || 'An error occurred');
                 }
             },
         },

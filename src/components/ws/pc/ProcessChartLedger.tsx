@@ -4,8 +4,8 @@ import { Trash2, Copy } from 'lucide-react'
 import { useReactTable, getCoreRowModel, flexRender, ColumnDef } from '@tanstack/react-table'
 import { Button } from '@/components/ui/button'
 import { SymbolIcon, SYMBOL_META, SymbolType } from './SymbolMeta'
-import { EditableCell } from './EditableCell'
-import { TABLE_STYLES, STATUS_COLORS } from './table-styles'
+import { EditableCell } from '../wdc/EditableCell'
+import { TABLE_STYLES, STATUS_COLORS } from '../shared/table-styles'
 import type { ProcessStep } from '@/types/entities'
 import {
   Table,

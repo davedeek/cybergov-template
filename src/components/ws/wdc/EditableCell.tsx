@@ -1,7 +1,7 @@
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { FormError } from '@/components/ui/form-error'
-import type { SymbolType } from './SymbolMeta'
+import type { SymbolType } from '../pc/SymbolMeta'
 
 interface EditableCellBaseProps {
   isEditing: boolean

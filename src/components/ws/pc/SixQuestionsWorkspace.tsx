@@ -6,7 +6,7 @@ import {
   ACTION_COLORS,
   type QuestionKey,
   type ProposedAction,
-} from './six-questions'
+} from '../shared/six-questions'
 import type { ProcessStep, StepAnnotation } from '@/types/entities'
 import { trpcClient } from '@/integrations/tanstack-query/root-provider'
 import { Plus } from 'lucide-react'

@@ -19,7 +19,8 @@ export const auth = betterAuth({
     updateAge: 60 * 60 * 24, // refresh session token every 24 hours
     cookieCache: {
       enabled: true,
-      maxAge: 60 * 5, // cache session cookie for 5 min (avoids DB lookup on every request)
+      maxAge: 60 * 5, // 5 min cache
+      refreshCache: true, // auto-refresh cookie at 80% of maxAge, avoids DB round-trip
     },
   },
   rateLimit: {
@@ -29,7 +30,7 @@ export const auth = betterAuth({
       '/sign-in/email': { window: 300, max: 5 },
       '/sign-up/email': { window: 3600, max: 3 },
     },
-    storage: 'memory',
+    storage: 'database',
   },
   plugins: [tanstackStartCookies()],
 })
